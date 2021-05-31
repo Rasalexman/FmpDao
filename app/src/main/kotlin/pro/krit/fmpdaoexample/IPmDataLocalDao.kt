@@ -7,4 +7,4 @@ import pro.krit.hiveprocessor.base.ILocalFmpDao
     resourceName = "ZSR_TORO_PM_DATA",
     parameterName = "ET_DATA"
 )
-interface IPmDataLocalDao : ILocalFmpDao<PmEtDataEntity, PmStatus>
+interface IPmDataLocalDao : ILocalFmpDao<PmEtDataLocalEntity, PmLocalStatus>
