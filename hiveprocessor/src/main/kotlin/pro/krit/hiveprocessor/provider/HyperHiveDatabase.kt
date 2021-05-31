@@ -6,6 +6,9 @@ import com.mobrun.plugin.api.HyperHiveState
 import com.mobrun.plugin.api.VersionAPI
 import java.io.File
 
+/**
+ * Base class for extends and use as FMP database instance
+ */
 abstract class HyperHiveDatabase : IHyperHiveDatabase {
 
     private var hyperHive: HyperHive? = null

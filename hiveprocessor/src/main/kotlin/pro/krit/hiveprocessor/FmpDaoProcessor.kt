@@ -74,7 +74,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             ::getDataFromFmpLocalDao
         )
         if (!fmpResult && !fmpLocalResult) {
-            processModules(modulesMap)
+            processDaos(modulesMap)
 
             val firstDatabase =
                 roundEnv.getElementsAnnotatedWith(FmpDatabase::class.java).firstOrNull()
@@ -151,7 +151,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
-    private fun processModules(moduleElements: List<BindData>) {
+    private fun processDaos(moduleElements: List<BindData>) {
         moduleElements.forEach { bindData ->
             val classFileName = bindData.fileName
             val mainClassName = ClassName(bindData.mainData.packName, bindData.mainData.className)
@@ -338,7 +338,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             if (kind == ElementKind.METHOD && kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    "Only classes and methods can be annotated as @FmpDao or @FmpDatabase"
+                    "Only classes and interfaces can be annotated as @FmpDao or @FmpDatabase"
                 )
                 return true
             }
