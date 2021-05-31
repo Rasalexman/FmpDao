@@ -7,6 +7,7 @@ import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpDao
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
+import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter.executeQuery
 import pro.krit.hiveprocessor.common.QueryExecuter.executeStatus
 
@@ -21,8 +22,9 @@ const val ERROR_CODE_SELECT_ALL = 10001
 const val ERROR_CODE_SELECT_WHERE = 10002
 const val ERROR_CODE_REMOVE_WHERE = 10003
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAll(): List<E> {
-    val selectAllQuery = "SELECT * FROM $tableName"
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAll(limit: Long = 0): List<E> {
+    val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
+    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $tableName$limitQuery"
     return executeQuery(
         dao = this,
         query = selectAllQuery,
@@ -31,12 +33,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.sel
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAllAsync(): List<E> {
-    return selectAll()
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAllAsync(limit: Long = 0): List<E> {
+    return selectAll(limit)
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectWhere(expression: String): List<E> {
-    val selectAllQuery = "SELECT * FROM $tableName WHERE $expression"
+    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
     return executeQuery(
         dao = this,
         query = selectAllQuery,
@@ -52,7 +54,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.removeWhere(expression: String): S {
-    val deleteQuery = "DELETE FROM $tableName WHERE $expression"
+    val deleteQuery = "${QueryBuilder.DELETE_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
     return executeStatus(
         dao = this,
         query = deleteQuery,
