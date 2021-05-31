@@ -3,7 +3,6 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.ILocalFmpDao
 import pro.krit.hiveprocessor.extensions.tableName
-import sun.jvm.hotspot.code.Location
 
 object QueryBuilder {
 

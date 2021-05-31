@@ -96,7 +96,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         val fileName = className.createFileName()
 
         val superClassName = ClassName(packName, className)
-        val classTypeSpec = TypeSpec.classBuilder(fileName)
+        val classTypeSpec = TypeSpec.objectBuilder(fileName)
         classTypeSpec.superclass(superClassName)
 
         val functs = databaseElement.enclosedElements
