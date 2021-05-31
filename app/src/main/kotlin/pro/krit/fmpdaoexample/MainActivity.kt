@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val hyperHiveConfig: HyperHiveConfig = HyperHiveConfig(
+        val hyperHiveConfig = HyperHiveConfig(
             dbKey = "",
             serverAddress = "",
             environment = "",

@@ -1,7 +1,7 @@
 package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.ILocalFmpDao
+import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.extensions.tableName
 
 object QueryBuilder {
@@ -12,7 +12,7 @@ object QueryBuilder {
     const val WHERE = "WHERE"
     const val LIMIT = "LIMIT"
 
-    fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: ILocalFmpDao<E, S>): String {
+    fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: IFmpLocalDao<E, S>): String {
         val localDaoFields = dao.localDaoFields
         if (localDaoFields?.fieldsNames == null) {
             throw UnsupportedOperationException("No 'fieldsNames' key for operation 'createTableQuery'")
@@ -42,7 +42,7 @@ object QueryBuilder {
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
-        dao: ILocalFmpDao<E, S>,
+        dao: IFmpLocalDao<E, S>,
         item: E
     ): String {
         if (dao.localDaoFields?.fieldsForQuery == null) {
@@ -57,7 +57,7 @@ object QueryBuilder {
                 FieldsBuilder.getValues(dao, item)
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(dao: ILocalFmpDao<E, S>, items: List<E>): String {
+    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {
         val stringBuilder = StringBuilder("BEGIN TRANSACTION; ")
         for (item in items) {
             stringBuilder.append(createInsertOrReplaceQuery(dao, item))
@@ -67,7 +67,7 @@ object QueryBuilder {
         return stringBuilder.toString()
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: ILocalFmpDao<E, S>, item: E): String {
+    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: IFmpLocalDao<E, S>, item: E): String {
         val localDaoFields = dao.localDaoFields
         if (localDaoFields?.primaryKeyField == null || localDaoFields.primaryKeyName == null) {
             throw UnsupportedOperationException("No 'primaryKeyField' for operation 'createDeleteQuery'")
@@ -87,7 +87,7 @@ object QueryBuilder {
                 "'"
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: ILocalFmpDao<E, S>, items: List<E>): String {
+    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {
         val stringBuilder = StringBuilder("BEGIN TRANSACTION; ")
         for (item in items) {
             stringBuilder.append(createDeleteQuery(dao, item))

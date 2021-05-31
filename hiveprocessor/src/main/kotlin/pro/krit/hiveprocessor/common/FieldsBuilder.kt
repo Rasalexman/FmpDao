@@ -1,12 +1,12 @@
 package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.ILocalFmpDao
+import pro.krit.hiveprocessor.base.IFmpLocalDao
 import java.util.*
 
 object FieldsBuilder {
 
-    fun <E : Any, S : StatusSelectTable<E>> getValues(dao: ILocalFmpDao<E, S>, item: E): String {
+    fun <E : Any, S : StatusSelectTable<E>> getValues(dao: IFmpLocalDao<E, S>, item: E): String {
         val localDaoFields = dao.localDaoFields
         if (localDaoFields?.primaryKeyField == null || localDaoFields.fields == null) {
             throw UnsupportedOperationException("No 'primaryKeyField' for operation $dao 'getValues'")
@@ -51,7 +51,7 @@ object FieldsBuilder {
         return stringBuilderRes.toString()
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> getFields(dao: ILocalFmpDao<E, S>, fieldsNames: ArrayList<String>): String {
+    fun <E : Any, S : StatusSelectTable<E>> getFields(dao: IFmpLocalDao<E, S>, fieldsNames: ArrayList<String>): String {
         var res = "("
         var prefix = ""
         dao.localDaoFields?.primaryKeyName?.let {

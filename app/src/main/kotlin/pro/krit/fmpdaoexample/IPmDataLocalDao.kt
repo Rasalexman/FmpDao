@@ -1,10 +1,10 @@
 package pro.krit.fmpdaoexample
 
 import pro.krit.hiveprocessor.annotations.FmpLocalDao
-import pro.krit.hiveprocessor.base.ILocalFmpDao
+import pro.krit.hiveprocessor.base.IFmpLocalDao
 
 @FmpLocalDao(
     resourceName = "ZSR_TORO_PM_DATA",
-    parameterName = "ET_DATA"
+    parameterName = "ET_DATA_LOCAL"
 )
-interface IPmDataLocalDao : ILocalFmpDao<PmEtDataLocalEntity, PmLocalStatus>
+interface IPmDataLocalDao : IFmpLocalDao<PmEtDataLocalEntity, PmLocalStatus>

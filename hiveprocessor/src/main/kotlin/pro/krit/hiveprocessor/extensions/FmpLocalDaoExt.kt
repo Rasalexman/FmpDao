@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.ILocalFmpDao
+import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.common.LocalDaoFields
 import pro.krit.hiveprocessor.common.FieldsBuilder.getFields
 import pro.krit.hiveprocessor.common.QueryBuilder
@@ -16,7 +16,7 @@ const val ERROR_CODE_CREATE = 10004
 const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.createTable(): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTable(): S {
     return executeStatus(
         dao = this,
         query = QueryBuilder.createTableQuery(this),
@@ -25,11 +25,11 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.createTableAsync(): S {
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTableAsync(): S {
     return createTable()
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.insertOrReplace(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     item: E
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, item)
@@ -41,13 +41,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.insertOrReplaceAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     item: E
 ): S {
     return insertOrReplace(item)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.insertOrReplace(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, items)
@@ -59,13 +59,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.insertOrReplaceAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>
 ): S {
     return insertOrReplace(items)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.delete(item: E): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(item: E): S {
     val query = QueryBuilder.createDeleteQuery(this, item)
     return executeStatus(
         dao = this,
@@ -75,13 +75,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.deleteAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     item: E
 ): S {
     return delete(item)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.delete(items: List<E>): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(items: List<E>): S {
     val query = QueryBuilder.createDeleteQuery(this, items)
     return executeStatus(
         dao = this,
@@ -91,13 +91,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.deleteAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     items: List<E>
 ): S {
     return delete(items)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> ILocalFmpDao<E, S>.initFields() {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.initFields() {
     var localPrimaryKey: Field? = null
     var localPrimaryKeyName: String? = null
     val localFields = ArrayList<Field>()

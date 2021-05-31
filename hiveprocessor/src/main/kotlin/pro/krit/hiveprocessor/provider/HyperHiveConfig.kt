@@ -1,5 +1,8 @@
 package pro.krit.hiveprocessor.provider
 
+/**
+ * Config for create [HyperHiveDatabase] instance
+ */
 data class HyperHiveConfig(
     val dbKey: String,
     val serverAddress: String,
