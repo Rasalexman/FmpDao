@@ -3,8 +3,15 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.ILocalFmpDao
 import pro.krit.hiveprocessor.extensions.tableName
+import sun.jvm.hotspot.code.Location
 
 object QueryBuilder {
+
+    const val SELECT_QUERY = "SELECT * FROM"
+    const val DELETE_QUERY = "DELETE FROM"
+
+    const val WHERE = "WHERE"
+    const val LIMIT = "LIMIT"
 
     fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: ILocalFmpDao<E, S>): String {
         val localDaoFields = dao.localDaoFields
