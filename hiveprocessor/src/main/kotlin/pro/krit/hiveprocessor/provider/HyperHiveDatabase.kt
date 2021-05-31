@@ -28,7 +28,7 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
         return hyperHiveState ?: throw NullPointerException("HyperHiveState instance is not initialized")
     }
 
-    fun initialize(hState: HyperHiveState, config: HyperHiveConfig): IHyperHiveDatabase {
+    fun initialize(hState: HyperHiveState, config: HyperHiveConfig) {
         hyperHiveState = hState
             .setHostWithSchema(config.serverAddress)
             .setApiVersion(VersionAPI.V_1)
@@ -41,8 +41,6 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
             .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).apply {
                 hyperHive = buildHyperHive().setupLogs(config.logLevel)
             }
-
-        return this
     }
 
     fun closeAndClear(pathBase: String = "") {
