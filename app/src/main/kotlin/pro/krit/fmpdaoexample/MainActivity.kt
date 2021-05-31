@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
             project = "",
             dbPath = ""
         )
-        val mainDb: MainDatabase = MainDatabaseImpl()
+        val mainDb: MainDatabase = MainDatabaseImpl
         mainDb.initialize(HyperHiveState(this.applicationContext), hyperHiveConfig)
         val pmDao = mainDb.providePmDao()
         pmDao.selectAll(limit = 50L)
