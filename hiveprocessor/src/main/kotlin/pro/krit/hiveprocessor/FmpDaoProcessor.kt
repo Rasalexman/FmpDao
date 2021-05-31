@@ -27,8 +27,8 @@ class FmpDaoProcessor : AbstractProcessor() {
     companion object {
         private const val CLASS_POSTFIX = "Impl"
 
-        private const val  DAO_PACKAGE_NAME = "pro.krit.generated.dao"
-        private const val  DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
+        private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
+        private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
 
         private const val INIT_FIELDS_PATH = "pro.krit.hiveprocessor.extensions"
 
@@ -73,7 +73,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             modulesMap,
             ::getDataFromFmpLocalDao
         )
-        if(!fmpResult && !fmpLocalResult) {
+        if (!fmpResult && !fmpLocalResult) {
             processModules(modulesMap)
 
             val firstDatabase =
@@ -95,13 +95,13 @@ class FmpDaoProcessor : AbstractProcessor() {
         val packName = databaseData.packageName
         val fileName = className.createFileName()
 
-        val superClassName= ClassName(packName, className)
+        val superClassName = ClassName(packName, className)
         val classTypeSpec = TypeSpec.classBuilder(fileName)
         classTypeSpec.superclass(superClassName)
 
         val functs = databaseElement.enclosedElements
         functs.forEach { enclose ->
-            if(enclose.kind == ElementKind.METHOD && enclose.modifiers.contains(Modifier.ABSTRACT)) {
+            if (enclose.kind == ElementKind.METHOD && enclose.modifiers.contains(Modifier.ABSTRACT)) {
                 val (returnPack, returnClass) = enclose.asType().toString().getPackAndClass()
                 val funcName = enclose.simpleName.toString()
                 val returnedClass = ClassName(returnPack, returnClass)
@@ -110,10 +110,27 @@ class FmpDaoProcessor : AbstractProcessor() {
                 returnElementData?.let {
                     val returnedClassName = ClassName(DAO_PACKAGE_NAME, it.fileName)
 
+                    val propName = funcName + CLASS_POSTFIX
+                    val prop =
+                        PropertySpec.builder(propName, returnedClassName.copy(nullable = true))
+                            .mutable()
+                            .addModifiers(KModifier.PRIVATE)
+                            .initializer("null")
+                            .build()
+
+                    classTypeSpec.addProperty(prop)
+
+                    val statementIf = "if($propName == null) "
+                    val statementCreate = "$propName = %T($FIELD_PROVIDER = this) "
+                    val statementReturn = "return $propName!!"
+
                     val funcSpec = FunSpec.builder(funcName)
                         .addModifiers(KModifier.OVERRIDE)
                         .returns(returnedClass)
-                        .addStatement("return %T($FIELD_PROVIDER = this)", returnedClassName)
+                        .beginControlFlow(statementIf)
+                        .addStatement(statementCreate, returnedClassName)
+                        .endControlFlow()
+                        .addStatement(statementReturn)
                         .build()
 
                     classTypeSpec.addFunction(funcSpec)
@@ -138,9 +155,10 @@ class FmpDaoProcessor : AbstractProcessor() {
         moduleElements.forEach { bindData ->
             val classFileName = bindData.fileName
             val mainClassName = ClassName(bindData.mainData.packName, bindData.mainData.className)
-            val classTypeSpec = TypeSpec.classBuilder(classFileName).addSuperinterface(mainClassName)
-                .primaryConstructor(constructorFunSpec(bindData))
-                .addProperties(createProperties(bindData))
+            val classTypeSpec =
+                TypeSpec.classBuilder(classFileName).addSuperinterface(mainClassName)
+                    .primaryConstructor(constructorFunSpec(bindData))
+                    .addProperties(createProperties(bindData))
 
             val file = FileSpec.builder(DAO_PACKAGE_NAME, classFileName)
                 .addComment(FILE_COMMENT)
@@ -177,13 +195,22 @@ class FmpDaoProcessor : AbstractProcessor() {
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        return  if(bindData.isLocal) {
-            val isLocalProp = PropertySpec.builder(FIELD_DAO_FIELDS, LocalDaoFields::class.asTypeName().copy(nullable = true))
+        return if (bindData.isLocal) {
+            val isLocalProp = PropertySpec.builder(
+                FIELD_DAO_FIELDS,
+                LocalDaoFields::class.asTypeName().copy(nullable = true)
+            )
                 .mutable()
                 .initializer(FIELD_DAO_FIELDS)
                 .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                 .build()
-            listOf(hyperHiveProviderProp, nameResourceProp, parameterNameProp, isCachedProp, isLocalProp)
+            listOf(
+                hyperHiveProviderProp,
+                nameResourceProp,
+                parameterNameProp,
+                isCachedProp,
+                isLocalProp
+            )
         } else {
             listOf(hyperHiveProviderProp, nameResourceProp, parameterNameProp, isCachedProp)
         }
@@ -217,8 +244,11 @@ class FmpDaoProcessor : AbstractProcessor() {
             .addParameter(parameterName)
             .addParameter(isCached)
             .apply {
-                if(bindData.isLocal) {
-                    val isLocalProp = ParameterSpec.builder(FIELD_DAO_FIELDS, LocalDaoFields::class.asTypeName().copy(nullable = true))
+                if (bindData.isLocal) {
+                    val isLocalProp = ParameterSpec.builder(
+                        FIELD_DAO_FIELDS,
+                        LocalDaoFields::class.asTypeName().copy(nullable = true)
+                    )
                         .defaultValue("null")
                         .build()
                     addParameter(isLocalProp)
@@ -254,7 +284,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         element: Element,
         resourceName: String,
         parameterName: String,
-        isCached:Boolean = false,
+        isCached: Boolean = false,
         isLocal: Boolean = false
     ): BindData {
         val annotationType = element.asType()
