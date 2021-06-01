@@ -37,7 +37,7 @@ version = Builds.Processor.VERSION_NAME
 
 publishing {
     publications {
-        create<MavenPublication>("kodigen") {
+        create<MavenPublication>("hiveprocessor") {
             from(components["kotlin"])
             // You can then customize attributes of the publication as shown below.
             groupId = "pro.krit.hiveprocessor"
