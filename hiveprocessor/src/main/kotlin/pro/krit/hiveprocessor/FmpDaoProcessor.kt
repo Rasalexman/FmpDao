@@ -16,6 +16,7 @@ import java.util.*
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
+import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
@@ -35,7 +36,11 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val QUERY_EXECUTER_PATH = "pro.krit.hiveprocessor.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
+        private const val HYPER_HIVE_BASE_CLASSE_NAME = "HyperHiveDatabase"
+
         private const val INIT_FIELDS_NAME = "initFields"
+
+        private const val FUNC_MEMBER_STATEMENT = "this.%M()"
 
         private const val FIELD_PROVIDER = "hyperHiveDatabase"
         private const val FIELD_RESOURCE = "nameResource"
@@ -50,6 +55,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val KOTLIN_LIST_PATH = "kotlin.collections"
         private const val KOTLIN_LIST_NAME = "List"
 
+        private const val NULL_INITIALIZER = "null"
+        private const val TAG_CLASS_NAME = "%T"
+
         private const val QUERY_VALUE = "val query: String = "
         private const val QUERY_RETURN = "return %T.executeQuery(this, query)"
 
@@ -59,6 +67,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         /** Element Utilities, obtained from the processing environment */
         private var ELEMENT_UTILS: Elements by Delegates.notNull()
+
         /** Type Utilities, obtained from the processing environment */
         private var TYPE_UTILS: Types by Delegates.notNull()
     }
@@ -122,9 +131,38 @@ class FmpDaoProcessor : AbstractProcessor() {
         val classTypeSpec = TypeSpec.objectBuilder(fileName)
         classTypeSpec.superclass(superClassName)
 
-        val functs = databaseElement.enclosedElements
-        functs.forEach { enclose ->
-            if (enclose.kind == ElementKind.METHOD && enclose.modifiers.contains(Modifier.ABSTRACT)) {
+        // Extended classes only for Interfaces
+        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(databaseElement.asType())
+        if (extendedTypeMirrors != null && extendedTypeMirrors.size > 1) {
+            val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
+            extendedElements.forEach {
+                createFunctions(classTypeSpec, it, daoList)
+            }
+        }
+        // than create function for database
+        createFunctions(classTypeSpec, databaseElement, daoList)
+
+        val fileBuilder = FileSpec.builder(DATABASE_PACKAGE_NAME, fileName)
+            .addComment(FILE_COMMENT)
+            .addType(classTypeSpec.build())
+
+        val file = fileBuilder.build()
+        try {
+            file.writeTo(filer)
+        } catch (e: IOException) {
+            val message = java.lang.String.format("Unable to write file: %s", e.message)
+            messager.printMessage(Diagnostic.Kind.ERROR, message)
+        }
+    }
+
+    private fun createFunctions(
+        classTypeSpec: TypeSpec.Builder,
+        element: Element,
+        daoList: List<BindData>
+    ) {
+        val methods = element.enclosedElements
+        methods.forEach { enclose ->
+            if (enclose.isAbstractMethod()) {
                 val (returnPack, returnClass) = enclose.asType().toString().getPackAndClass()
                 val funcName = enclose.simpleName.toString()
                 val returnedClass = ClassName(returnPack, returnClass)
@@ -138,13 +176,13 @@ class FmpDaoProcessor : AbstractProcessor() {
                         PropertySpec.builder(propName, returnedClassName.copy(nullable = true))
                             .mutable()
                             .addModifiers(KModifier.PRIVATE)
-                            .initializer("null")
+                            .initializer(NULL_INITIALIZER)
                             .build()
 
                     classTypeSpec.addProperty(prop)
 
-                    val statementIf = "if($propName == null) "
-                    val statementCreate = "$propName = %T($FIELD_PROVIDER = this) "
+                    val statementIf = "if($propName == $NULL_INITIALIZER) "
+                    val statementCreate = "$propName = $TAG_CLASS_NAME($FIELD_PROVIDER = this) "
                     val statementReturn = "return $propName!!"
 
                     val funcSpec = FunSpec.builder(funcName)
@@ -159,18 +197,6 @@ class FmpDaoProcessor : AbstractProcessor() {
                     classTypeSpec.addFunction(funcSpec)
                 }
             }
-        }
-
-        val fileBuilder = FileSpec.builder(DATABASE_PACKAGE_NAME, fileName)
-            .addComment(FILE_COMMENT)
-            .addType(classTypeSpec.build())
-
-        val file = fileBuilder.build()
-        try {
-            file.writeTo(filer)
-        } catch (e: IOException) {
-            val message = java.lang.String.format("Unable to write file: %s", e.message)
-            messager.printMessage(Diagnostic.Kind.ERROR, message)
         }
     }
 
@@ -199,7 +225,8 @@ class FmpDaoProcessor : AbstractProcessor() {
                     val parameters = enclose.takeParameters(isSuspend)
                     parameters.forEach { property ->
                         val propName = property.toString()
-                        val propertyClassName = property.asType().toString().getPackAndClass().second
+                        val propertyClassName =
+                            property.asType().toString().getPackAndClass().second
 
                         val kotlinPropClass = propertyClassName.capitalizeFirst()
                         val propertyClass = ClassName(KOTLIN_PATH, kotlinPropClass)
@@ -319,10 +346,13 @@ class FmpDaoProcessor : AbstractProcessor() {
                         FIELD_DAO_FIELDS,
                         LocalDaoFields::class.asTypeName().copy(nullable = true)
                     )
-                        .defaultValue("null")
+                        .defaultValue(NULL_INITIALIZER)
                         .build()
                     addParameter(isLocalProp)
-                    addStatement("this.%M()", MemberName(INIT_FIELDS_PATH, INIT_FIELDS_NAME))
+                    addStatement(
+                        FUNC_MEMBER_STATEMENT,
+                        MemberName(INIT_FIELDS_PATH, INIT_FIELDS_NAME)
+                    )
                 }
             }
             .build()
@@ -377,11 +407,25 @@ class FmpDaoProcessor : AbstractProcessor() {
         )
     }
 
+    // Take extended interfaces for implement abstract methods
+    private fun List<TypeMirror>.mapToInterfaceElements(): List<Element> {
+        return this.mapNotNull { typeMirror ->
+            typeMirror.takeIf {
+                val currentClassName = it.toString().getPackAndClass().second
+                currentClassName != HYPER_HIVE_BASE_CLASSE_NAME
+            }?.run {
+                val typeElement = TYPE_UTILS.asElement(this)
+                // Only for Interfaces
+                typeElement.takeIf { it.kind == ElementKind.INTERFACE }
+            }
+        }
+    }
+
     private fun Element.takeParameters(isSuspend: Boolean): List<Element> {
         val allParams = (this as? ExecutableElement)?.parameters.orEmpty()
-        return if(isSuspend) {
-            if(allParams.isNotEmpty() && allParams.size > 1) {
-                allParams.subList(0, allParams.size-1)
+        return if (isSuspend) {
+            if (allParams.isNotEmpty() && allParams.size > 1) {
+                allParams.subList(0, allParams.size - 1)
             } else emptyList()
         } else {
             allParams
@@ -394,7 +438,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun String.createReturnType(returnPack: String, returnClass: String): TypeName {
         val isList = this.contains(LIST_RETURN_TYPE)
-        return if(isList) {
+        return if (isList) {
             val list = ClassName(KOTLIN_LIST_PATH, KOTLIN_LIST_NAME)
             list.parameterizedBy(ClassName(returnPack, returnClass))
         } else {
@@ -415,7 +459,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun String.withoutSuspend(): String {
         val isSuspend = this.contains(SUSPEND_QUALIFIER)
-        return if(isSuspend) {
+        return if (isSuspend) {
             val indexStart = this.indexOf(LIST_RETURN_TYPE)
             val lastIndex = this.lastIndexOf(">")
             this.substring(indexStart, lastIndex)
@@ -426,7 +470,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun String.replaceTablePattern(returnClass: String, bindData: BindData): String {
         val tablePattern = ":$returnClass"
-        return if(this.contains(tablePattern)) {
+        return if (this.contains(tablePattern)) {
             val tableName = "${bindData.resourceName}_${bindData.parameterName}"
             this.replace(tablePattern, tableName)
         } else this
@@ -434,7 +478,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun String.splitArray(): String {
         val ifArray = this.contains(LIST_RETURN_TYPE)
-        return if(ifArray) {
+        return if (ifArray) {
             this.split("<")[1].replace(">", "")
         } else {
             this
@@ -442,7 +486,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     }
 
     private fun String.screenParameter(className: String): String {
-        return if(className == "String") {
+        return if (className == "String") {
             "\'$$this\'"
         } else {
             "$$this"
