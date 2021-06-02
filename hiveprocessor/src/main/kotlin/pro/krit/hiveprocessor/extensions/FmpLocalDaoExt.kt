@@ -5,10 +5,12 @@ import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpLocalDao
-import pro.krit.hiveprocessor.common.LocalDaoFields
 import pro.krit.hiveprocessor.common.FieldsBuilder.getFields
+import pro.krit.hiveprocessor.common.LocalDaoFields
 import pro.krit.hiveprocessor.common.QueryBuilder
+import pro.krit.hiveprocessor.common.QueryExecuter.checkStatusForTable
 import pro.krit.hiveprocessor.common.QueryExecuter.executeStatus
+import pro.krit.hiveprocessor.common.QueryExecuter.executeTransactionStatus
 import java.lang.reflect.Field
 import java.util.*
 
@@ -17,9 +19,10 @@ const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTable(): S {
+    val query = QueryBuilder.createTableQuery(this)
     return executeStatus(
         dao = this,
-        query = QueryBuilder.createTableQuery(this),
+        query = query,
         errorCode = ERROR_CODE_CREATE,
         methodName = "createTable"
     )
@@ -33,12 +36,22 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
     item: E
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, item)
-    return executeStatus(
+    var status = executeStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
         methodName = "insertOrReplace"
     )
+    val tableIsNotCreated = checkStatusForTable(this, status)
+    if (tableIsNotCreated == null) {
+        status = executeStatus(
+            dao = this,
+            query = query,
+            errorCode = ERROR_CODE_INSERT,
+            methodName = "insertOrReplace"
+        )
+    }
+    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
@@ -51,12 +64,22 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
     items: List<E>
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, items)
-    return executeStatus(
+    var status = executeTransactionStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
         methodName = "insertOrReplaceList"
     )
+    val tableIsNotCreated = checkStatusForTable(this, status)
+    if (tableIsNotCreated == null) {
+        status = executeTransactionStatus(
+            dao = this,
+            query = query,
+            errorCode = ERROR_CODE_INSERT,
+            methodName = "insertOrReplaceList"
+        )
+    }
+    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
@@ -83,7 +106,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocal
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(items: List<E>): S {
     val query = QueryBuilder.createDeleteQuery(this, items)
-    return executeStatus(
+    return executeTransactionStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_DELETE,
@@ -133,7 +156,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             localFields.add(field)
             localFieldsNames.add(name)
         }
-        localFieldsForQuery = getFields(this, localFieldsNames)
+        localFieldsForQuery = getFields(localPrimaryKeyName, localFieldsNames)
     }
 
     localDaoFields = LocalDaoFields(

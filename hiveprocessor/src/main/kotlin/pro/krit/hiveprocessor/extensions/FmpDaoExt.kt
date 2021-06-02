@@ -1,11 +1,13 @@
 package pro.krit.hiveprocessor.extensions
 
+import com.mobrun.plugin.api.Call
 import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.api.request_assistant.RequestBuilder
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpDao
+import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter.executeQuery
@@ -16,7 +18,7 @@ typealias Value = Any
 typealias ScalarMap = Map<Parameter, Value>
 
 val <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.tableName: String
-    get() = nameResource + "_" + nameParameter
+    get() = "\'${nameResource}_${nameParameter}\'"
 
 const val ERROR_CODE_SELECT_ALL = 10001
 const val ERROR_CODE_SELECT_WHERE = 10002
@@ -33,7 +35,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.sel
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAllAsync(limit: Long = 0): List<E> {
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAllAsync(
+    limit: Long = 0
+): List<E> {
     return selectAll(limit)
 }
 
@@ -53,7 +57,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
     return selectWhere(expression)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.removeWhere(expression: String): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(expression: String): S {
     val deleteQuery = "${QueryBuilder.DELETE_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
     return executeStatus(
         dao = this,
@@ -63,10 +67,24 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.rem
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.removeWhereAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhereAsync(
     expression: String
 ): S {
-    return removeWhere(expression)
+    return deleteWhere(expression)
+}
+
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(): S {
+    val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $tableName"
+    return executeStatus(
+        dao = this,
+        query = deleteAllQuery,
+        errorCode = ERROR_CODE_REMOVE_WHERE,
+        methodName = "removeWhere"
+    )
+}
+
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(): S {
+    return deleteAll()
 }
 
 ///------Update Section
@@ -75,9 +93,11 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.upd
     params: ScalarMap? = null,
     resourceName: String? = null
 ): BaseStatus {
+    if (this is IFmpLocalDao) return LocalUpdateStatus()
+
     val localResourceName = resourceName ?: nameResource
     val request = newRequest(params, localResourceName)
-    return request.streamCallAuto().execute()
+    return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.updateAsync(
@@ -89,14 +109,40 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.newRequest(
     params: ScalarMap? = null,
-    resourceName: String
+    resourceName: String? = null
 ): RequestBuilder<CustomParameter, ScalarParameter<*>> {
+    if (this is IFmpLocalDao) return LocalRequestBuilder()
+
+    val hyperHive = hyperHiveDatabase.provideHyperHive()
+    val localResourceName = resourceName ?: nameResource
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
-        RequestBuilder(hyperHiveDatabase.provideHyperHive(), resourceName, isCached)
+        RequestBuilder(hyperHive, localResourceName, isCached)
     if (params?.isNotEmpty() == true) {
         params.forEach {
             builder.addScalar(LimitedScalarParameter(name = it.key, value = it.value))
         }
     }
     return builder
+}
+
+class LocalUpdateStatus : BaseStatus() {
+    override fun isOk(): Boolean {
+        return true
+    }
+}
+
+class LocalRequestBuilder : RequestBuilder<CustomParameter, ScalarParameter<*>>(
+    null, "", false
+) {
+    override fun streamCallAuto(): Call<BaseStatus>? {
+        return null
+    }
+
+    override fun streamCallDelta(): Call<BaseStatus>? {
+        return null
+    }
+
+    override fun streamCallTable(): Call<BaseStatus>? {
+        return null
+    }
 }

@@ -2,6 +2,7 @@ package pro.krit.fmpdaoexample
 
 import pro.krit.hiveprocessor.annotations.FmpDatabase
 import pro.krit.hiveprocessor.provider.HyperHiveDatabase
+import pro.krit.hiveprocessor.provider.IHyperHiveDatabase
 
 @FmpDatabase
 abstract class MainDatabase : HyperHiveDatabase(), IMainDatabase {
@@ -10,7 +11,7 @@ abstract class MainDatabase : HyperHiveDatabase(), IMainDatabase {
     //abstract fun providePmLocalDao(): IPmDataLocalDao
 }
 
-interface IMainDatabase {
+interface IMainDatabase : IHyperHiveDatabase {
     fun providePmDao(): IPmDataDao
     fun providePmLocalDao(): IPmDataLocalDao
 }

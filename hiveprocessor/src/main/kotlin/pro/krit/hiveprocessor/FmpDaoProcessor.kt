@@ -39,6 +39,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val HYPER_HIVE_BASE_CLASSE_NAME = "HyperHiveDatabase"
 
         private const val INIT_FIELDS_NAME = "initFields"
+        private const val INIT_CREATE_TABLE = "createTable"
 
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
 
@@ -353,6 +354,10 @@ class FmpDaoProcessor : AbstractProcessor() {
                         FUNC_MEMBER_STATEMENT,
                         MemberName(INIT_FIELDS_PATH, INIT_FIELDS_NAME)
                     )
+                    addStatement(
+                        FUNC_MEMBER_STATEMENT,
+                        MemberName(INIT_FIELDS_PATH, INIT_CREATE_TABLE)
+                    )
                 }
             }
             .build()
@@ -412,7 +417,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         return this.mapNotNull { typeMirror ->
             typeMirror.takeIf {
                 val currentClassName = it.toString().getPackAndClass().second
-                currentClassName != HYPER_HIVE_BASE_CLASSE_NAME
+                !currentClassName.contains(HYPER_HIVE_BASE_CLASSE_NAME)
             }?.run {
                 val typeElement = TYPE_UTILS.asElement(this)
                 // Only for Interfaces

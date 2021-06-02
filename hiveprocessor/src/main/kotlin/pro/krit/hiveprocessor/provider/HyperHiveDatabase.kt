@@ -1,6 +1,7 @@
 package pro.krit.hiveprocessor.provider
 
 import com.google.gson.GsonBuilder
+import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
 import com.mobrun.plugin.api.VersionAPI
@@ -17,11 +18,16 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
     override val databasePath: String
         get() = hyperHiveState?.dbPathDefault.orEmpty()
 
+    private var savedFmpDbKey: String = ""
+
     override val isDbCreated: Boolean
         get() {
             val file = File(databasePath)
             return file.exists()
         }
+
+    override val databaseApi: DatabaseAPI
+        get() = provideHyperHive().databaseAPI
 
     override fun provideHyperHive(): HyperHive {
         return hyperHive ?: throw NullPointerException("HyperHive instance is not initialized")
@@ -31,7 +37,10 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
         return hyperHiveState ?: throw NullPointerException("HyperHiveState instance is not initialized")
     }
 
-    fun initialize(hState: HyperHiveState, config: HyperHiveConfig) {
+    @Suppress("UNCHECKED_CAST")
+    fun<T : HyperHiveDatabase> initialize(hState: HyperHiveState, config: HyperHiveConfig): T {
+        savedFmpDbKey = config.dbKey
+
         hyperHiveState = hState
             .setHostWithSchema(config.serverAddress)
             .setApiVersion(VersionAPI.V_1)
@@ -44,18 +53,56 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
             .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).apply {
                 hyperHive = buildHyperHive().setupLogs(config.logLevel)
             }
+        return this as T
     }
 
-    fun closeAndClear(pathBase: String = "") {
-        if(pathBase.isNotEmpty()) {
-            hyperHive?.databaseAPI?.closeBase(pathBase)
-        } else {
-            hyperHive?.databaseAPI?.closeDefaultBase()
+    override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {
+        var isClosed = true
+        var isOpened = tryToOpenDatabase(dbKey, pathBase)
+        if(!isOpened) {
+            isClosed = tryToCloseDatabase(pathBase)
+            isOpened = tryToOpenDatabase(dbKey, pathBase)
         }
-        clear()
+        return DatabaseState(isOpened = isOpened, isClosed = isClosed)
     }
 
-    fun clear() {
+    override fun closeDatabase(pathBase: String): DatabaseState {
+        val isClosed = tryToCloseDatabase(pathBase)
+        return DatabaseState(isOpened = false, isClosed = isClosed)
+    }
+
+    override fun closeAndClearProviders(pathBase: String) {
+        if(tryToCloseDatabase(pathBase)) {
+            clearProviders()
+        }
+    }
+
+    private fun tryToOpenDatabase(fmpKey: String = "", pathBase: String = ""): Boolean {
+        val currentKey = fmpKey.takeIf { it.isNotEmpty() } ?: savedFmpDbKey
+        val key = generateKey(currentKey)
+        val hyperHiveDatabaseApi = databaseApi
+        return if(pathBase.isNotEmpty()) {
+            hyperHiveDatabaseApi.openBase(pathBase, key)
+        } else {
+            hyperHiveDatabaseApi.openDefaultBase(key)
+        }
+    }
+
+    private fun tryToCloseDatabase(pathBase: String = ""): Boolean {
+        val hyperHiveDatabaseApi = databaseApi
+        return if(pathBase.isNotEmpty()) {
+            hyperHiveDatabaseApi.closeBase(pathBase)
+        } else {
+            hyperHiveDatabaseApi.closeDefaultBase()
+        }
+    }
+
+    private fun generateKey(login: String): String {
+        return "${login}bjasbjasbjasew"
+    }
+
+    private fun clearProviders() {
+        savedFmpDbKey = ""
         hyperHive = null
         hyperHiveState = null
     }
