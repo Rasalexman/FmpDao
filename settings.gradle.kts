@@ -1,3 +1,3 @@
 rootProject.name = "FmpDao"
 rootProject.buildFileName = "build.gradle.kts"
-include(":app", ":hiveprocessor")
+include(":app", ":hhive", ":hiveprocessor")

@@ -16,6 +16,7 @@ android {
         targetSdkVersion(Builds.TARGET_VERSION)
         versionCode = Builds.App.VERSION_CODE
         versionName = Builds.App.VERSION_NAME
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -38,6 +39,7 @@ android {
 
     packagingOptions {
         exclude("META-INF/notice.txt")
+        exclude("META-INF/plugin_release.kotlin_module")
     }
 
     // Declare the task that will monitor all configurations.
@@ -79,6 +81,9 @@ dependencies {
     
     implementation(Libs.Core.coreKtx)
     implementation(Libs.Common.sresultpresentation)
+    implementation(Libs.Common.gson)
+
+    implementation(project(":hhive"))
 
     implementation(project(":hiveprocessor"))
     kapt(project(":hiveprocessor"))

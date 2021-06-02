@@ -9,26 +9,14 @@ object Libs {
     object Common {
         //--- GSOn
         const val gson = "com.google.code.gson:gson:${Versions.gson}"
-
-        //--- LEAK DETECTOR
-        const val leakCanary = "com.squareup.leakcanary:leakcanary-android:${Versions.leakcanary}"
-
-        //----- DI
-        const val kodigen = "com.github.Rasalexman.KODI:kodigen:${Versions.kodi}"
-
-        const val kotpref = "com.chibatching.kotpref:kotpref:${Versions.kotPref}"
-        const val kotprefSupport = "com.chibatching.kotpref:livedata-support:${Versions.kotPref}"
-
-        const val sresult = "com.github.Rasalexman.SResult:sresult:${Versions.sresult}"
         const val sresultpresentation = "com.github.Rasalexman.SResult:sresultpresentation:${Versions.sresult}"
     }
 
-    //--- ROOM DB
-    object Room {
-        const val runtime = "androidx.room:room-runtime:${Versions.room}"
-        const val ktx = "androidx.room:room-ktx:${Versions.room}"
-        const val kapt = "androidx.room:room-compiler:${Versions.room}"
+    object Processor {
+        const val kotlinPoet = "com.squareup:kotlinpoet:1.8.0"
+        const val autoService = "com.google.auto.service:auto-service:1.0"
     }
+
 
     object Tests {
         const val junit = "junit:junit:${Versions.junit}"

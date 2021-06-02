@@ -1,4 +1,5 @@
 import config.Builds
+import org.jetbrains.kotlin.ir.backend.js.compile
 
 plugins {
     id("java-library")
@@ -22,14 +23,15 @@ java {
 }
 
 dependencies {
-    api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
+    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
     implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
+    implementation(config.Libs.Common.gson)
 
-    api(config.Libs.Common.gson)
+    //api(project(":hhive"))
 
-    implementation("com.squareup:kotlinpoet:1.8.0")
-    implementation("com.google.auto.service:auto-service:1.0")
-    kapt("com.google.auto.service:auto-service:1.0")
+    implementation(config.Libs.Processor.kotlinPoet)
+    implementation(config.Libs.Processor.autoService)
+    kapt(config.Libs.Processor.autoService)
 }
 
 group = "pro.krit.hiveprocessor"
