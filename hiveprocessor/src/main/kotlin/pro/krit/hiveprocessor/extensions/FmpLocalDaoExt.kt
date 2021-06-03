@@ -107,7 +107,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>,
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): S {
     return withContext(Dispatchers.IO) { insertOrReplace(items, notifyAll) }
 }
