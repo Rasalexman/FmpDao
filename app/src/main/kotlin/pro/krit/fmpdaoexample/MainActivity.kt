@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        return
 
         /*val insertScope = CoroutineScope(Dispatchers.Main)
         insertScope.launch {
@@ -80,8 +81,8 @@ class MainActivity : AppCompatActivity() {
             pmLocalDao.deleteAsync(selectFirst)
         }*/
 
-        insertList(pmLocalDao)
-        insertSingle(pmLocalDao)
+        //insertList(pmLocalDao)
+        //insertSingle(pmLocalDao)
 
         /*val updateLocalStatus = pmLocalDao.update()
         println("----> updateStatus = ${updateLocalStatus.isOk}")
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         val count = 10
         if(resultLimitLocal.size > count) {
             val listToDelete = resultLimitLocal.subList(resultLimitLocal.size-count, resultLimitLocal.size)
-            deleteList(pmLocalDao, listToDelete)
+            //deleteList(pmLocalDao, listToDelete)
         }
 
         val resultAfterDeleteLocal = pmLocalDao.selectAll()

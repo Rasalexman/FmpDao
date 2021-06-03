@@ -41,17 +41,38 @@ const val ERROR_CODE_SELECT_ALL = 10001
 const val ERROR_CODE_SELECT_WHERE = 10002
 const val ERROR_CODE_REMOVE_WHERE = 10003
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable() = flow<List<E>> {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable(
+    withStart: Boolean = true,
+    isDistincted: Boolean = false
+) = flow<List<E>> {
     this@flowable.hyperHiveDatabase.getTrigger(this@flowable).collect {
-        println("-----> flowable collect = $it")
         emit(selectAllAsync())
+    }
+}.onStart {
+    if (withStart) {
+        emit(selectAllAsync())
+    }
+}.apply {
+    if (isDistincted) {
+        distinctUntilChanged()
     }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowableWhere(expression: String = "") = flow<List<E>> {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowableWhere(
+    expression: String = "",
+    withStart: Boolean = true,
+    isDistincted: Boolean = false
+) = flow<List<E>> {
     this@flowableWhere.hyperHiveDatabase.getTrigger(this@flowableWhere).collect {
-        println("-----> flowableWhere collect = $expression")
         emit(selectWhereAsync(expression))
+    }
+}.onStart {
+    if (withStart) {
+        emit(selectWhereAsync(expression))
+    }
+}.apply {
+    if (isDistincted) {
+        distinctUntilChanged()
     }
 }
 
@@ -115,12 +136,16 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(): S {
-    return withContext(Dispatchers.IO) {  deleteAll() }
+    return withContext(Dispatchers.IO) { deleteAll() }
 }
 
-fun<E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
+fun <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.triggerFlow() {
+    (hyperHiveDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(tableName)
+}
+
+fun <E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
     if (this.status.name == "OK") {
-        (dao.hyperHiveDatabase.getTrigger(dao) as MutableSharedFlow<String>).tryEmit(dao.tableName)
+        dao.triggerFlow()
     }
     return this
 }
