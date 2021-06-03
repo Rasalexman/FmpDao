@@ -3,7 +3,7 @@ package config
 object Libs {
     object Core {
         const val coreKtx = "androidx.core:core-ktx:${Versions.appCoreX}"
-        const val navigationUiKtx = "androidx.navigation:navigation-ui-ktx:${Versions.navigation}"
+        const val coroutinesCore = "org.jetbrains.kotlinx:kotlinx-coroutines-core:${Versions.coroutines}"
     }
 
     object Common {

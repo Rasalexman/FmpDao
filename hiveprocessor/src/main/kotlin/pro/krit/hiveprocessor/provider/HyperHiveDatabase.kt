@@ -19,6 +19,12 @@ import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
 import com.mobrun.plugin.api.VersionAPI
+import com.mobrun.plugin.models.StatusSelectTable
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import pro.krit.hiveprocessor.base.IFmpDao
+import pro.krit.hiveprocessor.extensions.tableName
 import java.io.File
 
 /**
@@ -33,6 +39,8 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
         get() = hyperHiveState?.dbPathDefault.orEmpty()
 
     private var savedFmpDbKey: String = ""
+
+    private val triggers: HashMap<String, Flow<String>> = hashMapOf()
 
     override val isDbCreated: Boolean
         get() {
@@ -49,6 +57,10 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
 
     override fun provideHyperHiveState(): HyperHiveState {
         return hyperHiveState ?: throw NullPointerException("HyperHiveState instance is not initialized")
+    }
+
+    override fun <E : Any, T : StatusSelectTable<E>> getTrigger(dao: IFmpDao<E, T>): Flow<String> {
+        return triggers.getOrPut(dao.tableName) { MutableSharedFlow(5, 5, BufferOverflow.DROP_OLDEST) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -116,6 +128,7 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
     }
 
     private fun clearProviders() {
+        triggers.clear()
         savedFmpDbKey = ""
         hyperHive = null
         hyperHiveState = null

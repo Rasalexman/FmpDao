@@ -17,5 +17,13 @@ data class PmEtDataLocalEntity(
     //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
     @JvmField
     @SerializedName("AUART")
-    var auart: String? = null
+    var auart: String? = null,
+
+    @JvmField
+    @SerializedName("TYPE")
+    var type: PmType? = null
 )
+
+enum class PmType {
+    USER, ADMIN
+}
