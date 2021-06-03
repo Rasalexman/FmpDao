@@ -20,7 +20,7 @@ import pro.krit.hiveprocessor.provider.IHyperHiveDatabase
 /**
  * Base abstraction for annotation processing works with remotely fmp database structures
  */
-interface IFmpDao<E : Any, T : StatusSelectTable<E>>{
+interface IFmpDao<E : Any, T : StatusSelectTable<E>> {
     val hyperHiveDatabase: IHyperHiveDatabase
     val nameResource: String
     val nameParameter: String

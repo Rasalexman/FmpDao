@@ -20,6 +20,9 @@ import com.mobrun.plugin.api.request_assistant.RequestBuilder
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IFmpDao
 import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
@@ -37,6 +40,20 @@ val <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.tableName: String
 const val ERROR_CODE_SELECT_ALL = 10001
 const val ERROR_CODE_SELECT_WHERE = 10002
 const val ERROR_CODE_REMOVE_WHERE = 10003
+
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable() = flow<List<E>> {
+    this@flowable.hyperHiveDatabase.getTrigger(this@flowable).collect {
+        println("-----> flowable collect = $it")
+        emit(selectAllAsync())
+    }
+}
+
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowableWhere(expression: String = "") = flow<List<E>> {
+    this@flowableWhere.hyperHiveDatabase.getTrigger(this@flowableWhere).collect {
+        println("-----> flowableWhere collect = $expression")
+        emit(selectWhereAsync(expression))
+    }
+}
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAll(limit: Long = 0): List<E> {
     val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
@@ -68,7 +85,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.sel
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectWhereAsync(
     expression: String
 ): List<E> {
-    return selectWhere(expression)
+    return withContext(Dispatchers.IO) { selectWhere(expression) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(expression: String): S {
@@ -78,13 +95,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
         query = deleteQuery,
         errorCode = ERROR_CODE_REMOVE_WHERE,
         methodName = "removeWhere"
-    )
+    ).triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhereAsync(
     expression: String
 ): S {
-    return deleteWhere(expression)
+    return withContext(Dispatchers.IO) { deleteWhere(expression) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(): S {
@@ -94,11 +111,18 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
         query = deleteAllQuery,
         errorCode = ERROR_CODE_REMOVE_WHERE,
         methodName = "removeWhere"
-    )
+    ).triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(): S {
-    return deleteAll()
+    return withContext(Dispatchers.IO) {  deleteAll() }
+}
+
+fun<E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
+    if (this.status.name == "OK") {
+        (dao.hyperHiveDatabase.getTrigger(dao) as MutableSharedFlow<String>).tryEmit(dao.tableName)
+    }
+    return this
 }
 
 ///------Update Section
@@ -118,7 +142,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
     params: ScalarMap? = null,
     resourceName: String? = null
 ): BaseStatus {
-    return update(params, resourceName)
+    return withContext(Dispatchers.IO) { update(params, resourceName) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.newRequest(

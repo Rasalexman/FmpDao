@@ -18,6 +18,8 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.mobrun.plugin.models.StatusSelectTable
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.common.FieldsBuilder.getFields
 import pro.krit.hiveprocessor.common.LocalDaoFields
@@ -65,13 +67,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             methodName = "insertOrReplace"
         )
     }
-    return status
+    return status.triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     item: E
 ): S {
-    return insertOrReplace(item)
+    return withContext(Dispatchers.IO) { insertOrReplace(item) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
@@ -93,13 +95,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             methodName = "insertOrReplaceList"
         )
     }
-    return status
+    return status.triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>
 ): S {
-    return insertOrReplace(items)
+    return withContext(Dispatchers.IO) { insertOrReplace(items) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(item: E): S {
@@ -109,13 +111,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
         query = query,
         errorCode = ERROR_CODE_DELETE,
         methodName = "delete"
-    )
+    ).triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     item: E
 ): S {
-    return delete(item)
+    return withContext(Dispatchers.IO) { delete(item) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(items: List<E>): S {
@@ -125,13 +127,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
         query = query,
         errorCode = ERROR_CODE_DELETE,
         methodName = "deleteList"
-    )
+    ).triggerFlow(this)
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     items: List<E>
 ): S {
-    return delete(items)
+    return withContext(Dispatchers.IO) { delete(items) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.initFields() {

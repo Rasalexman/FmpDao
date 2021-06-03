@@ -17,6 +17,9 @@ package pro.krit.hiveprocessor.provider
 import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
+import com.mobrun.plugin.models.StatusSelectTable
+import kotlinx.coroutines.flow.Flow
+import pro.krit.hiveprocessor.base.IFmpDao
 
 interface IHyperHiveDatabase {
     val isDbCreated: Boolean
@@ -24,6 +27,8 @@ interface IHyperHiveDatabase {
     val databaseApi: DatabaseAPI
     fun provideHyperHive(): HyperHive
     fun provideHyperHiveState(): HyperHiveState
+
+    fun<E : Any, T : StatusSelectTable<E>> getTrigger(dao: IFmpDao<E, T>): Flow<String>
 
     fun openDatabase(dbKey: String = "", pathBase: String = ""): DatabaseState
     fun closeDatabase(pathBase: String = ""): DatabaseState
