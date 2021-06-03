@@ -43,7 +43,7 @@ const val ERROR_CODE_REMOVE_WHERE = 10003
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable(
     withStart: Boolean = true,
-    isDistincted: Boolean = false
+    withDistinct: Boolean = false
 ) = flow<List<E>> {
     this@flowable.hyperHiveDatabase.getTrigger(this@flowable).collect {
         emit(selectAllAsync())
@@ -53,7 +53,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
         emit(selectAllAsync())
     }
 }.apply {
-    if (isDistincted) {
+    if (withDistinct) {
         distinctUntilChanged()
     }
 }
@@ -61,7 +61,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowableWhere(
     expression: String = "",
     withStart: Boolean = true,
-    isDistincted: Boolean = false
+    withDistinct: Boolean = false
 ) = flow<List<E>> {
     this@flowableWhere.hyperHiveDatabase.getTrigger(this@flowableWhere).collect {
         emit(selectWhereAsync(expression))
@@ -71,7 +71,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
         emit(selectWhereAsync(expression))
     }
 }.apply {
-    if (isDistincted) {
+    if (withDistinct) {
         distinctUntilChanged()
     }
 }

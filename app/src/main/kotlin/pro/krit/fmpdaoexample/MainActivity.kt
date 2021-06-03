@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
-            pmLocalDao.flowable().flowOn(Dispatchers.IO).collect {
+            pmLocalDao.flowable(withDistinct = true).flowOn(Dispatchers.IO).collect {
                 println("----> flowable count = ${it.size}")
             }
         }
@@ -66,8 +66,6 @@ class MainActivity : AppCompatActivity() {
                 println("----> flowable PmType.USER count = ${it.size}")
             }
         }
-
-        return
 
         /*val insertScope = CoroutineScope(Dispatchers.Main)
         insertScope.launch {
