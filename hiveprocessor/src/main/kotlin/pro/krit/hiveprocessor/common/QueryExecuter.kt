@@ -20,6 +20,7 @@ import pro.krit.hiveprocessor.base.IFmpDao
 import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.extensions.createTable
 import pro.krit.hiveprocessor.extensions.tableName
+import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
 
@@ -30,10 +31,11 @@ object QueryExecuter {
         dao: IFmpDao<E, S>,
         query: String,
         errorCode: Int = DEFAULT_ERRORCODE,
-        methodName: String = ""
+        methodName: String = "",
+        notifyAll: Boolean = false
     ): List<E> {
         return try {
-            val status = executeStatus(dao, query, errorCode, methodName)
+            val status = executeStatus(dao, query, errorCode, methodName, notifyAll)
             status.result.database.records
         } catch (e: Exception) {
             e.printStackTrace()
@@ -73,7 +75,8 @@ object QueryExecuter {
         dao: IFmpDao<E, S>,
         query: String,
         errorCode: Int = 1001,
-        methodName: String = ""
+        methodName: String = "",
+        notifyAll: Boolean = false
     ): S {
         return try {
             val hyperHiveDatabaseApi = dao.hyperHiveDatabase.databaseApi
@@ -84,6 +87,8 @@ object QueryExecuter {
                 codeType = errorCode,
                 method = methodName
             ) as S
+        }.apply {
+            if(notifyAll) this.triggerFlow(dao)
         }
     }
 
@@ -91,11 +96,12 @@ object QueryExecuter {
         dao: IFmpDao<E, S>,
         query: String,
         errorCode: Int = 1001,
-        methodName: String = ""
+        methodName: String = "",
+        notifyAll: Boolean = false
     ): S {
         var status = executeStatus(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
         if(status.isOk) {
-            status = executeStatus(dao, query, errorCode, methodName)
+            status = executeStatus(dao, query, errorCode, methodName, notifyAll)
         }
         val endStatus = executeStatus(dao, QueryBuilder.END_TRANSACTION_QUERY)
         if(!endStatus.isOk) {

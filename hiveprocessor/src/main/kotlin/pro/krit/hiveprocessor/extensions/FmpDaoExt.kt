@@ -109,34 +109,40 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
     return withContext(Dispatchers.IO) { selectWhere(expression) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(expression: String): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(
+    expression: String,
+    notifyAll: Boolean = true
+): S {
     val deleteQuery = "${QueryBuilder.DELETE_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
     return executeStatus(
         dao = this,
         query = deleteQuery,
         errorCode = ERROR_CODE_REMOVE_WHERE,
-        methodName = "removeWhere"
-    ).triggerFlow(this)
+        methodName = "removeWhere",
+        notifyAll = notifyAll
+    )
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhereAsync(
-    expression: String
+    expression: String,
+    notifyAll: Boolean = true
 ): S {
-    return withContext(Dispatchers.IO) { deleteWhere(expression) }
+    return withContext(Dispatchers.IO) { deleteWhere(expression, notifyAll) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(notifyAll: Boolean = true): S {
     val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $tableName"
     return executeStatus(
         dao = this,
         query = deleteAllQuery,
         errorCode = ERROR_CODE_REMOVE_WHERE,
-        methodName = "removeWhere"
-    ).triggerFlow(this)
+        methodName = "removeWhere",
+        notifyAll = notifyAll
+    )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(): S {
-    return withContext(Dispatchers.IO) { deleteAll() }
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(notifyAll: Boolean = true): S {
+    return withContext(Dispatchers.IO) { deleteAll(notifyAll) }
 }
 
 fun <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.triggerFlow() {
