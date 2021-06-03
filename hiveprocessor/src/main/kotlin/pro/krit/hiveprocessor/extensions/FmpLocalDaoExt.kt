@@ -49,14 +49,16 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocal
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
-    item: E
+    item: E,
+    notifyAll: Boolean = false
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, item)
     var status = executeStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
-        methodName = "insertOrReplace"
+        methodName = "insertOrReplace",
+        notifyAll
     )
     val tableIsNotCreated = checkStatusForTable(this, status)
     if (tableIsNotCreated == null) {
@@ -64,27 +66,31 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             dao = this,
             query = query,
             errorCode = ERROR_CODE_INSERT,
-            methodName = "insertOrReplace"
+            methodName = "insertOrReplace",
+            notifyAll
         )
     }
-    return status.triggerFlow(this)
+    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
-    item: E
+    item: E,
+    notifyAll: Boolean = false
 ): S {
-    return withContext(Dispatchers.IO) { insertOrReplace(item) }
+    return withContext(Dispatchers.IO) { insertOrReplace(item, notifyAll) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
-    items: List<E>
+    items: List<E>,
+    notifyAll: Boolean = false
 ): S {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, items)
     var status = executeTransactionStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
-        methodName = "insertOrReplaceList"
+        methodName = "insertOrReplaceList",
+        notifyAll = notifyAll
     )
     val tableIsNotCreated = checkStatusForTable(this, status)
     if (tableIsNotCreated == null) {
@@ -92,48 +98,60 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             dao = this,
             query = query,
             errorCode = ERROR_CODE_INSERT,
-            methodName = "insertOrReplaceList"
+            methodName = "insertOrReplaceList",
+            notifyAll = notifyAll
         )
     }
-    return status.triggerFlow(this)
+    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
-    items: List<E>
+    items: List<E>,
+    notifyAll: Boolean = true
 ): S {
-    return withContext(Dispatchers.IO) { insertOrReplace(items) }
+    return withContext(Dispatchers.IO) { insertOrReplace(items, notifyAll) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(item: E): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
+    item: E,
+    notifyAll: Boolean = true
+): S {
     val query = QueryBuilder.createDeleteQuery(this, item)
     return executeStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_DELETE,
-        methodName = "delete"
-    ).triggerFlow(this)
+        methodName = "delete",
+        notifyAll = notifyAll
+    )
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
-    item: E
+    item: E,
+    notifyAll: Boolean = true
 ): S {
-    return withContext(Dispatchers.IO) { delete(item) }
+    return withContext(Dispatchers.IO) { delete(item, notifyAll) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(items: List<E>): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
+    items: List<E>,
+    notifyAll: Boolean = true
+): S {
     val query = QueryBuilder.createDeleteQuery(this, items)
     return executeTransactionStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_DELETE,
-        methodName = "deleteList"
-    ).triggerFlow(this)
+        methodName = "deleteList",
+        notifyAll = notifyAll
+    )
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
-    items: List<E>
+    items: List<E>,
+    notifyAll: Boolean = true
 ): S {
-    return withContext(Dispatchers.IO) { delete(items) }
+    return withContext(Dispatchers.IO) { delete(items, notifyAll) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.initFields() {
