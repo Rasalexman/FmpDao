@@ -17,14 +17,11 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpDao
-import pro.krit.hiveprocessor.base.IFmpLocalDao
-import pro.krit.hiveprocessor.extensions.createTable
 import pro.krit.hiveprocessor.extensions.tableName
 import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
 
-    const val NO_SUCH_TABLE_ERROR = "no_such_table"
     const val DEFAULT_ERRORCODE = 1001
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeQuery(
@@ -44,40 +41,13 @@ object QueryExecuter {
         }
     }
 
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> checkStatusForTable(
-        dao: IFmpLocalDao<E, S>,
-        status: S
-    ): S? {
-        var localStatus: S? = null
-        var tableIsNotCreated = status.checkForTableError()
-        if (tableIsNotCreated) {
-            val statusForCreateTable = dao.createTable()
-            tableIsNotCreated = statusForCreateTable.checkForTableError()
-            if (tableIsNotCreated) {
-                localStatus = statusForCreateTable
-            }
-        }
-        return localStatus
-    }
-
-    inline fun <reified E : Any> StatusSelectTable<E>.checkForTableError(): Boolean {
-        val errors = this.errors.orEmpty()
-        return if (errors.isNotEmpty()) {
-            errors.any {
-                it.descriptions.any { error ->
-                    error.replace(" ", "_").contains(NO_SUCH_TABLE_ERROR)
-                }
-            }
-        } else false
-    }
-
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeStatus(
         dao: IFmpDao<E, S>,
         query: String,
         errorCode: Int = 1001,
         methodName: String = "",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         return try {
             val hyperHiveDatabaseApi = dao.hyperHiveDatabase.databaseApi
             hyperHiveDatabaseApi.query(query, S::class.java).execute()!!
@@ -88,7 +58,7 @@ object QueryExecuter {
                 method = methodName
             ) as S
         }.apply {
-            if(notifyAll) this.triggerFlow(dao)
+            if (notifyAll) this.triggerFlow(dao)
         }
     }
 
@@ -98,13 +68,19 @@ object QueryExecuter {
         errorCode: Int = 1001,
         methodName: String = "",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         var status = executeStatus(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
-        if(status.isOk) {
-            status = executeStatus(dao, query, errorCode, methodName, notifyAll)
+        if (status.isOk) {
+            status = executeStatus(dao, query, errorCode, methodName)
         }
-        val endStatus = executeStatus(dao, QueryBuilder.END_TRANSACTION_QUERY)
-        if(!endStatus.isOk) {
+        val endStatus = executeStatus(
+            dao,
+            QueryBuilder.END_TRANSACTION_QUERY,
+            DEFAULT_ERRORCODE,
+            methodName,
+            notifyAll
+        )
+        if (!endStatus.isOk) {
             status = endStatus
         }
         return status

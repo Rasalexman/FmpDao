@@ -16,9 +16,14 @@ package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpLocalDao
+import java.security.MessageDigest
 import java.util.*
 
 object FieldsBuilder {
+
+    private val md by lazy { MessageDigest.getInstance("SHA-256") }
+    private const val PRIMARY_KEY_JAVA_TYPE = "String"
+    private const val VALUE_NULL = "NULL"
 
     fun <E : Any, S : StatusSelectTable<E>> getValues(dao: IFmpLocalDao<E, S>, item: E): String {
         val localDaoFields = dao.localDaoFields
@@ -31,14 +36,14 @@ object FieldsBuilder {
         val stringBuilderRes = StringBuilder("(")
         var prefix = ""
         try {
-            val value = primaryKeyField[item]
-            if (value == null) {
-                stringBuilderRes.append("NULL")
-            } else {
-                stringBuilderRes.append("'")
-                    .append(value)
-                    .append("'")
-            }
+            val primaryKeyValue = primaryKeyField[item]
+                ?: if (primaryKeyField.type.simpleName == PRIMARY_KEY_JAVA_TYPE) {
+                    generatePrimaryKeyValue()
+                } else VALUE_NULL
+
+            stringBuilderRes.append("'")
+                .append(primaryKeyValue)
+                .append("'")
             prefix = ", "
         } catch (e: IllegalAccessException) {
             e.printStackTrace()
@@ -65,9 +70,16 @@ object FieldsBuilder {
         return stringBuilderRes.toString()
     }
 
+    private fun generatePrimaryKeyValue(): String {
+        val key = UUID.randomUUID().toString()
+        val bytes = key.toByteArray()
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
+
     fun getFields(
         primaryKeyName: String?,
-        fieldsNames: ArrayList<String>
+        fieldsNames: List<String>
     ): String {
         var res = "("
         var prefix = ""

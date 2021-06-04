@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         val whereScope = CoroutineScope(Dispatchers.Main)
         whereScope.launch {
-            pmLocalDao.flowableWhere("TYPE = \'${PmType.USER}\'").flowOn(Dispatchers.IO).collect {
+            pmLocalDao.flowableWhere("TYPE = \'${PmType.USER}\' ORDER BY QWERTY ASC").flowOn(Dispatchers.IO).collect {
                 println("----> flowable PmType.USER count = ${it.size}")
             }
         }
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             pmLocalDao.deleteAsync(selectFirst)
         }*/
 
-        //insertList(pmLocalDao)
+        insertList(pmLocalDao)
         //insertSingle(pmLocalDao)
 
         /*val updateLocalStatus = pmLocalDao.update()
@@ -99,8 +99,8 @@ class MainActivity : AppCompatActivity() {
             //deleteList(pmLocalDao, listToDelete)
         }
 
-        val resultAfterDeleteLocal = pmLocalDao.selectAll()
-        println("----> resultAfterDeleteLocal = ${resultAfterDeleteLocal.size}")
+        //val resultAfterDeleteLocal = pmLocalDao.selectAll()
+        //println("----> resultAfterDeleteLocal = ${resultAfterDeleteLocal.size}")
     }
 
     private fun deleteList(dao: IPmDataLocalDao, list: List<PmEtDataLocalEntity>) {
@@ -116,20 +116,25 @@ class MainActivity : AppCompatActivity() {
     private fun insertSingle(dao: IPmDataLocalDao) {
         val statusInsert = dao.insertOrReplace(
             PmEtDataLocalEntity(
-                id = Random.nextInt(),
                 marker = UUID.randomUUID().toString().take(18),
-                auart = UUID.randomUUID().toString().take(12)
-            )
+                auart = UUID.randomUUID().toString().take(12),
+                index = Random.nextInt(10, 10000000),
+                type = PmType.USER
+            ), notifyAll = true
         )
         println("-----> insertSingle = ${statusInsert.isOk}")
     }
 
     private suspend fun insertSingleAsync(dao: IPmDataLocalDao) {
+        val randomvalue = Random.nextInt(1, 10)
+        val type = if(randomvalue%2 == 0) PmType.USER else PmType.ADMIN
         val statusInsert = dao.insertOrReplaceAsync(
             PmEtDataLocalEntity(
-                id = Random.nextInt(),
+                //id = Random.nextInt(),
                 marker = UUID.randomUUID().toString().take(18),
-                auart = UUID.randomUUID().toString().take(12)
+                auart = UUID.randomUUID().toString().take(12),
+                index = Random.nextInt(10, 10000000),
+                type = type
             )
         )
         println("-----> insertStatus = ${statusInsert.isOk}")
@@ -142,13 +147,14 @@ class MainActivity : AppCompatActivity() {
             val type = if(it%2 == 0) PmType.USER else PmType.ADMIN
 
             localListToInsert.add(PmEtDataLocalEntity(
-                id = Random.nextInt(),
+                //id = Random.nextInt(),
                 marker = UUID.randomUUID().toString().take(18),
                 auart = UUID.randomUUID().toString().take(12),
-                type = type
+                index = Random.nextInt(10, 10000000),
+                type = type,
             ))
         }
-        val insertAllStatus = dao.insertOrReplace(localListToInsert)
+        val insertAllStatus = dao.insertOrReplace(localListToInsert, notifyAll = true)
         println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
     }
 }

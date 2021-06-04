@@ -24,7 +24,6 @@ import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.common.FieldsBuilder.getFields
 import pro.krit.hiveprocessor.common.LocalDaoFields
 import pro.krit.hiveprocessor.common.QueryBuilder
-import pro.krit.hiveprocessor.common.QueryExecuter.checkStatusForTable
 import pro.krit.hiveprocessor.common.QueryExecuter.executeStatus
 import pro.krit.hiveprocessor.common.QueryExecuter.executeTransactionStatus
 import java.lang.reflect.Field
@@ -34,7 +33,7 @@ const val ERROR_CODE_CREATE = 10004
 const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTable(): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTable(): StatusSelectTable<E> {
     val query = QueryBuilder.createTableQuery(this)
     return executeStatus(
         dao = this,
@@ -44,78 +43,56 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTableAsync(): S {
-    return createTable()
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTableAsync(): StatusSelectTable<E> {
+    return withContext(Dispatchers.IO) { createTable() }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     item: E,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, item)
-    var status = executeStatus(
+    return executeStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
         methodName = "insertOrReplace",
         notifyAll
     )
-    val tableIsNotCreated = checkStatusForTable(this, status)
-    if (tableIsNotCreated == null) {
-        status = executeStatus(
-            dao = this,
-            query = query,
-            errorCode = ERROR_CODE_INSERT,
-            methodName = "insertOrReplace",
-            notifyAll
-        )
-    }
-    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     item: E,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { insertOrReplace(item, notifyAll) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     val query = QueryBuilder.createInsertOrReplaceQuery(this, items)
-    var status = executeTransactionStatus(
+    return executeTransactionStatus(
         dao = this,
         query = query,
         errorCode = ERROR_CODE_INSERT,
         methodName = "insertOrReplaceList",
         notifyAll = notifyAll
     )
-    val tableIsNotCreated = checkStatusForTable(this, status)
-    if (tableIsNotCreated == null) {
-        status = executeTransactionStatus(
-            dao = this,
-            query = query,
-            errorCode = ERROR_CODE_INSERT,
-            methodName = "insertOrReplaceList",
-            notifyAll = notifyAll
-        )
-    }
-    return status
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { insertOrReplace(items, notifyAll) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
     item: E,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     val query = QueryBuilder.createDeleteQuery(this, item)
     return executeStatus(
         dao = this,
@@ -129,14 +106,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     item: E,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { delete(item, notifyAll) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
     items: List<E>,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     val query = QueryBuilder.createDeleteQuery(this, items)
     return executeTransactionStatus(
         dao = this,
@@ -150,7 +127,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     items: List<E>,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { delete(items, notifyAll) }
 }
 
@@ -158,7 +135,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
     var localPrimaryKey: Field? = null
     var localPrimaryKeyName: String? = null
     val localFields = ArrayList<Field>()
-    val localFieldsNames = ArrayList<String>()
+    val localFieldsNames = mutableMapOf<String, String>()
     var localFieldsForQuery: String? = null
 
     val fieldsClass = E::class.java.fields
@@ -188,14 +165,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S
             localPrimaryKey = field
         } else {
             localFields.add(field)
-            localFieldsNames.add(name)
+            localFieldsNames[name] = field.type.simpleName
         }
-        localFieldsForQuery = getFields(localPrimaryKeyName, localFieldsNames)
+        localFieldsForQuery = getFields(localPrimaryKeyName, localFieldsNames.keys.toList())
     }
 
     localDaoFields = LocalDaoFields(
         fields = localFields,
-        fieldsNames = localFieldsNames,
+        fieldsNamesWithTypes = localFieldsNames,
         primaryKeyField = localPrimaryKey,
         primaryKeyName = localPrimaryKeyName,
         fieldsForQuery = localFieldsForQuery

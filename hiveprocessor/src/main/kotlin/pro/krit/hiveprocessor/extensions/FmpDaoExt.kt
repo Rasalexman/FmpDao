@@ -112,7 +112,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(
     expression: String,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     val deleteQuery = "${QueryBuilder.DELETE_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
     return executeStatus(
         dao = this,
@@ -126,11 +126,13 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhereAsync(
     expression: String,
     notifyAll: Boolean = true
-): S {
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { deleteWhere(expression, notifyAll) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(notifyAll: Boolean = true): S {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(
+    notifyAll: Boolean = true
+): StatusSelectTable<E> {
     val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $tableName"
     return executeStatus(
         dao = this,
@@ -141,7 +143,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(notifyAll: Boolean = true): S {
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(
+    notifyAll: Boolean = true
+): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { deleteAll(notifyAll) }
 }
 
