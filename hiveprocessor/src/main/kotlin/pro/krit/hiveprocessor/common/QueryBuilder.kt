@@ -32,13 +32,16 @@ object QueryBuilder {
     private const val CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS "
     private const val TEXT_PRIMARY_KEY = " TEXT PRIMARY KEY NOT NULL"
     private const val TEXT_FIELD_TYPE = " TEXT"
+    private const val INTEGER_FIELD_TYPE = " INTEGER"
 
     private const val INSERT_OR_REPLACE = "INSERT OR REPLACE INTO "
     private const val VALUES = " VALUES "
 
+    private const val FIELD_TYPE_INTEGER = "Integer"
+
     fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: IFmpLocalDao<E, S>): String {
         val localDaoFields = dao.localDaoFields
-        val fieldsNames = localDaoFields?.fieldsNames
+        val fieldsNames = localDaoFields?.fieldsNamesWithTypes
         if (fieldsNames.isNullOrEmpty()) {
             throw UnsupportedOperationException("No 'fieldsNames' key for operation 'createTableQuery'")
         }
@@ -57,14 +60,21 @@ object QueryBuilder {
                 prefix = ", "
             }
 
-            for (fieldName in localFieldNames) {
+            for(entry in localFieldNames) {
+                val fieldName = entry.key
+                val fieldType = entry.value
+
                 append(prefix)
                 append(fieldName)
-                append(TEXT_FIELD_TYPE)
+                append(getFieldType(fieldType))
                 prefix = ", "
             }
             append(")")
         }
+    }
+
+    private fun getFieldType(fieldType: String): String {
+        return if(fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(

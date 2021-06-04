@@ -7,7 +7,7 @@ data class PmEtDataLocalEntity(
     @JvmField
     @PrimaryKey
     @SerializedName("ID")
-    var id: Int? = null,
+    var id: String? = null,
 
     //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
     @JvmField
@@ -18,6 +18,10 @@ data class PmEtDataLocalEntity(
     @JvmField
     @SerializedName("AUART")
     var auart: String? = null,
+
+    @JvmField
+    @SerializedName("QWERTY")
+    var index: Int? = null,
 
     @JvmField
     @SerializedName("TYPE")
