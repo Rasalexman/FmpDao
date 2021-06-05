@@ -16,7 +16,7 @@ package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpLocalDao
-import pro.krit.hiveprocessor.extensions.tableName
+import pro.krit.hiveprocessor.extensions.fullTableName
 
 object QueryBuilder {
 
@@ -51,7 +51,7 @@ object QueryBuilder {
         val localFieldNames = fieldsNames.orEmpty()
         return buildString {
             append(CREATE_TABLE_QUERY)
-            append(dao.tableName)
+            append(dao.fullTableName)
             append(" (")
 
             primaryKeyName?.let {
@@ -85,7 +85,7 @@ object QueryBuilder {
             ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
 
         val fieldsValues = FieldsBuilder.getValues(dao, item)
-        return "$INSERT_OR_REPLACE${dao.tableName} $fieldsForQuery$VALUES$fieldsValues"
+        return "$INSERT_OR_REPLACE${dao.fullTableName} $fieldsForQuery$VALUES$fieldsValues"
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {
@@ -113,7 +113,7 @@ object QueryBuilder {
             e.printStackTrace()
             throw UnsupportedOperationException(e.message)
         }
-        return "$DELETE_QUERY ${dao.tableName} $WHERE $primaryKeyName = '$keyValue'"
+        return "$DELETE_QUERY ${dao.fullTableName} $WHERE $primaryKeyName = '$keyValue'"
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {

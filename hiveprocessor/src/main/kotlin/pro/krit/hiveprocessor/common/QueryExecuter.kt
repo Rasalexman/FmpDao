@@ -17,7 +17,7 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpDao
-import pro.krit.hiveprocessor.extensions.tableName
+import pro.krit.hiveprocessor.extensions.fullTableName
 import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
@@ -36,7 +36,7 @@ object QueryExecuter {
             status.result.database.records
         } catch (e: Exception) {
             e.printStackTrace()
-            println("[ERROR]: ${dao.tableName} ERROR WITH QUERY $query")
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
         }
     }

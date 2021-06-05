@@ -26,7 +26,7 @@ package pro.krit.hiveprocessor.annotations
  *
  * Also you should define
  * @param resourceName - The name of resource from remote FMP-server
- * @param parameterName - The name of remote table to operate with
+ * @param tableName - The name of remote table to operate with
  *
  * For FmpLocalDao Entities mark field [com.mobrun.plugin.api.request_assistant.PrimaryKey] field
  *
@@ -66,5 +66,5 @@ package pro.krit.hiveprocessor.annotations
 @Retention(AnnotationRetention.SOURCE)
 annotation class FmpLocalDao(
     val resourceName: String,
-    val parameterName: String = ""
+    val tableName: String = ""
 )

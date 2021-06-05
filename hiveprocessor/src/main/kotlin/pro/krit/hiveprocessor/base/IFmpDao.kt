@@ -22,7 +22,7 @@ import pro.krit.hiveprocessor.provider.IHyperHiveDatabase
  */
 interface IFmpDao<E : Any, T : StatusSelectTable<E>> {
     val hyperHiveDatabase: IHyperHiveDatabase
-    val nameResource: String
-    val nameParameter: String
+    val resourceName: String
+    val tableName: String
     val isCached: Boolean
 }

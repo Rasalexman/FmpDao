@@ -20,8 +20,9 @@ data class BindData(
     val element: Element,
     val fileName: String,
     val mainData: TypeData,
+    val parameters: List<String> = emptyList(),
     val resourceName: String = "",
-    val parameterName: String = "",
-    val isCached: Boolean = false,
+    val tableName: String = "",
+    val isDelta: Boolean = false,
     val isLocal: Boolean = false
 )
