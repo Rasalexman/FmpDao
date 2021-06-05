@@ -24,7 +24,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import pro.krit.hiveprocessor.base.IFmpDao
-import pro.krit.hiveprocessor.extensions.tableName
+import pro.krit.hiveprocessor.extensions.fullTableName
 import java.io.File
 
 /**
@@ -60,7 +60,7 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
     }
 
     override fun <E : Any, T : StatusSelectTable<E>> getTrigger(dao: IFmpDao<E, T>): Flow<String> {
-        return triggers.getOrPut(dao.tableName) { MutableSharedFlow(5, 5, BufferOverflow.DROP_OLDEST) }
+        return triggers.getOrPut(dao.fullTableName) { MutableSharedFlow(5, 5, BufferOverflow.DROP_OLDEST) }
     }
 
     @Suppress("UNCHECKED_CAST")

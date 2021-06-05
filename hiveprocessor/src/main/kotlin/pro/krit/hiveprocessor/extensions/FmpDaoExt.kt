@@ -34,8 +34,8 @@ typealias Parameter = String
 typealias Value = Any
 typealias ScalarMap = Map<Parameter, Value>
 
-val <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.tableName: String
-    get() = "\'${nameResource}_${nameParameter}\'"
+val <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.fullTableName: String
+    get() = "\'${resourceName}_${tableName}\'"
 
 const val ERROR_CODE_SELECT_ALL = 10001
 const val ERROR_CODE_SELECT_WHERE = 10002
@@ -78,7 +78,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAll(limit: Long = 0): List<E> {
     val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
-    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $tableName$limitQuery"
+    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $fullTableName$limitQuery"
     return executeQuery(
         dao = this,
         query = selectAllQuery,
@@ -94,7 +94,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectWhere(expression: String): List<E> {
-    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
+    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $fullTableName ${QueryBuilder.WHERE} $expression"
     return executeQuery(
         dao = this,
         query = selectAllQuery,
@@ -113,7 +113,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
     expression: String,
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
-    val deleteQuery = "${QueryBuilder.DELETE_QUERY} $tableName ${QueryBuilder.WHERE} $expression"
+    val deleteQuery = "${QueryBuilder.DELETE_QUERY} $fullTableName ${QueryBuilder.WHERE} $expression"
     return executeStatus(
         dao = this,
         query = deleteQuery,
@@ -133,7 +133,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
-    val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $tableName"
+    val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $fullTableName"
     return executeStatus(
         dao = this,
         query = deleteAllQuery,
@@ -150,7 +150,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 }
 
 fun <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.triggerFlow() {
-    (hyperHiveDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(tableName)
+    (hyperHiveDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(fullTableName)
 }
 
 fun <E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
@@ -168,7 +168,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.upd
 ): BaseStatus {
     if (this is IFmpLocalDao) return LocalUpdateStatus()
 
-    val localResourceName = resourceName ?: nameResource
+    val localResourceName = resourceName ?: resourceName
     val request = newRequest(params, localResourceName)
     return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
@@ -187,7 +187,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.new
     if (this is IFmpLocalDao) return LocalRequestBuilder()
 
     val hyperHive = hyperHiveDatabase.provideHyperHive()
-    val localResourceName = resourceName ?: nameResource
+    val localResourceName = resourceName ?: resourceName
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
         RequestBuilder(hyperHive, localResourceName, isCached)
     if (params?.isNotEmpty() == true) {

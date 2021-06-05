@@ -6,7 +6,8 @@ import pro.krit.hiveprocessor.base.IFmpDao
 
 @FmpDao(
     resourceName = "ZSR_TORO_PM_DATA",
-    parameterName = "ET_DATA"
+    tableName = "ET_DATA",
+    parameters = ["IV_WERKS", "IV_LGORT"]
 )
 interface IPmDataDao : IFmpDao<PmEtDataEntity, PmStatus> {
 

@@ -29,16 +29,17 @@ import pro.krit.hiveprocessor.base.IFmpDao
  *
  * Also you should define
  * @param resourceName - The name of resource from remote FMP-server
- * @param parameterName - The name of remote table to operate with
- * @param isCached - Does it need to use {@link com.mobrun.plugin.api.HyperHive#deltaStream()}
+ * @param tableName - The name of remote table to operate with
+ * @param isDelta - Does it need to use {@link com.mobrun.plugin.api.HyperHive#deltaStream()}
  * instead of {@link com.mobrun.plugin.api.HyperHive#deltaStream()} to operate with data updates
+ * @param parameters - list of input request parameters names. Default: emptyArray()
  *
  * Example:
  * <p><pre>{@code
  * &#64FmpDao(
  *      resourceName = "ZSR_TORO_PM_DATA",
  *      parameterName = "ET_DATA",
- *      isCached = true
+ *      isDelta = true
  * )
  * interface IPmDataDao : IFmpDao<PmEtDataEntity, PmStatus>
  *
@@ -62,6 +63,7 @@ import pro.krit.hiveprocessor.base.IFmpDao
 @Retention(AnnotationRetention.SOURCE)
 annotation class FmpDao(
     val resourceName: String,
-    val parameterName: String = "",
-    val isCached: Boolean = false
+    val tableName: String = "",
+    val parameters: Array<String> = [],
+    val isDelta: Boolean = false
 )

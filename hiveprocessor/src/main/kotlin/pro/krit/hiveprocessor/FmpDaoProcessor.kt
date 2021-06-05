@@ -46,7 +46,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
 
-        private const val INIT_FIELDS_PATH = "pro.krit.hiveprocessor.extensions"
+        private const val EXTENSIONS_PATH = "pro.krit.hiveprocessor.extensions"
         private const val QUERY_EXECUTER_PATH = "pro.krit.hiveprocessor.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
@@ -54,12 +54,15 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         private const val INIT_FIELDS_NAME = "initFields"
         private const val INIT_CREATE_TABLE = "createTable"
+        private const val UPDATE_STATEMENT = "update"
+        private const val UPDATE_ASYNC_STATEMENT = "updateAsync"
 
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
+        private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
 
         private const val FIELD_PROVIDER = "hyperHiveDatabase"
-        private const val FIELD_RESOURCE = "nameResource"
-        private const val FIELD_PARAMETER = "nameParameter"
+        private const val FIELD_RESOURCE = "resourceName"
+        private const val FIELD_PARAMETER = "tableName"
         private const val FIELD_CACHED = "isCached"
         private const val FIELD_DAO_FIELDS = "localDaoFields"
 
@@ -215,6 +218,8 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
+
+
     private fun processDaos(moduleElements: List<BindData>) {
         moduleElements.forEach { bindData ->
             val classFileName = bindData.fileName
@@ -223,6 +228,14 @@ class FmpDaoProcessor : AbstractProcessor() {
                 TypeSpec.classBuilder(classFileName).addSuperinterface(mainClassName)
                     .primaryConstructor(constructorFunSpec(bindData))
                     .addProperties(createProperties(bindData))
+
+            if(bindData.parameters.isNotEmpty()) {
+                val localParams = bindData.parameters
+                val update = createUpdateFunction(localParams, "updateWithParams", isAsync = false)
+                val updateAsync = createUpdateFunction(localParams, "updateWithParamsAsync", isAsync = true)
+                classTypeSpec.addFunction(update.build())
+                classTypeSpec.addFunction(updateAsync.build())
+            }
 
             val functs = bindData.element.enclosedElements
             functs.forEach { enclose ->
@@ -287,6 +300,38 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
+    private fun createUpdateFunction(parameters: List<String>, funName: String, isAsync: Boolean): FunSpec.Builder {
+        val funcSpec = FunSpec.builder(funName)
+        var mapOfParams = "%M("
+        val paramsSize = parameters.size - 1
+        parameters.forEachIndexed { index, paramName ->
+            val param = paramName.lowercase()
+            val propertyClass = ClassName(KOTLIN_PATH, "Any")
+            val parameterSpec = ParameterSpec.builder(param, propertyClass).build()
+            funcSpec.addParameter(parameterSpec)
+            mapOfParams += "\"$paramName\" to $param"
+            mapOfParams += if(index < paramsSize) ", " else ""
+        }
+        mapOfParams += ")"
+
+        val statement = "return $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
+        val returnType = ClassName("com.mobrun.plugin.models", "BaseStatus")
+        val updateFuncName = if(isAsync) {
+            UPDATE_ASYNC_STATEMENT
+        } else {
+            UPDATE_STATEMENT
+        }
+        return funcSpec.addStatement(
+            statement,
+            MemberName(EXTENSIONS_PATH, updateFuncName),
+            MemberName("kotlin.collections", "mapOf")
+        ).returns(returnType).apply {
+            if(isAsync) {
+                addModifiers(KModifier.SUSPEND)
+            }
+        }
+    }
+
     private fun createProperties(bindData: BindData): List<PropertySpec> {
         val hyperHiveProviderProp =
             PropertySpec.builder(FIELD_PROVIDER, IHyperHiveDatabase::class)
@@ -294,7 +339,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                 .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                 .build()
 
-        val nameResourceProp = PropertySpec.builder(FIELD_RESOURCE, String::class)
+        val resourceNameProp = PropertySpec.builder(FIELD_RESOURCE, String::class)
             .initializer(FIELD_RESOURCE)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
@@ -319,31 +364,31 @@ class FmpDaoProcessor : AbstractProcessor() {
                 .build()
             listOf(
                 hyperHiveProviderProp,
-                nameResourceProp,
+                resourceNameProp,
                 parameterNameProp,
                 isCachedProp,
                 isLocalProp
             )
         } else {
-            listOf(hyperHiveProviderProp, nameResourceProp, parameterNameProp, isCachedProp)
+            listOf(hyperHiveProviderProp, resourceNameProp, parameterNameProp, isCachedProp)
         }
     }
 
     private fun constructorFunSpec(bindData: BindData): FunSpec {
-        val nameResource = ParameterSpec.builder(FIELD_RESOURCE, String::class).apply {
+        val resourceName = ParameterSpec.builder(FIELD_RESOURCE, String::class).apply {
             if (bindData.resourceName.isNotEmpty()) {
                 defaultValue("\"${bindData.resourceName}\"")
             }
         }.build()
 
         val parameterName = ParameterSpec.builder(FIELD_PARAMETER, String::class).apply {
-            if (bindData.parameterName.isNotEmpty()) {
-                defaultValue("\"${bindData.parameterName}\"")
+            if (bindData.tableName.isNotEmpty()) {
+                defaultValue("\"${bindData.tableName}\"")
             }
         }.build()
 
         val isCached = ParameterSpec.builder(FIELD_CACHED, Boolean::class)
-            .defaultValue("${bindData.isCached}")
+            .defaultValue("${bindData.isDelta}")
             .build()
 
         val hyperHiveProvider =
@@ -352,7 +397,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         return FunSpec.constructorBuilder()
             .addParameter(hyperHiveProvider)
-            .addParameter(nameResource)
+            .addParameter(resourceName)
             .addParameter(parameterName)
             .addParameter(isCached)
             .apply {
@@ -366,11 +411,11 @@ class FmpDaoProcessor : AbstractProcessor() {
                     addParameter(isLocalProp)
                     addStatement(
                         FUNC_MEMBER_STATEMENT,
-                        MemberName(INIT_FIELDS_PATH, INIT_FIELDS_NAME)
+                        MemberName(EXTENSIONS_PATH, INIT_FIELDS_NAME)
                     )
                     addStatement(
                         FUNC_MEMBER_STATEMENT,
-                        MemberName(INIT_FIELDS_PATH, INIT_CREATE_TABLE)
+                        MemberName(EXTENSIONS_PATH, INIT_CREATE_TABLE)
                     )
                 }
             }
@@ -382,8 +427,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         return createAnnotationData(
             element = element,
             resourceName = annotation.resourceName,
-            parameterName = annotation.parameterName,
-            isCached = annotation.isCached,
+            tableName = annotation.tableName,
+            isDelta = annotation.isDelta,
+            parameters = annotation.parameters,
             isLocal = false
         )
     }
@@ -393,8 +439,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         return createAnnotationData(
             element = element,
             resourceName = annotation.resourceName,
-            parameterName = annotation.parameterName,
-            isCached = false,
+            tableName = annotation.tableName,
+            parameters = emptyArray(),
+            isDelta = false,
             isLocal = true
         )
     }
@@ -402,8 +449,9 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun createAnnotationData(
         element: Element,
         resourceName: String,
-        parameterName: String,
-        isCached: Boolean = false,
+        tableName: String,
+        parameters: Array<String>,
+        isDelta: Boolean = false,
         isLocal: Boolean = false
     ): BindData {
         val annotationType = element.asType()
@@ -415,13 +463,14 @@ class FmpDaoProcessor : AbstractProcessor() {
         return BindData(
             element = element,
             fileName = fileName,
+            parameters = parameters.toList(),
             mainData = TypeData(
                 packName = elementClassName.packageName,
                 className = elementClassName.simpleName
             ),
             resourceName = resourceName,
-            parameterName = parameterName,
-            isCached = isCached,
+            tableName = tableName,
+            isDelta = isDelta,
             isLocal = isLocal
         )
     }
@@ -490,7 +539,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun String.replaceTablePattern(returnClass: String, bindData: BindData): String {
         val tablePattern = ":$returnClass"
         return if (this.contains(tablePattern)) {
-            val tableName = "${bindData.resourceName}_${bindData.parameterName}"
+            val tableName = "${bindData.resourceName}_${bindData.tableName}"
             this.replace(tablePattern, tableName)
         } else this
     }
