@@ -15,6 +15,7 @@
 package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hiveprocessor.base.IFmpDao
 import pro.krit.hiveprocessor.base.IFmpLocalDao
 import pro.krit.hiveprocessor.extensions.fullTableName
 
@@ -27,8 +28,8 @@ object QueryBuilder {
     const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;"
     const val END_TRANSACTION_QUERY = "END TRANSACTION;"
 
-    const val WHERE = "WHERE"
-    const val LIMIT = "LIMIT"
+    private const val WHERE = "WHERE"
+    private const val LIMIT = "LIMIT"
 
     private const val CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS "
     private const val TEXT_PRIMARY_KEY = " TEXT PRIMARY KEY NOT NULL"
@@ -39,6 +40,21 @@ object QueryBuilder {
     private const val VALUES = " VALUES "
 
     private const val FIELD_TYPE_INTEGER = "Integer"
+
+    fun <E : Any, S : StatusSelectTable<E>> createQuery(
+        dao: IFmpDao<E, S>,
+        prefix: String = SELECT_QUERY,
+        where: String = "",
+        limit: Int = 0
+    ): String {
+        val tableName = dao.fullTableName
+        val limitQuery = limit.takeIf { it > 0 }?.run { " $LIMIT $limit" }.orEmpty()
+        return if (where.isNotEmpty()) {
+            "$prefix $tableName $WHERE $where$limitQuery"
+        } else {
+            "$prefix $tableName$limitQuery"
+        }
+    }
 
     fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: IFmpLocalDao<E, S>): String {
         val localDaoFields = dao.localDaoFields
@@ -72,10 +88,6 @@ object QueryBuilder {
             }
             append(")")
         }
-    }
-
-    private fun getFieldType(fieldType: String): String {
-        return if(fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
@@ -124,5 +136,9 @@ object QueryBuilder {
                 .append("; ")
         }
         return stringBuilder.toString()
+    }
+
+    private fun getFieldType(fieldType: String): String {
+        return if(fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
     }
 }

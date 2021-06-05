@@ -67,13 +67,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.sel
     where: String = "",
     limit: Int = 0
 ): List<E> {
-    val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
-    val selectQuery = if(where.isNotEmpty()) {
-        "${QueryBuilder.SELECT_QUERY} $fullTableName ${QueryBuilder.WHERE} $where$limitQuery"
-    } else {
-        "${QueryBuilder.SELECT_QUERY} $fullTableName$limitQuery"
-    }
-
+    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.SELECT_QUERY, where, limit)
     return executeQuery(
         dao = this,
         query = selectQuery,
@@ -92,12 +86,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.count(
     where: String = ""
 ): List<E> {
-    val selectQuery = if(where.isNotEmpty()) {
-        "${QueryBuilder.COUNT_QUERY} $fullTableName ${QueryBuilder.WHERE} $where"
-    } else {
-        "${QueryBuilder.COUNT_QUERY} $fullTableName"
-    }
-
+    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.COUNT_QUERY, where)
     return executeQuery(
         dao = this,
         query = selectQuery,
@@ -116,12 +105,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.del
     where: String = "",
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
-    val deleteQuery = if(where.isNotEmpty()) {
-        "${QueryBuilder.DELETE_QUERY} $fullTableName ${QueryBuilder.WHERE} $where"
-    } else {
-        "${QueryBuilder.DELETE_QUERY} $fullTableName"
-    }
-
+    val deleteQuery = QueryBuilder.createQuery(this, QueryBuilder.DELETE_QUERY, where)
     return executeStatus(
         dao = this,
         query = deleteQuery,
