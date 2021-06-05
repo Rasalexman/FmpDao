@@ -24,7 +24,7 @@ package pro.krit.hiveprocessor.annotations
  *
  * <p><pre>
  *  &#64FmpDatabase
- *  abstract class MainDatabase : HyperHiveDatabase() {
+ *  abstract class MainDatabase : AbstractFmpDatabase() {
  *      abstract fun providePmDao(): IPmDataDao
  *      abstract fun providePmLocalDao(): IPmDataLocalDao
  *  }
@@ -33,9 +33,9 @@ package pro.krit.hiveprocessor.annotations
  *  or with interface abstraction need to extend [pro.krit.hiveprocessor.provider.IFmpDatabase]
  *  <p><pre>
  *  @FmpDatabase
- *  abstract class MainDatabase : HyperHiveDatabase(), IMainDatabase
+ *  abstract class MainDatabase : AbstractFmpDatabase(), IMainDatabase
  *
- *  interface IMainDatabase : IHyperHiveDatabase {
+ *  interface IMainDatabase : IFmpDatabase {
  *      fun providePmDao(): IPmDataDao
  *      fun providePmLocalDao(): IPmDataLocalDao
  *  }
@@ -43,4 +43,6 @@ package pro.krit.hiveprocessor.annotations
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
-annotation class FmpDatabase()
+annotation class FmpDatabase(
+    val asDaoProvider: Boolean = false
+)

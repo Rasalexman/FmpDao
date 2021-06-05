@@ -50,7 +50,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val QUERY_EXECUTER_PATH = "pro.krit.hiveprocessor.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
-        private const val HYPER_HIVE_BASE_CLASSE_NAME = "HyperHiveDatabase"
+        private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
 
         private const val INIT_CREATE_TABLE = "createTable"
 
@@ -142,6 +142,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun processDatabase(databaseElement: Element, daoList: List<BindData>) {
         checkElementForRestrictions("FmpDatabase", databaseElement)
 
+        val annotation = databaseElement.getAnnotation(FmpDatabase::class.java)
         val annotationType = databaseElement.asType()
         val databaseData = ClassName.bestGuess(annotationType.toString())
 
@@ -154,16 +155,14 @@ class FmpDaoProcessor : AbstractProcessor() {
         classTypeSpec.superclass(superClassName)
 
         // Extended classes only for Interfaces
-        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(databaseElement.asType())
-        if (extendedTypeMirrors != null && extendedTypeMirrors.size > 1) {
-            val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
-            extendedElements.forEach {
-                createFunctions(classTypeSpec, it, daoList)
-            }
-        }
-        createDatabaseExtendedFunction(classTypeSpec, databaseElement, daoList)
+        createDatabaseExtendedFunction(
+            classTypeSpec,
+            databaseElement,
+            daoList,
+            annotation.asDaoProvider
+        )
         // than create function for database
-        createFunctions(classTypeSpec, databaseElement, daoList)
+        createFunctions(classTypeSpec, databaseElement, daoList, annotation.asDaoProvider)
 
         val fileBuilder = FileSpec.builder(DATABASE_PACKAGE_NAME, fileName)
             .addComment(FILE_COMMENT)
@@ -178,15 +177,20 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
-    private fun createDatabaseExtendedFunction(classTypeSpec: TypeSpec.Builder,
-                                               element: Element,
-                                               daoList: List<BindData>) {
+    private fun createDatabaseExtendedFunction(
+        classTypeSpec: TypeSpec.Builder,
+        element: Element,
+        daoList: List<BindData>,
+        asProvider: Boolean
+    ) {
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
-        if (extendedTypeMirrors != null && extendedTypeMirrors.size > 1) {
-            val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
+        if (extendedTypeMirrors != null && extendedTypeMirrors.isNotEmpty()) {
+            val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter { !it.simpleName.toString().contains("IFmpDatabase") }
+            //println("----------------> createDatabaseExtendedFunction")
+            //println("checkExtendedInterface $element - $extendedElements ")
             extendedElements.forEach {
-                createFunctions(classTypeSpec, it, daoList)
-                createDatabaseExtendedFunction(classTypeSpec, it, daoList)
+                createFunctions(classTypeSpec, it, daoList, asProvider)
+                createDatabaseExtendedFunction(classTypeSpec, it, daoList, asProvider)
             }
         }
     }
@@ -194,9 +198,12 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun createFunctions(
         classTypeSpec: TypeSpec.Builder,
         element: Element,
-        daoList: List<BindData>
+        daoList: List<BindData>,
+        asProvide: Boolean = false
     ) {
         val methods = element.enclosedElements
+        //println("----------------> createFunctions")
+        //println("element $element | enclosedElements = $methods")
         methods.forEach { enclose ->
             if (enclose.isAbstractMethod()) {
                 val (returnPack, returnClass) = enclose.asType().toString().getPackAndClass()
@@ -207,27 +214,33 @@ class FmpDaoProcessor : AbstractProcessor() {
                 returnElementData?.let {
                     val returnedClassName = ClassName(DAO_PACKAGE_NAME, it.fileName)
 
-                    val propName = funcName + CLASS_POSTFIX
-                    val prop =
-                        PropertySpec.builder(propName, returnedClassName.copy(nullable = true))
-                            .mutable()
-                            .addModifiers(KModifier.PRIVATE)
-                            .initializer(NULL_INITIALIZER)
-                            .build()
-
-                    classTypeSpec.addProperty(prop)
-
-                    val statementIf = "if($propName == $NULL_INITIALIZER) "
-                    val statementCreate = "$propName = $TAG_CLASS_NAME($FIELD_PROVIDER = this) "
-                    val statementReturn = "return $propName!!"
-
+                    val instanceStatement = "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
                     val funcSpec = FunSpec.builder(funcName)
                         .addModifiers(KModifier.OVERRIDE)
-                        .returns(returnedClass)
-                        .beginControlFlow(statementIf)
-                        .addStatement(statementCreate, returnedClassName)
-                        .endControlFlow()
-                        .addStatement(statementReturn)
+                        .returns(returnedClass).apply {
+                            if (asProvide) {
+                                addStatement("return $instanceStatement", returnedClassName)
+                            } else {
+
+                                val propName = funcName + CLASS_POSTFIX
+                                val prop =
+                                    PropertySpec.builder(propName, returnedClassName.copy(nullable = true))
+                                        .mutable()
+                                        .addModifiers(KModifier.PRIVATE)
+                                        .initializer(NULL_INITIALIZER)
+                                        .build()
+
+                                classTypeSpec.addProperty(prop)
+
+                                val statementIf = "if($propName == $NULL_INITIALIZER) "
+                                val statementCreate = "$propName = $instanceStatement"
+                                val statementReturn = "return $propName!!"
+                                beginControlFlow(statementIf)
+                                addStatement(statementCreate, returnedClassName)
+                                endControlFlow()
+                                addStatement(statementReturn)
+                            }
+                        }
                         .build()
 
                     classTypeSpec.addFunction(funcSpec)
@@ -246,10 +259,11 @@ class FmpDaoProcessor : AbstractProcessor() {
                     .primaryConstructor(constructorFunSpec(bindData))
                     .addProperties(createProperties(bindData))
 
-            if(bindData.parameters.isNotEmpty()) {
+            if (bindData.parameters.isNotEmpty()) {
                 val localParams = bindData.parameters
                 val requestFunc = createRequestFunction(localParams, REQUEST_NAME, isAsync = false)
-                val requestFuncAsync = createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)
+                val requestFuncAsync =
+                    createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)
                 classTypeSpec.addFunction(requestFunc.build())
                 classTypeSpec.addFunction(requestFuncAsync.build())
             }
@@ -317,7 +331,11 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
-    private fun createRequestFunction(parameters: List<String>, funName: String, isAsync: Boolean): FunSpec.Builder {
+    private fun createRequestFunction(
+        parameters: List<String>,
+        funName: String,
+        isAsync: Boolean
+    ): FunSpec.Builder {
         val funcSpec = FunSpec.builder(funName)
         var mapOfParams = "%M("
         val paramsSize = parameters.size - 1
@@ -327,13 +345,13 @@ class FmpDaoProcessor : AbstractProcessor() {
             val parameterSpec = ParameterSpec.builder(param, propertyClass).build()
             funcSpec.addParameter(parameterSpec)
             mapOfParams += "\"$paramName\" to $param"
-            mapOfParams += if(index < paramsSize) ", " else ""
+            mapOfParams += if (index < paramsSize) ", " else ""
         }
         mapOfParams += ")"
 
         val statement = "return $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
         val returnType = ClassName("com.mobrun.plugin.models", "BaseStatus")
-        val updateFuncName = if(isAsync) {
+        val updateFuncName = if (isAsync) {
             REQUEST_ASYNC_STATEMENT
         } else {
             REQUEST_STATEMENT
@@ -343,7 +361,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             MemberName(EXTENSIONS_PATH, updateFuncName),
             MemberName("kotlin.collections", "mapOf")
         ).returns(returnType).apply {
-            if(isAsync) {
+            if (isAsync) {
                 addModifiers(KModifier.SUSPEND)
             }
         }
@@ -426,7 +444,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                         .defaultValue(NULL_INITIALIZER)
                         .build()
                     addParameter(isLocalProp)
-                    if(bindData.createTableOnInit) {
+                    if (bindData.createTableOnInit) {
                         addStatement(
                             FUNC_MEMBER_STATEMENT,
                             MemberName(EXTENSIONS_PATH, INIT_CREATE_TABLE)
@@ -502,20 +520,20 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun checkElementForRestrictions(annotationName: String, element: Element) {
         val annotationType = element.asType()
-        val hasKindError = if(annotationName == "FmpDatabase") {
+        val hasKindError = if (annotationName == "FmpDatabase") {
             element.kind == ElementKind.INTERFACE
         } else {
             element.kind == ElementKind.CLASS
         }
         val hasAbstractError = hasKindError || !element.modifiers.contains(Modifier.ABSTRACT)
-        if(hasAbstractError) {
+        if (hasAbstractError) {
             throw IllegalStateException(
                 "$annotationType with $annotationName annotation should be an interface and " +
                         "implement I${annotationName}.kt to be correctly processed"
             )
         }
 
-        if(!checkExtendedInterface(element, annotationName)) {
+        if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
                 "$annotationType with $annotationName annotation should implement I${annotationName}.kt to be correctly processed"
             )
@@ -526,11 +544,13 @@ class FmpDaoProcessor : AbstractProcessor() {
         var hasElement = false
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
-        if(!extendedElements.isNullOrEmpty()) {
+        if (!extendedElements.isNullOrEmpty()) {
             extendedElements.forEach {
                 hasElement = it.simpleName.toString().contains(annotationName)
-                if(!hasElement) {
+                if (!hasElement) {
                     hasElement = checkExtendedInterface(it, annotationName)
+                } else {
+                    return hasElement
                 }
             }
         }
@@ -542,7 +562,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         return this.mapNotNull { typeMirror ->
             typeMirror.takeIf {
                 val currentClassName = it.toString().getPackAndClass().second
-                !currentClassName.contains(HYPER_HIVE_BASE_CLASSE_NAME)
+                !currentClassName.contains(BASE_FMP_DATABASE_NAME)
             }?.run {
                 val typeElement = TYPE_UTILS.asElement(this)
                 // Only for Interfaces
