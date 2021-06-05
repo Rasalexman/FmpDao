@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.hiveprocessor.extensions.*
-import pro.krit.hiveprocessor.provider.HyperHiveConfig
+import pro.krit.hiveprocessor.provider.DatabaseConfig
 import java.util.*
 import kotlin.random.Random
 
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         val dbPath = this.applicationContext.getDatabasePath(fmpDbName).path
 
-        val hyperHiveConfig = HyperHiveConfig(
+        val hyperHiveConfig = DatabaseConfig(
             dbKey = "Main",
             serverAddress = serverAddress,
             environment = environment,

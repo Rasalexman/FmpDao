@@ -21,7 +21,7 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IFmpDao
 
-interface IHyperHiveDatabase {
+interface IFmpDatabase {
     val isDbCreated: Boolean
     val databasePath: String
     val databaseApi: DatabaseAPI

@@ -15,14 +15,14 @@
 package pro.krit.hiveprocessor.base
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.provider.IHyperHiveDatabase
+import pro.krit.hiveprocessor.provider.IFmpDatabase
 
 /**
  * Base abstraction for annotation processing works with remotely fmp database structures
  */
 interface IFmpDao<E : Any, T : StatusSelectTable<E>> {
-    val hyperHiveDatabase: IHyperHiveDatabase
+    val fmpDatabase: IFmpDatabase
     val resourceName: String
     val tableName: String
-    val isCached: Boolean
+    val isDelta: Boolean
 }

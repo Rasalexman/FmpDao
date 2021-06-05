@@ -15,9 +15,9 @@
 package pro.krit.hiveprocessor.provider
 
 /**
- * Config for create [HyperHiveDatabase] instance
+ * Config for create [AbstractFmpDatabase] instance
  */
-data class HyperHiveConfig(
+data class DatabaseConfig(
     val dbKey: String,
     val serverAddress: String,
     val environment: String,
