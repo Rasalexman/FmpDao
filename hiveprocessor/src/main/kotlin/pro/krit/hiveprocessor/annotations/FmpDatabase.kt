@@ -16,7 +16,7 @@ package pro.krit.hiveprocessor.annotations
 
 /**
  * Main annotation for generating database implementation and used only with abstract class
- * [pro.krit.hiveprocessor.provider.HyperHiveDatabase] and his abstract extended children.
+ * [pro.krit.hiveprocessor.provider.AbstractFmpDatabase] and his abstract extended children.
  * It's generate an Kotlin Object class with current implementation of abstract functions f
  * or provide instance of database DAO
  *
@@ -30,7 +30,7 @@ package pro.krit.hiveprocessor.annotations
  *  }
  *  </pre></p>
  *
- *  or with interface abstraction need to extend [pro.krit.hiveprocessor.provider.IHyperHiveDatabase]
+ *  or with interface abstraction need to extend [pro.krit.hiveprocessor.provider.IFmpDatabase]
  *  <p><pre>
  *  @FmpDatabase
  *  abstract class MainDatabase : HyperHiveDatabase(), IMainDatabase

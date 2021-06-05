@@ -49,7 +49,7 @@ object QueryExecuter {
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
         return try {
-            val hyperHiveDatabaseApi = dao.hyperHiveDatabase.databaseApi
+            val hyperHiveDatabaseApi = dao.fmpDatabase.databaseApi
             hyperHiveDatabaseApi.query(query, S::class.java).execute()!!
         } catch (e: Exception) {
             createErrorStatus<E>(

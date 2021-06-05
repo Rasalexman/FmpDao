@@ -24,7 +24,7 @@ import pro.krit.hiveprocessor.annotations.FmpQuery
 import pro.krit.hiveprocessor.common.LocalDaoFields
 import pro.krit.hiveprocessor.data.BindData
 import pro.krit.hiveprocessor.data.TypeData
-import pro.krit.hiveprocessor.provider.IHyperHiveDatabase
+import pro.krit.hiveprocessor.provider.IFmpDatabase
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
@@ -52,7 +52,6 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         private const val HYPER_HIVE_BASE_CLASSE_NAME = "HyperHiveDatabase"
 
-        private const val INIT_FIELDS_NAME = "initFields"
         private const val INIT_CREATE_TABLE = "createTable"
 
         private const val REQUEST_STATEMENT = "request"
@@ -63,10 +62,10 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
 
-        private const val FIELD_PROVIDER = "hyperHiveDatabase"
+        private const val FIELD_PROVIDER = "fmpDatabase"
         private const val FIELD_RESOURCE = "resourceName"
-        private const val FIELD_PARAMETER = "tableName"
-        private const val FIELD_CACHED = "isCached"
+        private const val FIELD_TABLE = "tableName"
+        private const val FIELD_IS_DELTA = "isDelta"
         private const val FIELD_DAO_FIELDS = "localDaoFields"
 
         private const val LIST_RETURN_TYPE = "java.util.List"
@@ -141,6 +140,8 @@ class FmpDaoProcessor : AbstractProcessor() {
     }
 
     private fun processDatabase(databaseElement: Element, daoList: List<BindData>) {
+        checkElementForRestrictions("FmpDatabase", databaseElement)
+
         val annotationType = databaseElement.asType()
         val databaseData = ClassName.bestGuess(annotationType.toString())
 
@@ -160,6 +161,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                 createFunctions(classTypeSpec, it, daoList)
             }
         }
+        createDatabaseExtendedFunction(classTypeSpec, databaseElement, daoList)
         // than create function for database
         createFunctions(classTypeSpec, databaseElement, daoList)
 
@@ -173,6 +175,19 @@ class FmpDaoProcessor : AbstractProcessor() {
         } catch (e: IOException) {
             val message = java.lang.String.format("Unable to write file: %s", e.message)
             messager.printMessage(Diagnostic.Kind.ERROR, message)
+        }
+    }
+
+    private fun createDatabaseExtendedFunction(classTypeSpec: TypeSpec.Builder,
+                                               element: Element,
+                                               daoList: List<BindData>) {
+        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
+        if (extendedTypeMirrors != null && extendedTypeMirrors.size > 1) {
+            val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
+            extendedElements.forEach {
+                createFunctions(classTypeSpec, it, daoList)
+                createDatabaseExtendedFunction(classTypeSpec, it, daoList)
+            }
         }
     }
 
@@ -336,7 +351,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun createProperties(bindData: BindData): List<PropertySpec> {
         val hyperHiveProviderProp =
-            PropertySpec.builder(FIELD_PROVIDER, IHyperHiveDatabase::class)
+            PropertySpec.builder(FIELD_PROVIDER, IFmpDatabase::class)
                 .initializer(FIELD_PROVIDER)
                 .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
                 .build()
@@ -346,13 +361,13 @@ class FmpDaoProcessor : AbstractProcessor() {
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        val parameterNameProp = PropertySpec.builder(FIELD_PARAMETER, String::class)
-            .initializer(FIELD_PARAMETER)
+        val parameterNameProp = PropertySpec.builder(FIELD_TABLE, String::class)
+            .initializer(FIELD_TABLE)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        val isCachedProp = PropertySpec.builder(FIELD_CACHED, Boolean::class)
-            .initializer(FIELD_CACHED)
+        val isCachedProp = PropertySpec.builder(FIELD_IS_DELTA, Boolean::class)
+            .initializer(FIELD_IS_DELTA)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
@@ -383,18 +398,18 @@ class FmpDaoProcessor : AbstractProcessor() {
             }
         }.build()
 
-        val parameterName = ParameterSpec.builder(FIELD_PARAMETER, String::class).apply {
+        val parameterName = ParameterSpec.builder(FIELD_TABLE, String::class).apply {
             if (bindData.tableName.isNotEmpty()) {
                 defaultValue("\"${bindData.tableName}\"")
             }
         }.build()
 
-        val isCached = ParameterSpec.builder(FIELD_CACHED, Boolean::class)
+        val isCached = ParameterSpec.builder(FIELD_IS_DELTA, Boolean::class)
             .defaultValue("${bindData.isDelta}")
             .build()
 
         val hyperHiveProvider =
-            ParameterSpec.builder(FIELD_PROVIDER, IHyperHiveDatabase::class)
+            ParameterSpec.builder(FIELD_PROVIDER, IFmpDatabase::class)
                 .build()
 
         return FunSpec.constructorBuilder()
@@ -487,7 +502,12 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun checkElementForRestrictions(annotationName: String, element: Element) {
         val annotationType = element.asType()
-        val hasAbstractError = element.kind == ElementKind.CLASS || !element.modifiers.contains(Modifier.ABSTRACT)
+        val hasKindError = if(annotationName == "FmpDatabase") {
+            element.kind == ElementKind.INTERFACE
+        } else {
+            element.kind == ElementKind.CLASS
+        }
+        val hasAbstractError = hasKindError || !element.modifiers.contains(Modifier.ABSTRACT)
         if(hasAbstractError) {
             throw IllegalStateException(
                 "$annotationType with $annotationName annotation should be an interface and " +
@@ -495,20 +515,26 @@ class FmpDaoProcessor : AbstractProcessor() {
             )
         }
 
-        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
-        val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
-        var hasExtendedErrors = extendedElements.isNullOrEmpty()
-        if (!extendedTypeMirrors.isNullOrEmpty()) {
-            hasExtendedErrors = !extendedElements.any {
-                it.simpleName.toString().contains(annotationName)
-            }
-        }
-
-        if(hasExtendedErrors) {
+        if(!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
                 "$annotationType with $annotationName annotation should implement I${annotationName}.kt to be correctly processed"
             )
         }
+    }
+
+    private fun checkExtendedInterface(element: Element, annotationName: String): Boolean {
+        var hasElement = false
+        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
+        val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
+        if(!extendedElements.isNullOrEmpty()) {
+            extendedElements.forEach {
+                hasElement = it.simpleName.toString().contains(annotationName)
+                if(!hasElement) {
+                    hasElement = checkExtendedInterface(it, annotationName)
+                }
+            }
+        }
+        return hasElement
     }
 
     // Take extended interfaces for implement abstract methods

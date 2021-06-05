@@ -45,7 +45,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
     withStart: Boolean = true,
     withDistinct: Boolean = false
 ) = flow<List<E>> {
-    this@flowable.hyperHiveDatabase.getTrigger(this@flowable).collect {
+    this@flowable.fmpDatabase.getTrigger(this@flowable).collect {
         emit(selectAllAsync())
     }
 }.onStart {
@@ -63,7 +63,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
     withStart: Boolean = true,
     withDistinct: Boolean = false
 ) = flow<List<E>> {
-    this@flowableWhere.hyperHiveDatabase.getTrigger(this@flowableWhere).collect {
+    this@flowableWhere.fmpDatabase.getTrigger(this@flowableWhere).collect {
         emit(selectWhereAsync(expression))
     }
 }.onStart {
@@ -150,7 +150,7 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
 }
 
 fun <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.triggerFlow() {
-    (hyperHiveDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(fullTableName)
+    (fmpDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(fullTableName)
 }
 
 fun <E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
@@ -186,10 +186,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.new
 ): RequestBuilder<CustomParameter, ScalarParameter<*>> {
     if (this is IFmpLocalDao) return LocalRequestBuilder()
 
-    val hyperHive = hyperHiveDatabase.provideHyperHive()
+    val hyperHive = fmpDatabase.provideHyperHive()
     val localResourceName = resourceName ?: resourceName
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
-        RequestBuilder(hyperHive, localResourceName, isCached)
+        RequestBuilder(hyperHive, localResourceName, isDelta)
     if (params?.isNotEmpty() == true) {
         params.forEach {
             builder.addScalar(LimitedScalarParameter(name = it.key, value = it.value))

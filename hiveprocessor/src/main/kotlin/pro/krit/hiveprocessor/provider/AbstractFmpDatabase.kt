@@ -30,7 +30,7 @@ import java.io.File
 /**
  * Base class for extends and use as FMP database instance
  */
-abstract class HyperHiveDatabase : IHyperHiveDatabase {
+abstract class AbstractFmpDatabase : IFmpDatabase {
 
     private var hyperHive: HyperHive? = null
     private var hyperHiveState: HyperHiveState? = null
@@ -64,7 +64,7 @@ abstract class HyperHiveDatabase : IHyperHiveDatabase {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun<T : HyperHiveDatabase> initialize(hState: HyperHiveState, config: HyperHiveConfig): T {
+    fun<T : AbstractFmpDatabase> initialize(hState: HyperHiveState, config: DatabaseConfig): T {
         savedFmpDbKey = config.dbKey
 
         hyperHiveState = hState
