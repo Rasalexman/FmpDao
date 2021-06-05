@@ -4,10 +4,10 @@ import pro.krit.hiveprocessor.annotations.FmpDatabase
 import pro.krit.hiveprocessor.provider.AbstractFmpDatabase
 import pro.krit.hiveprocessor.provider.IFmpDatabase
 
-@FmpDatabase
+@FmpDatabase(asDaoProvider = true)
 abstract class MainDatabase : AbstractFmpDatabase(), IMainDatabase {
     // You can use it if you want
-    //abstract fun providePmDao(): IPmDataDao
+    abstract fun providePmDao(): IPmDataDao
     //abstract fun providePmLocalDao(): IPmDataLocalDao
 }
 
@@ -18,5 +18,5 @@ interface IMainLocalDatabase {
 }
 
 interface IMainRemoteDatabase {
-    fun providePmDao(): IPmDataDao
+    //fun providePmDao(): IPmDataDao
 }

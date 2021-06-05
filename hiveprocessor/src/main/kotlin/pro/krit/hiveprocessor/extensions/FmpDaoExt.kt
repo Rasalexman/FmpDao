@@ -37,20 +37,25 @@ typealias ScalarMap = Map<Parameter, Value>
 val <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.fullTableName: String
     get() = "\'${resourceName}_${tableName}\'"
 
-const val ERROR_CODE_SELECT_ALL = 10001
-const val ERROR_CODE_SELECT_WHERE = 10002
-const val ERROR_CODE_REMOVE_WHERE = 10003
+const val ERROR_CODE_SELECT_WHERE = 10001
+const val ERROR_CODE_REMOVE_WHERE = 10002
+const val ERROR_CODE_COUNT_WHERE = 10003
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable(
+    where: String = "",
     withStart: Boolean = true,
     withDistinct: Boolean = false
-) = flow<List<E>> {
-    this@flowable.fmpDatabase.getTrigger(this@flowable).collect {
-        emit(selectAllAsync())
+) = flow {
+    val trigger = this@flowable
+    this@flowable.fmpDatabase.getTrigger(trigger).collect {
+        kotlinx.coroutines.delay(100L)
+        val result = selectAsync(where)
+        emit(result)
     }
 }.onStart {
     if (withStart) {
-        emit(selectAllAsync())
+        val result = selectAsync(where)
+        emit(result)
     }
 }.apply {
     if (withDistinct) {
@@ -58,95 +63,79 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flo
     }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowableWhere(
-    expression: String = "",
-    withStart: Boolean = true,
-    withDistinct: Boolean = false
-) = flow<List<E>> {
-    this@flowableWhere.fmpDatabase.getTrigger(this@flowableWhere).collect {
-        emit(selectWhereAsync(expression))
-    }
-}.onStart {
-    if (withStart) {
-        emit(selectWhereAsync(expression))
-    }
-}.apply {
-    if (withDistinct) {
-        distinctUntilChanged()
-    }
-}
-
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAll(limit: Long = 0): List<E> {
-    val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
-    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $fullTableName$limitQuery"
-    return executeQuery(
-        dao = this,
-        query = selectAllQuery,
-        errorCode = ERROR_CODE_SELECT_ALL,
-        methodName = "selectAll"
-    )
-}
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAllAsync(
-    limit: Long = 0
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.select(
+    where: String = "",
+    limit: Int = 0
 ): List<E> {
-    return selectAll(limit)
-}
+    val limitQuery = limit.takeIf { it > 0 }?.run { " ${QueryBuilder.LIMIT} $limit" }.orEmpty()
+    val selectQuery = if(where.isNotEmpty()) {
+        "${QueryBuilder.SELECT_QUERY} $fullTableName ${QueryBuilder.WHERE} $where$limitQuery"
+    } else {
+        "${QueryBuilder.SELECT_QUERY} $fullTableName$limitQuery"
+    }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectWhere(expression: String): List<E> {
-    val selectAllQuery = "${QueryBuilder.SELECT_QUERY} $fullTableName ${QueryBuilder.WHERE} $expression"
     return executeQuery(
         dao = this,
-        query = selectAllQuery,
+        query = selectQuery,
         errorCode = ERROR_CODE_SELECT_WHERE,
         methodName = "selectWhere"
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectWhereAsync(
-    expression: String
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAsync(
+    where: String = "",
+    limit: Int = 0
 ): List<E> {
-    return withContext(Dispatchers.IO) { selectWhere(expression) }
+    return withContext(Dispatchers.IO) { select(where, limit) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhere(
-    expression: String,
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.count(
+    where: String = ""
+): List<E> {
+    val selectQuery = if(where.isNotEmpty()) {
+        "${QueryBuilder.COUNT_QUERY} $fullTableName ${QueryBuilder.WHERE} $where"
+    } else {
+        "${QueryBuilder.COUNT_QUERY} $fullTableName"
+    }
+
+    return executeQuery(
+        dao = this,
+        query = selectQuery,
+        errorCode = ERROR_CODE_COUNT_WHERE,
+        methodName = "countWhere"
+    )
+}
+
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.countAsync(
+    where: String = ""
+): List<E> {
+    return withContext(Dispatchers.IO) { count(where) }
+}
+
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.delete(
+    where: String = "",
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
-    val deleteQuery = "${QueryBuilder.DELETE_QUERY} $fullTableName ${QueryBuilder.WHERE} $expression"
+    val deleteQuery = if(where.isNotEmpty()) {
+        "${QueryBuilder.DELETE_QUERY} $fullTableName ${QueryBuilder.WHERE} $where"
+    } else {
+        "${QueryBuilder.DELETE_QUERY} $fullTableName"
+    }
+
     return executeStatus(
         dao = this,
         query = deleteQuery,
         errorCode = ERROR_CODE_REMOVE_WHERE,
-        methodName = "removeWhere",
+        methodName = "delete",
         notifyAll = notifyAll
     )
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteWhereAsync(
-    expression: String,
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAsync(
+    where: String = "",
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { deleteWhere(expression, notifyAll) }
-}
-
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAll(
-    notifyAll: Boolean = true
-): StatusSelectTable<E> {
-    val deleteAllQuery = "${QueryBuilder.DELETE_QUERY} $fullTableName"
-    return executeStatus(
-        dao = this,
-        query = deleteAllQuery,
-        errorCode = ERROR_CODE_REMOVE_WHERE,
-        methodName = "removeWhere",
-        notifyAll = notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAllAsync(
-    notifyAll: Boolean = true
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { deleteAll(notifyAll) }
+    return withContext(Dispatchers.IO) { delete(where, notifyAll) }
 }
 
 fun <E : Any, S : StatusSelectTable<E>> IFmpDao<E, S>.triggerFlow() {
@@ -163,33 +152,27 @@ fun <E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
 ///------Update Section
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.request(
-    params: ScalarMap? = null,
-    resourceName: String? = null
+    params: ScalarMap? = null
 ): BaseStatus {
     if (this is IFmpLocalDao) return LocalUpdateStatus()
-
-    val localResourceName = resourceName ?: resourceName
-    val request = newRequest(params, localResourceName)
+    val request = requestBuilder(params)
     return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.requestAsync(
-    params: ScalarMap? = null,
-    resourceName: String? = null
+    params: ScalarMap? = null
 ): BaseStatus {
-    return withContext(Dispatchers.IO) { request(params, resourceName) }
+    return withContext(Dispatchers.IO) { request(params) }
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.newRequest(
-    params: ScalarMap? = null,
-    resourceName: String? = null
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.requestBuilder(
+    params: ScalarMap? = null
 ): RequestBuilder<CustomParameter, ScalarParameter<*>> {
     if (this is IFmpLocalDao) return LocalRequestBuilder()
 
     val hyperHive = fmpDatabase.provideHyperHive()
-    val localResourceName = resourceName ?: resourceName
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
-        RequestBuilder(hyperHive, localResourceName, isDelta)
+        RequestBuilder(hyperHive, resourceName, isDelta)
     if (params?.isNotEmpty() == true) {
         params.forEach {
             builder.addScalar(LimitedScalarParameter(name = it.key, value = it.value))

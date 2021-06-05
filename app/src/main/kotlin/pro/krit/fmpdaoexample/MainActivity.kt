@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity() {
         val dbState = mainDb.openDatabase()
         println("-----> dbState = $dbState")
         val pmLocalDao = mainDb.providePmLocalDao()
-        val resultList = pmLocalDao.selectAll()
+        val resultList = pmLocalDao.select()
         println("----> all count = ${resultList.size}")
 
         val scope = CoroutineScope(Dispatchers.Main)
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
         val whereScope = CoroutineScope(Dispatchers.Main)
         whereScope.launch {
-            pmLocalDao.flowableWhere("TYPE = \'${PmType.USER}\' ORDER BY QWERTY ASC").flowOn(Dispatchers.IO).collect {
+            pmLocalDao.flowable("TYPE = \'${PmType.USER}\' ORDER BY QWERTY ASC").flowOn(Dispatchers.IO).collect {
                 println("----> flowable PmType.USER count = ${it.size}")
             }
         }
@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity() {
             pmLocalDao.deleteAsync(selectFirst)
         }*/
 
-        insertList(pmLocalDao)
+        //insertList(pmLocalDao)
         //insertSingle(pmLocalDao)
 
         /*val updateLocalStatus = pmLocalDao.update()
@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity() {
         val requestLocal = pmLocalDao.newRequest()
         println("----> requestLocal = $requestLocal")*/
 
-        val resultLimitLocal = pmLocalDao.selectAll(limit = 50)
+        val resultLimitLocal = pmLocalDao.select(limit = 50)
         /*val first = resultLimitLocal.lastOrNull()
         first?.let {
             deleteSingle(pmLocalDao, it)
@@ -154,7 +154,7 @@ class MainActivity : AppCompatActivity() {
                 type = type,
             ))
         }
-        val insertAllStatus = dao.insertOrReplace(localListToInsert, notifyAll = true)
+        val insertAllStatus = dao.insertOrReplace(localListToInsert)
         println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
     }
 }
