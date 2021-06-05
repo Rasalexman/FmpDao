@@ -162,7 +162,7 @@ fun <E : Any, S : StatusSelectTable<E>> S.triggerFlow(dao: IFmpDao<E, S>): S {
 
 ///------Update Section
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.update(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.request(
     params: ScalarMap? = null,
     resourceName: String? = null
 ): BaseStatus {
@@ -173,11 +173,11 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.upd
     return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.updateAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.requestAsync(
     params: ScalarMap? = null,
     resourceName: String? = null
 ): BaseStatus {
-    return withContext(Dispatchers.IO) { update(params, resourceName) }
+    return withContext(Dispatchers.IO) { request(params, resourceName) }
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.newRequest(

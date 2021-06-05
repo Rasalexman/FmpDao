@@ -20,6 +20,7 @@ data class BindData(
     val element: Element,
     val fileName: String,
     val mainData: TypeData,
+    val createTableOnInit: Boolean,
     val parameters: List<String> = emptyList(),
     val resourceName: String = "",
     val tableName: String = "",

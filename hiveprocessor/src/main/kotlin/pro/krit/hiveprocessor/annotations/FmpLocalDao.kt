@@ -66,5 +66,6 @@ package pro.krit.hiveprocessor.annotations
 @Retention(AnnotationRetention.SOURCE)
 annotation class FmpLocalDao(
     val resourceName: String,
-    val tableName: String = ""
+    val tableName: String = "",
+    val createTableOnInit: Boolean = true
 )

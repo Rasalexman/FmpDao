@@ -14,8 +14,12 @@
 
 package pro.krit.hiveprocessor.common
 
+import com.google.gson.annotations.Expose
+import com.google.gson.annotations.SerializedName
+import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IFmpLocalDao
+import java.lang.reflect.Field
 import java.security.MessageDigest
 import java.util.*
 
@@ -24,6 +28,53 @@ object FieldsBuilder {
     private val md by lazy { MessageDigest.getInstance("SHA-256") }
     private const val PRIMARY_KEY_JAVA_TYPE = "String"
     private const val VALUE_NULL = "NULL"
+
+    fun <E : Any, S : StatusSelectTable<E>> initFields(dao: IFmpLocalDao<E, S>, fields: Array<Field>) {
+        var localPrimaryKey: Field? = null
+        var localPrimaryKeyName: String? = null
+        val localFields = ArrayList<Field>()
+        val localFieldsNames = mutableMapOf<String, String>()
+        var localFieldsForQuery: String? = null
+
+        for (field in fields) {
+            val skipExposeAnnotation = field.getAnnotation(Expose::class.java) != null
+            if (skipExposeAnnotation) {
+                continue
+            }
+
+            val primaryKeyAnnotation = field.getAnnotation(
+                PrimaryKey::class.java
+            )
+            var isPrimary = false
+            if (primaryKeyAnnotation != null) {
+                if (localPrimaryKey != null) {
+                    throw UnsupportedOperationException("Not support multiple PrimaryKey")
+                }
+                isPrimary = true
+            }
+            val annotationSerializedName = field.getAnnotation(
+                SerializedName::class.java
+            )
+
+            val name: String = annotationSerializedName?.value ?: field.name
+            if (isPrimary) {
+                localPrimaryKeyName = name
+                localPrimaryKey = field
+            } else {
+                localFields.add(field)
+                localFieldsNames[name] = field.type.simpleName
+            }
+            localFieldsForQuery = getFields(localPrimaryKeyName, localFieldsNames.keys.toList())
+        }
+
+        dao.localDaoFields = LocalDaoFields(
+            fields = localFields,
+            fieldsNamesWithTypes = localFieldsNames,
+            primaryKeyField = localPrimaryKey,
+            primaryKeyName = localPrimaryKeyName,
+            fieldsForQuery = localFieldsForQuery
+        )
+    }
 
     fun <E : Any, S : StatusSelectTable<E>> getValues(dao: IFmpLocalDao<E, S>, item: E): String {
         val localDaoFields = dao.localDaoFields
@@ -77,7 +128,7 @@ object FieldsBuilder {
         return digest.fold("", { str, it -> str + "%02x".format(it) })
     }
 
-    fun getFields(
+    private fun getFields(
         primaryKeyName: String?,
         fieldsNames: List<String>
     ): String {

@@ -54,8 +54,11 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         private const val INIT_FIELDS_NAME = "initFields"
         private const val INIT_CREATE_TABLE = "createTable"
-        private const val UPDATE_STATEMENT = "update"
-        private const val UPDATE_ASYNC_STATEMENT = "updateAsync"
+
+        private const val REQUEST_STATEMENT = "request"
+        private const val REQUEST_NAME = "requestWithParams"
+        private const val REQUEST_ASYNC_STATEMENT = "requestAsync"
+        private const val REQUEST_ASYNC_NAME = "requestWithParamsAsync"
 
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
@@ -218,12 +221,11 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
-
-
     private fun processDaos(moduleElements: List<BindData>) {
         moduleElements.forEach { bindData ->
             val classFileName = bindData.fileName
             val mainClassName = ClassName(bindData.mainData.packName, bindData.mainData.className)
+
             val classTypeSpec =
                 TypeSpec.classBuilder(classFileName).addSuperinterface(mainClassName)
                     .primaryConstructor(constructorFunSpec(bindData))
@@ -231,10 +233,10 @@ class FmpDaoProcessor : AbstractProcessor() {
 
             if(bindData.parameters.isNotEmpty()) {
                 val localParams = bindData.parameters
-                val update = createUpdateFunction(localParams, "updateWithParams", isAsync = false)
-                val updateAsync = createUpdateFunction(localParams, "updateWithParamsAsync", isAsync = true)
-                classTypeSpec.addFunction(update.build())
-                classTypeSpec.addFunction(updateAsync.build())
+                val requestFunc = createRequestFunction(localParams, REQUEST_NAME, isAsync = false)
+                val requestFuncAsync = createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)
+                classTypeSpec.addFunction(requestFunc.build())
+                classTypeSpec.addFunction(requestFuncAsync.build())
             }
 
             val functs = bindData.element.enclosedElements
@@ -300,7 +302,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
-    private fun createUpdateFunction(parameters: List<String>, funName: String, isAsync: Boolean): FunSpec.Builder {
+    private fun createRequestFunction(parameters: List<String>, funName: String, isAsync: Boolean): FunSpec.Builder {
         val funcSpec = FunSpec.builder(funName)
         var mapOfParams = "%M("
         val paramsSize = parameters.size - 1
@@ -317,9 +319,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         val statement = "return $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
         val returnType = ClassName("com.mobrun.plugin.models", "BaseStatus")
         val updateFuncName = if(isAsync) {
-            UPDATE_ASYNC_STATEMENT
+            REQUEST_ASYNC_STATEMENT
         } else {
-            UPDATE_STATEMENT
+            REQUEST_STATEMENT
         }
         return funcSpec.addStatement(
             statement,
@@ -409,14 +411,12 @@ class FmpDaoProcessor : AbstractProcessor() {
                         .defaultValue(NULL_INITIALIZER)
                         .build()
                     addParameter(isLocalProp)
-                    addStatement(
-                        FUNC_MEMBER_STATEMENT,
-                        MemberName(EXTENSIONS_PATH, INIT_FIELDS_NAME)
-                    )
-                    addStatement(
-                        FUNC_MEMBER_STATEMENT,
-                        MemberName(EXTENSIONS_PATH, INIT_CREATE_TABLE)
-                    )
+                    if(bindData.createTableOnInit) {
+                        addStatement(
+                            FUNC_MEMBER_STATEMENT,
+                            MemberName(EXTENSIONS_PATH, INIT_CREATE_TABLE)
+                        )
+                    }
                 }
             }
             .build()
@@ -425,44 +425,54 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun getDataFromFmpDao(element: Element): BindData {
         val annotation = element.getAnnotation(FmpDao::class.java)
         return createAnnotationData(
+            annotationName = "FmpDao",
             element = element,
             resourceName = annotation.resourceName,
             tableName = annotation.tableName,
             isDelta = annotation.isDelta,
             parameters = annotation.parameters,
-            isLocal = false
+            isLocal = false,
+            createTableOnInit = false
         )
     }
 
     private fun getDataFromFmpLocalDao(element: Element): BindData {
         val annotation = element.getAnnotation(FmpLocalDao::class.java)
         return createAnnotationData(
+            annotationName = "FmpLocalDao",
             element = element,
             resourceName = annotation.resourceName,
             tableName = annotation.tableName,
             parameters = emptyArray(),
+            createTableOnInit = annotation.createTableOnInit,
             isDelta = false,
             isLocal = true
         )
     }
 
     private fun createAnnotationData(
+        annotationName: String,
         element: Element,
         resourceName: String,
         tableName: String,
         parameters: Array<String>,
+        createTableOnInit: Boolean,
         isDelta: Boolean = false,
         isLocal: Boolean = false
     ): BindData {
+
+
+        checkElementForRestrictions(element = element, annotationName = annotationName)
+
         val annotationType = element.asType()
         val elementClassName = ClassName.bestGuess(annotationType.toString())
-
         val className = elementClassName.simpleName
         val fileName = className.createFileName()
 
         return BindData(
             element = element,
             fileName = fileName,
+            createTableOnInit = createTableOnInit,
             parameters = parameters.toList(),
             mainData = TypeData(
                 packName = elementClassName.packageName,
@@ -473,6 +483,32 @@ class FmpDaoProcessor : AbstractProcessor() {
             isDelta = isDelta,
             isLocal = isLocal
         )
+    }
+
+    private fun checkElementForRestrictions(annotationName: String, element: Element) {
+        val annotationType = element.asType()
+        val hasAbstractError = element.kind == ElementKind.CLASS || !element.modifiers.contains(Modifier.ABSTRACT)
+        if(hasAbstractError) {
+            throw IllegalStateException(
+                "$annotationType with $annotationName annotation should be an interface and " +
+                        "implement I${annotationName}.kt to be correctly processed"
+            )
+        }
+
+        val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
+        val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
+        var hasExtendedErrors = extendedElements.isNullOrEmpty()
+        if (!extendedTypeMirrors.isNullOrEmpty()) {
+            hasExtendedErrors = !extendedElements.any {
+                it.simpleName.toString().contains(annotationName)
+            }
+        }
+
+        if(hasExtendedErrors) {
+            throw IllegalStateException(
+                "$annotationType with $annotationName annotation should implement I${annotationName}.kt to be correctly processed"
+            )
+        }
     }
 
     // Take extended interfaces for implement abstract methods
@@ -576,6 +612,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
+    @Suppress("SameParameterValue")
     private fun collectAnnotationData(
         elementsSet: Set<Element>,
         items: MutableList<BindData>,
@@ -586,7 +623,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             if (kind == ElementKind.METHOD && kind != ElementKind.CLASS && kind != ElementKind.INTERFACE) {
                 messager.printMessage(
                     Diagnostic.Kind.ERROR,
-                    "Only classes and interfaces can be annotated as @FmpDao or @FmpDatabase"
+                    "Only classes and interfaces can be annotated as @FmpDao, @FmpLocalDao or @FmpDatabase"
                 )
                 return true
             }
