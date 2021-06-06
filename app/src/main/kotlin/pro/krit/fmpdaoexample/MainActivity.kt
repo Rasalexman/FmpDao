@@ -10,6 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import pro.krit.generated.dao.PmDataFieldsDaoModel
+import pro.krit.generated.dao.PmDataFieldsDaoStatus
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.hiveprocessor.extensions.*
 import pro.krit.hiveprocessor.provider.DatabaseConfig
@@ -49,21 +51,45 @@ class MainActivity : AppCompatActivity() {
         )
         val dbState = mainDb.openDatabase()
         println("-----> dbState = $dbState")
+
         val pmLocalDao = mainDb.providePmLocalDao()
+        val pmRemoteDao = mainDb.providePmDao()
+        val pmFieldDao = mainDb.provideFieldsDao()
+        //pmFieldDao.createTable<PmDataFieldsDaoModel>()
+
+        exampleWithLocalDao(pmLocalDao)
+        exampleWithFieldsDao(pmFieldDao)
+    }
+
+    private fun exampleWithFieldsDao(pmFieldDao: IPmDataFieldsDao) {
+        val resultList = pmFieldDao.select<PmDataFieldsDaoModel>()
+        println("----> IPmDataFieldsDao all count = ${resultList.size}")
+
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            pmFieldDao.flowable<PmDataFieldsDaoModel>(withDistinct = true).flowOn(Dispatchers.IO).collect {
+                println("----> pmFieldDao count = ${it.size}")
+            }
+        }
+
+        insertFieldsList(pmFieldDao)
+    }
+
+    private fun exampleWithLocalDao(pmLocalDao: IPmDataLocalDao) {
         val resultList = pmLocalDao.select()
         println("----> all count = ${resultList.size}")
 
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
             pmLocalDao.flowable(withDistinct = true).flowOn(Dispatchers.IO).collect {
-                println("----> flowable count = ${it.size}")
+                println("----> pmLocalDao count = ${it.size}")
             }
         }
 
         val whereScope = CoroutineScope(Dispatchers.Main)
         whereScope.launch {
             pmLocalDao.flowable("TYPE = \'${PmType.USER}\' ORDER BY QWERTY ASC").flowOn(Dispatchers.IO).collect {
-                println("----> flowable PmType.USER count = ${it.size}")
+                println("----> pmLocalDao PmType.USER count = ${it.size}")
             }
         }
 
@@ -79,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             pmLocalDao.deleteAsync(selectFirst)
         }*/
 
-        //insertList(pmLocalDao)
+        insertLocalList(pmLocalDao)
         //insertSingle(pmLocalDao)
 
         /*val updateLocalStatus = pmLocalDao.update()
@@ -140,7 +166,20 @@ class MainActivity : AppCompatActivity() {
         println("-----> insertStatus = ${statusInsert.isOk}")
     }
 
-    private fun insertList(dao: IPmDataLocalDao) {
+    private fun insertFieldsList(dao: IPmDataFieldsDao) {
+        val localListToInsert = mutableListOf<PmDataFieldsDaoModel>()
+        val randomCount = Random.nextInt(21, 50)
+        repeat(randomCount) {
+            localListToInsert.add(PmDataFieldsDaoModel(
+                tplnr = UUID.randomUUID().toString().take(18),
+                taskNum = Random.nextInt(10, 10000000)
+            ))
+        }
+        val insertAllStatus = dao.insertOrReplace<PmDataFieldsDaoModel>(localListToInsert)
+        println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
+    }
+
+    private fun insertLocalList(dao: IPmDataLocalDao) {
         val localListToInsert = mutableListOf<PmEtDataLocalEntity>()
         val randomCount = Random.nextInt(21, 50)
         repeat(randomCount) {

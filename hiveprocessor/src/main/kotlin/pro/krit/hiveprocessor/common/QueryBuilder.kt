@@ -15,8 +15,8 @@
 package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.IFmpDao
-import pro.krit.hiveprocessor.base.IFmpLocalDao
+import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import pro.krit.hiveprocessor.extensions.fullTableName
 
 object QueryBuilder {
@@ -41,8 +41,8 @@ object QueryBuilder {
 
     private const val FIELD_TYPE_INTEGER = "Integer"
 
-    fun <E : Any, S : StatusSelectTable<E>> createQuery(
-        dao: IFmpDao<E, S>,
+    fun createQuery(
+        dao: IDao,
         prefix: String = SELECT_QUERY,
         where: String = "",
         limit: Int = 0
@@ -56,8 +56,8 @@ object QueryBuilder {
         }
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createTableQuery(dao: IFmpLocalDao<E, S>): String {
-        val localDaoFields = dao.localDaoFields
+    fun createTableQuery(dao: IFieldsDao): String {
+        val localDaoFields = dao.fieldsData
         val fieldsNames = localDaoFields?.fieldsNamesWithTypes
         if (fieldsNames.isNullOrEmpty()) {
             throw UnsupportedOperationException("No 'fieldsNames' key for operation 'createTableQuery'")
@@ -77,7 +77,7 @@ object QueryBuilder {
                 prefix = ", "
             }
 
-            for(entry in localFieldNames) {
+            for (entry in localFieldNames) {
                 val fieldName = entry.key
                 val fieldType = entry.value
 
@@ -90,18 +90,21 @@ object QueryBuilder {
         }
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
-        dao: IFmpLocalDao<E, S>,
+    fun <E : Any> createInsertOrReplaceQuery(
+        dao: IFieldsDao,
         item: E
     ): String {
-        val fieldsForQuery = dao.localDaoFields?.fieldsForQuery
+        val fieldsForQuery = dao.fieldsData?.fieldsForQuery
             ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
 
         val fieldsValues = FieldsBuilder.getValues(dao, item)
         return "$INSERT_OR_REPLACE${dao.fullTableName} $fieldsForQuery$VALUES$fieldsValues"
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {
+    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
+        dao: IFieldsDao,
+        items: List<E>
+    ): String {
         val stringBuilder = StringBuilder()
         for (item in items) {
             stringBuilder.append(createInsertOrReplaceQuery(dao, item))
@@ -110,11 +113,11 @@ object QueryBuilder {
         return stringBuilder.toString()
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(
-        dao: IFmpLocalDao<E, S>,
+    fun <E : Any> createDeleteQuery(
+        dao: IFieldsDao,
         item: E
     ): String {
-        val localDaoFields = dao.localDaoFields
+        val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val primaryKeyName = localDaoFields?.primaryKeyName
         if (primaryKeyField == null || primaryKeyName.isNullOrEmpty()) {
@@ -129,7 +132,7 @@ object QueryBuilder {
         return "$DELETE_QUERY ${dao.fullTableName} $WHERE $primaryKeyName = '$keyValue'"
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createDeleteQuery(dao: IFmpLocalDao<E, S>, items: List<E>): String {
+    fun <E : Any> createDeleteQuery(dao: IFieldsDao, items: List<E>): String {
         val stringBuilder = StringBuilder()
         for (item in items) {
             stringBuilder.append(createDeleteQuery(dao, item))
@@ -139,6 +142,6 @@ object QueryBuilder {
     }
 
     private fun getFieldType(fieldType: String): String {
-        return if(fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
+        return if (fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
     }
 }

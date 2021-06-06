@@ -22,6 +22,7 @@ data class BindData(
     val mainData: TypeData,
     val createTableOnInit: Boolean,
     val parameters: List<String> = emptyList(),
+    val fields: List<String> = emptyList(),
     val resourceName: String = "",
     val tableName: String = "",
     val isDelta: Boolean = false,

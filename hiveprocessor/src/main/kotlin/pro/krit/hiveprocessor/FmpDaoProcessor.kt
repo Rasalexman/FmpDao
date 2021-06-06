@@ -15,14 +15,18 @@
 package pro.krit.hiveprocessor
 
 import com.google.auto.service.AutoService
+import com.google.gson.annotations.SerializedName
+import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import pro.krit.hiveprocessor.annotations.FmpDao
 import pro.krit.hiveprocessor.annotations.FmpDatabase
-import pro.krit.hiveprocessor.annotations.FmpLocalDao
+import pro.krit.hiveprocessor.annotations.FmpFieldsDao
 import pro.krit.hiveprocessor.annotations.FmpQuery
-import pro.krit.hiveprocessor.common.LocalDaoFields
+import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.DaoFieldsData
 import pro.krit.hiveprocessor.data.BindData
+import pro.krit.hiveprocessor.data.FieldData
 import pro.krit.hiveprocessor.data.TypeData
 import pro.krit.hiveprocessor.provider.IFmpDatabase
 import java.io.IOException
@@ -35,6 +39,7 @@ import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 import kotlin.properties.Delegates
+import kotlin.reflect.KClass
 
 
 @AutoService(Processor::class)
@@ -42,6 +47,8 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     companion object {
         private const val CLASS_POSTFIX = "Impl"
+        private const val MODEL_POSTFIX = "Model"
+        private const val STATUS_POSTFIX = "Status"
 
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
@@ -66,7 +73,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val FIELD_RESOURCE = "resourceName"
         private const val FIELD_TABLE = "tableName"
         private const val FIELD_IS_DELTA = "isDelta"
-        private const val FIELD_DAO_FIELDS = "localDaoFields"
+        private const val FIELD_DAO_FIELDS = "fieldsData"
 
         private const val LIST_RETURN_TYPE = "java.util.List"
         private const val SUSPEND_QUALIFIER = "kotlin.coroutines.Continuation"
@@ -77,6 +84,9 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         private const val NULL_INITIALIZER = "null"
         private const val TAG_CLASS_NAME = "%T"
+
+        private const val MODEL_FIELD_TYPE_INT = "int"
+        private const val MODEL_FIELD_PRIMARY_KEY = "primary"
 
         private const val QUERY_VALUE = "val query: String = "
         private const val QUERY_RETURN = "return %T.executeQuery(this, query)"
@@ -121,9 +131,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         )
         // Create files for FmpLocalDao annotation
         val fmpLocalResult = collectAnnotationData(
-            roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
+            roundEnv.getElementsAnnotatedWith(FmpFieldsDao::class.java),
             modulesMap,
-            ::getDataFromFmpLocalDao
+            ::getDataFromFmpFieldsDao
         )
         // If we has generated files for database without errors
         if (!fmpResult && !fmpLocalResult) {
@@ -185,7 +195,9 @@ class FmpDaoProcessor : AbstractProcessor() {
     ) {
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         if (extendedTypeMirrors != null && extendedTypeMirrors.isNotEmpty()) {
-            val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter { !it.simpleName.toString().contains("IFmpDatabase") }
+            val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter {
+                !it.simpleName.toString().contains("IFmpDatabase")
+            }
             //println("----------------> createDatabaseExtendedFunction")
             //println("checkExtendedInterface $element - $extendedElements ")
             extendedElements.forEach {
@@ -222,9 +234,12 @@ class FmpDaoProcessor : AbstractProcessor() {
                                 addStatement("return $instanceStatement", returnedClassName)
                             } else {
 
-                                val propName = funcName + CLASS_POSTFIX
+                                val propName = funcName.createFileName()
                                 val prop =
-                                    PropertySpec.builder(propName, returnedClassName.copy(nullable = true))
+                                    PropertySpec.builder(
+                                        propName,
+                                        returnedClassName.copy(nullable = true)
+                                    )
                                         .mutable()
                                         .addModifiers(KModifier.PRIVATE)
                                         .initializer(NULL_INITIALIZER)
@@ -252,12 +267,17 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun processDaos(moduleElements: List<BindData>) {
         moduleElements.forEach { bindData ->
             val classFileName = bindData.fileName
-            val mainClassName = ClassName(bindData.mainData.packName, bindData.mainData.className)
+            val className = bindData.mainData.className
+            val packageName = bindData.mainData.packName
+            val mainClassName = ClassName(packageName, className)
+            val classBuilders = mutableListOf<TypeSpec.Builder>()
 
             val classTypeSpec =
-                TypeSpec.classBuilder(classFileName).addSuperinterface(mainClassName)
+                TypeSpec.classBuilder(classFileName)
+                    .addSuperinterface(mainClassName)
                     .primaryConstructor(constructorFunSpec(bindData))
                     .addProperties(createProperties(bindData))
+            classBuilders.add(classTypeSpec)
 
             if (bindData.parameters.isNotEmpty()) {
                 val localParams = bindData.parameters
@@ -266,6 +286,68 @@ class FmpDaoProcessor : AbstractProcessor() {
                     createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)
                 classTypeSpec.addFunction(requestFunc.build())
                 classTypeSpec.addFunction(requestFuncAsync.build())
+            }
+
+            if (bindData.fields.isNotEmpty()) {
+                val fileModelName = className.createFileName(MODEL_POSTFIX)
+                val fileStatusName = className.createFileName(STATUS_POSTFIX)
+
+                val modelClass = ClassName(DAO_PACKAGE_NAME, fileModelName)
+                val statusClass = ClassName(DAO_PACKAGE_NAME, fileStatusName)
+                val statusParentClaas = ClassName("com.mobrun.plugin.models", "StatusSelectTable")
+                val modelTypeSpec = TypeSpec.classBuilder(fileModelName)
+                val statusTypeSpec = TypeSpec.classBuilder(fileStatusName)
+                    .superclass(statusParentClaas.parameterizedBy(modelClass))
+
+                val baseClassType = if (bindData.isLocal) {
+                    IDao.IFmpFieldsDao::class.asTypeName()
+                } else {
+                    IDao.IFmpDao::class.asTypeName()
+                }
+                val hyperHiveProvider =
+                    ParameterSpec.builder(FIELD_PROVIDER, IFmpDatabase::class)
+                        .build()
+
+                val constructorSpec = FunSpec.constructorBuilder()
+                val annotationJvmField = AnnotationSpec.builder(JvmField::class).build()
+                val annotationPrimaryKey =  AnnotationSpec.builder(PrimaryKey::class).build()
+
+                bindData.fields.forEach { field ->
+                    val data = field.asModelFieldData()
+                    val annotationSerialize = AnnotationSpec.builder(SerializedName::class)
+                        .addMember("%S", data.annotate)
+                        .build()
+
+                    val currentType = data.type.asTypeName().copy(nullable = true)
+                    val prop =
+                        PropertySpec.builder(data.name, currentType)
+                            .mutable(true)
+                            .initializer(data.name)
+                            .addAnnotation(annotationJvmField)
+                            .apply {
+                                if(data.isPrimaryKey) {
+                                    addAnnotation(annotationPrimaryKey)
+                                }
+                            }
+                            .addAnnotation(annotationSerialize)
+                            .build()
+
+
+                    constructorSpec.addParameter(
+                        ParameterSpec.builder(data.name, currentType)
+                            .defaultValue("null")
+                            .build()
+                    )
+                    modelTypeSpec.addProperty(prop)
+                }
+                modelTypeSpec.primaryConstructor(constructorSpec.build())
+                modelTypeSpec.addModifiers(KModifier.DATA)
+                classBuilders.add(modelTypeSpec)
+                classBuilders.add(statusTypeSpec)
+
+                classTypeSpec.addSuperinterface(
+                    baseClassType.parameterizedBy(modelClass, statusClass)
+                )
             }
 
             val functs = bindData.element.enclosedElements
@@ -318,16 +400,24 @@ class FmpDaoProcessor : AbstractProcessor() {
                 }
             }
 
-            val file = FileSpec.builder(DAO_PACKAGE_NAME, classFileName)
-                .addComment(FILE_COMMENT)
-                .addType(classTypeSpec.build())
-                .build()
-            try {
-                file.writeTo(filer)
-            } catch (e: IOException) {
-                val message = java.lang.String.format("Unable to write file: %s", e.message)
-                messager.printMessage(Diagnostic.Kind.ERROR, message)
+            saveFile(classFileName, builders = classBuilders)
+        }
+    }
+
+    private fun saveFile(classFileName: String, builders: List<TypeSpec.Builder>) {
+        val file = FileSpec.builder(DAO_PACKAGE_NAME, classFileName)
+            .addComment(FILE_COMMENT)
+            .apply {
+                builders.forEach { builder ->
+                    addType(builder.build())
+                }
             }
+            .build()
+        try {
+            file.writeTo(filer)
+        } catch (e: IOException) {
+            val message = java.lang.String.format("Unable to write file: %s", e.message)
+            messager.printMessage(Diagnostic.Kind.ERROR, message)
         }
     }
 
@@ -389,10 +479,10 @@ class FmpDaoProcessor : AbstractProcessor() {
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        return if (bindData.isLocal) {
+        return if (bindData.isLocal || bindData.fields.isNotEmpty()) {
             val isLocalProp = PropertySpec.builder(
                 FIELD_DAO_FIELDS,
-                LocalDaoFields::class.asTypeName().copy(nullable = true)
+                DaoFieldsData::class.asTypeName().copy(nullable = true)
             ).mutable()
                 .initializer(FIELD_DAO_FIELDS)
                 .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
@@ -409,6 +499,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
+    // создаем иницилизируешие поля для конструктора а так жу функцию init {  }
     private fun constructorFunSpec(bindData: BindData): FunSpec {
         val resourceName = ParameterSpec.builder(FIELD_RESOURCE, String::class).apply {
             if (bindData.resourceName.isNotEmpty()) {
@@ -436,14 +527,15 @@ class FmpDaoProcessor : AbstractProcessor() {
             .addParameter(parameterName)
             .addParameter(isCached)
             .apply {
-                if (bindData.isLocal) {
+                if (bindData.isLocal || bindData.fields.isNotEmpty()) {
                     val isLocalProp = ParameterSpec.builder(
                         FIELD_DAO_FIELDS,
-                        LocalDaoFields::class.asTypeName().copy(nullable = true)
+                        DaoFieldsData::class.asTypeName().copy(nullable = true)
                     )
                         .defaultValue(NULL_INITIALIZER)
                         .build()
                     addParameter(isLocalProp)
+
                     if (bindData.createTableOnInit) {
                         addStatement(
                             FUNC_MEMBER_STATEMENT,
@@ -456,27 +548,31 @@ class FmpDaoProcessor : AbstractProcessor() {
     }
 
     private fun getDataFromFmpDao(element: Element): BindData {
-        val annotation = element.getAnnotation(FmpDao::class.java)
+        val jClass = FmpDao::class.java
+        val annotation = element.getAnnotation(jClass)
         return createAnnotationData(
-            annotationName = "FmpDao",
+            annotationName = jClass.simpleName,
             element = element,
             resourceName = annotation.resourceName,
             tableName = annotation.tableName,
             isDelta = annotation.isDelta,
             parameters = annotation.parameters,
+            fields = annotation.fields,
             isLocal = false,
             createTableOnInit = false
         )
     }
 
-    private fun getDataFromFmpLocalDao(element: Element): BindData {
-        val annotation = element.getAnnotation(FmpLocalDao::class.java)
+    private fun getDataFromFmpFieldsDao(element: Element): BindData {
+        val jClass = FmpFieldsDao::class.java
+        val annotation = element.getAnnotation(jClass)
         return createAnnotationData(
-            annotationName = "FmpLocalDao",
+            annotationName = jClass.simpleName,
             element = element,
             resourceName = annotation.resourceName,
             tableName = annotation.tableName,
             parameters = emptyArray(),
+            fields = annotation.fields,
             createTableOnInit = annotation.createTableOnInit,
             isDelta = false,
             isLocal = true
@@ -489,13 +585,14 @@ class FmpDaoProcessor : AbstractProcessor() {
         resourceName: String,
         tableName: String,
         parameters: Array<String>,
+        fields: Array<String>,
         createTableOnInit: Boolean,
         isDelta: Boolean = false,
         isLocal: Boolean = false
     ): BindData {
 
-
-        checkElementForRestrictions(element = element, annotationName = annotationName)
+        val realDaoForCheck = if (fields.isNotEmpty()) "FieldsDao" else annotationName
+        checkElementForRestrictions(element = element, annotationName = realDaoForCheck)
 
         val annotationType = element.asType()
         val elementClassName = ClassName.bestGuess(annotationType.toString())
@@ -507,6 +604,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             fileName = fileName,
             createTableOnInit = createTableOnInit,
             parameters = parameters.toList(),
+            fields = fields.toList(),
             mainData = TypeData(
                 packName = elementClassName.packageName,
                 className = elementClassName.simpleName
@@ -525,30 +623,35 @@ class FmpDaoProcessor : AbstractProcessor() {
         } else {
             element.kind == ElementKind.CLASS
         }
+        val realAnnotationName = if (!annotationName.contains("Fmp")) {
+            "Fmp$annotationName"
+        } else {
+            annotationName
+        }
         val hasAbstractError = hasKindError || !element.modifiers.contains(Modifier.ABSTRACT)
         if (hasAbstractError) {
             throw IllegalStateException(
-                "$annotationType with $annotationName annotation should be an interface and " +
+                "$annotationType with $realAnnotationName annotation should be an interface and " +
                         "implement I${annotationName}.kt to be correctly processed"
             )
         }
 
         if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
-                "$annotationType with $annotationName annotation should implement I${annotationName}.kt to be correctly processed"
+                "$annotationType with $realAnnotationName annotation should implement I${annotationName}.kt or have annotation parameter \'fields\' to be correctly processed"
             )
         }
     }
 
-    private fun checkExtendedInterface(element: Element, annotationName: String): Boolean {
+    private fun checkExtendedInterface(element: Element, compatorName: String): Boolean {
         var hasElement = false
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
         if (!extendedElements.isNullOrEmpty()) {
             extendedElements.forEach {
-                hasElement = it.simpleName.toString().contains(annotationName)
+                hasElement = it.simpleName.toString().contains(compatorName)
                 if (!hasElement) {
-                    hasElement = checkExtendedInterface(it, annotationName)
+                    hasElement = checkExtendedInterface(it, compatorName)
                 } else {
                     return hasElement
                 }
@@ -643,10 +746,48 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
     }
 
+    private fun String.asModelFieldData(): FieldData {
+        val propSplit = this.split("_").map { it.lowercase() }.toMutableList()
+        var type: KClass<*> = String::class
+        val indexOfInt = propSplit.indexOf(MODEL_FIELD_TYPE_INT)
+        if (indexOfInt > -1) {
+            type = Int::class
+            propSplit.removeAt(indexOfInt)
+        }
+
+        val indexOfPrimaryKey = propSplit.indexOf(MODEL_FIELD_PRIMARY_KEY)
+        val isPrimaryKey = indexOfPrimaryKey > -1
+
+        if (isPrimaryKey) {
+            propSplit.removeAt(indexOfPrimaryKey)
+        }
+
+        val fieldSmallName = buildString {
+            propSplit.forEachIndexed { index, s ->
+                if (index > 0) append(s.capitalizeFirst())
+                else append(s)
+            }
+        }
+        val fieldNameBig = buildString {
+            val size = propSplit.size - 1
+            propSplit.forEachIndexed { index, s ->
+                append(s.uppercase())
+                if (index < size) append("_")
+            }
+        }
+
+        return FieldData(
+            name = fieldSmallName,
+            type = type,
+            annotate = fieldNameBig,
+            isPrimaryKey = isPrimaryKey
+        )
+    }
+
     override fun getSupportedAnnotationTypes(): Set<String> {
         return setOf(
             FmpDao::class.java.canonicalName,
-            FmpLocalDao::class.java.canonicalName,
+            FmpFieldsDao::class.java.canonicalName,
             FmpDatabase::class.java.canonicalName
         )
     }
@@ -683,13 +824,13 @@ class FmpDaoProcessor : AbstractProcessor() {
         return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
     }
 
-    private fun String.createFileName(): String {
+    private fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
         var className = this
         val classNameFirstChar = className.first()
         if (classNameFirstChar == 'I' || classNameFirstChar == 'i') {
             className = className.substring(1)
         }
-        return className + CLASS_POSTFIX
+        return className + postFix
     }
 
 }

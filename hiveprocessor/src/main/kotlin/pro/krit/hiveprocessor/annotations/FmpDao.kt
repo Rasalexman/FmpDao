@@ -15,7 +15,6 @@
 package pro.krit.hiveprocessor.annotations
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.IFmpDao
 
 /**
  * This annotation is used for create Foresight HyperHive Table Resource
@@ -65,5 +64,6 @@ annotation class FmpDao(
     val resourceName: String,
     val tableName: String = "",
     val parameters: Array<String> = [],
+    val fields: Array<String> = [],
     val isDelta: Boolean = false
 )

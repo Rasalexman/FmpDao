@@ -23,7 +23,7 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import pro.krit.hiveprocessor.base.IFmpDao
+import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.extensions.fullTableName
 import java.io.File
 
@@ -59,7 +59,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return hyperHiveState ?: throw NullPointerException("HyperHiveState instance is not initialized")
     }
 
-    override fun <E : Any, T : StatusSelectTable<E>> getTrigger(dao: IFmpDao<E, T>): Flow<String> {
+    override fun getTrigger(dao: IDao): Flow<String> {
         return triggers.getOrPut(dao.fullTableName) { MutableSharedFlow(5, 5, BufferOverflow.DROP_OLDEST) }
     }
 
