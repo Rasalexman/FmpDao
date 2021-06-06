@@ -17,8 +17,7 @@ package pro.krit.hiveprocessor.common
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
-import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.IFmpLocalDao
+import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import java.lang.reflect.Field
 import java.security.MessageDigest
 import java.util.*
@@ -29,7 +28,7 @@ object FieldsBuilder {
     private const val PRIMARY_KEY_JAVA_TYPE = "String"
     private const val VALUE_NULL = "NULL"
 
-    fun <E : Any, S : StatusSelectTable<E>> initFields(dao: IFmpLocalDao<E, S>, fields: Array<Field>) {
+    fun initFields(dao: IFieldsDao, fields: Array<Field>) {
         var localPrimaryKey: Field? = null
         var localPrimaryKeyName: String? = null
         val localFields = ArrayList<Field>()
@@ -67,7 +66,7 @@ object FieldsBuilder {
             localFieldsForQuery = getFields(localPrimaryKeyName, localFieldsNames.keys.toList())
         }
 
-        dao.localDaoFields = LocalDaoFields(
+        dao.fieldsData = DaoFieldsData(
             fields = localFields,
             fieldsNamesWithTypes = localFieldsNames,
             primaryKeyField = localPrimaryKey,
@@ -76,8 +75,8 @@ object FieldsBuilder {
         )
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> getValues(dao: IFmpLocalDao<E, S>, item: E): String {
-        val localDaoFields = dao.localDaoFields
+    fun <E : Any> getValues(dao: IFieldsDao, item: E): String {
+        val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val fields = localDaoFields?.fields
         if (primaryKeyField == null || fields.isNullOrEmpty()) {

@@ -12,15 +12,14 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package pro.krit.hiveprocessor.base
+package pro.krit.hiveprocessor.common
 
-import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.common.LocalDaoFields
+import java.lang.reflect.Field
 
-
-/**
- * Base abstraction for annotation processing works with local fmp database structures
- */
-interface IFmpLocalDao<E : Any, T : StatusSelectTable<E>> : IFmpDao<E, T> {
-    var localDaoFields: LocalDaoFields?
-}
+data class DaoFieldsData(
+    var fields: List<Field>? = null,
+    var fieldsNamesWithTypes: Map<String, String>? = null,
+    var primaryKeyField: Field? = null,
+    var primaryKeyName: String? = null,
+    var fieldsForQuery: String? = null,
+)
