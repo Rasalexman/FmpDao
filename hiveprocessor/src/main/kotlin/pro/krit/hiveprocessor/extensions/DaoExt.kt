@@ -34,7 +34,13 @@ typealias Value = Any
 typealias ScalarMap = Map<Parameter, Value>
 
 val IDao.fullTableName: String
-    get() = "\'${resourceName}_${tableName}\'"
+    get() {
+        return if(tableName.isNotEmpty()) {
+            "\'${resourceName}_${tableName}\'"
+        } else {
+            "\'${resourceName}\'"
+        }
+    }
 
 const val ERROR_CODE_SELECT_WHERE = 10001
 const val ERROR_CODE_REMOVE_WHERE = 10002

@@ -38,7 +38,7 @@ package pro.krit.hiveprocessor.annotations
  * <pre>{@code
  * &#64FmpLocalDao(
  *      resourceName = "ZSR_TORO_PM_DATA",
- *      parameterName = "ET_DATA_LOCAL"
+ *      tableName = "ET_DATA_LOCAL"
  * )
  * interface IPmDataDao : IFmpLocalDao<PmEtDataLocalEntity, PmLocalStatus>
  *
@@ -47,17 +47,15 @@ package pro.krit.hiveprocessor.annotations
  * data class PmEtDataLocalEntity(
  *      &#64PrimaryKey
  *      &#64SerializedName("ID")
- *      var id: Long? = null,
+ *      val id: Long? = null,
  *
- *      //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
  *      &#64JvmField
  *      &#64SerializedName("MARKER")
- *      var marker: String? = null,
+ *      val marker: String? = null,
  *
- *      //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
  *      &#64JvmField
  *      &#64SerializedName("AUART")
- *      var auart: String? = null
+ *      val auart: String? = null
  * )
  * }</pre></p>
  *

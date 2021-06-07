@@ -15,7 +15,6 @@
 package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.models.Error
-import pro.krit.hiveprocessor.base.IDao.*
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.extensions.fullTableName

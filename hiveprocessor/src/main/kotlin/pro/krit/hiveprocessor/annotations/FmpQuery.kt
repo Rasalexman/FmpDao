@@ -21,7 +21,7 @@ package pro.krit.hiveprocessor.annotations
  *
  * @FmpDao(
  *      resourceName = "ZSR_TORO_PM_DATA",
- *      parameterName = "ET_DATA"
+ *      tableName = "ET_DATA"
  * )
  * interface IPmDataDao : IFmpDao<PmEtDataEntity, PmStatus> {
  *      // sql query with imported parameters and table name. Return only List<E : Any>
