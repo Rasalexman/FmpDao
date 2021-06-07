@@ -29,6 +29,8 @@ object FieldsBuilder {
     private const val VALUE_NULL = "NULL"
 
     fun initFields(dao: IFieldsDao, fields: Array<Field>) {
+        if(dao.fieldsData != null) return
+
         var localPrimaryKey: Field? = null
         var localPrimaryKeyName: String? = null
         val localFields = ArrayList<Field>()

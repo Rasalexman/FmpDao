@@ -22,5 +22,5 @@ sealed interface IDao {
     /**
      * Base abstraction for annotation processing works with local fmp database structures
      */
-    interface IFmpFieldsDao<E : Any, T : StatusSelectTable<E>> : IFmpDao<E, T>, IFieldsDao
+    interface IFmpLocalDao<E : Any, T : StatusSelectTable<E>> : IFmpDao<E, T>, IFieldsDao
 }

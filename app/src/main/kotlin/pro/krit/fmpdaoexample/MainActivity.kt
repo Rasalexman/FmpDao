@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity() {
         val pmLocalDao = mainDb.providePmLocalDao()
         val pmRemoteDao = mainDb.providePmDao()
         val pmFieldDao = mainDb.provideFieldsDao()
-        //pmFieldDao.createTable<PmDataFieldsDaoModel>()
+        pmFieldDao.createTable<PmDataFieldsDaoModel>()
 
         exampleWithLocalDao(pmLocalDao)
         exampleWithFieldsDao(pmFieldDao)

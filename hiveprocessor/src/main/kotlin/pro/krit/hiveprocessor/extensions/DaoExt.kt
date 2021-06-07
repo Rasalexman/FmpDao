@@ -125,8 +125,21 @@ const val ERROR_CODE_CREATE = 10004
 const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
 
-inline fun <reified E : Any> IFieldsDao.createTable(): StatusSelectTable<E> {
+inline fun <reified E : Any> IFieldsDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
+}
+
+suspend inline fun <reified E : Any> IFieldsDao.initFieldsAsync() {
+    withContext(Dispatchers.IO) {
+        FieldsBuilder.initFields(
+            this@initFieldsAsync,
+            E::class.java.fields
+        )
+    }
+}
+
+inline fun <reified E : Any> IFieldsDao.createTable(): StatusSelectTable<E> {
+    initFields<E>()
     val query = QueryBuilder.createTableQuery(this)
     return QueryExecuter.executeStatus(
         dao = this,
@@ -137,7 +150,10 @@ inline fun <reified E : Any> IFieldsDao.createTable(): StatusSelectTable<E> {
 }
 
 suspend inline fun <reified E : Any> IFieldsDao.createTableAsync(): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { createTable() }
+    return withContext(Dispatchers.IO) {
+        initFieldsAsync<E>()
+        createTable()
+    }
 }
 
 inline fun <reified E : Any> IFieldsDao.insertOrReplace(
