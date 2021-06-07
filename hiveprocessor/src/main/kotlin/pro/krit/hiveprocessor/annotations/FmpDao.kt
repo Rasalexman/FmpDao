@@ -14,15 +14,13 @@
 
 package pro.krit.hiveprocessor.annotations
 
-import com.mobrun.plugin.models.StatusSelectTable
-
 /**
  * This annotation is used for create Foresight HyperHive Table Resource
  * for work with remote fmp-server. You should annotate create blank interface file extended from
- * [IFmpDao] with marks two generics:
+ * [pro.krit.hiveprocessor.base.IDao.IFmpDao] with marks two generics:
  * <p>
  * 1) The first generic is database table structure model with serialized annotations
- * 2) Fmp Status class extended from [StatusSelectTable] to tell the hyperHive databaseApi
+ * 2) Fmp Status class extended from [com.mobrun.plugin.models.StatusSelectTable] to tell the hyperHive databaseApi
  * which kind of data should be converted from SQL statement
  * </p>
  *
@@ -32,6 +30,7 @@ import com.mobrun.plugin.models.StatusSelectTable
  * @param isDelta - Does it need to use {@link com.mobrun.plugin.api.HyperHive#deltaStream()}
  * instead of {@link com.mobrun.plugin.api.HyperHive#deltaStream()} to operate with data updates
  * @param parameters - list of input request parameters names. Default: emptyArray()
+ * @param fields - list of strings for autogenerate data models. Default: emptyArray()
  *
  * Example:
  * <p><pre>{@code
@@ -45,15 +44,14 @@ import com.mobrun.plugin.models.StatusSelectTable
  * class PmStatus : StatusSelectTable<PmEtDataEntity>()
  *
  * data class PmEtDataEntity(
- *      //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
+ *
  *      &#64JvmField
  *      &#64SerializedName("MARKER")
- *      var marker: String? = null,
-
- *      //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
+ *      val marker: String? = null,
+ *
  *      &#64JvmField
  *      &#64SerializedName("AUART")
- *      var auart: String? = null
+ *      val auart: String? = null
  * )
  * }</pre></p>
  *

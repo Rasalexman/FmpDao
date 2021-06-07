@@ -19,6 +19,8 @@ package pro.krit.hiveprocessor.annotations
  * [pro.krit.hiveprocessor.provider.AbstractFmpDatabase] and his abstract extended children.
  * It's generate an Kotlin Object class with current implementation of abstract functions f
  * or provide instance of database DAO
+ * @param asDaoProvider - need to create dao implementation object every time that it was called.
+ * Default is single instance.
  *
  * Example:
  *

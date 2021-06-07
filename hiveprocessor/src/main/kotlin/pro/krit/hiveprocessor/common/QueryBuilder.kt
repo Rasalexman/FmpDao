@@ -98,7 +98,7 @@ object QueryBuilder {
             ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
 
         val fieldsValues = FieldsBuilder.getValues(dao, item)
-        return "$INSERT_OR_REPLACE${dao.fullTableName} $fieldsForQuery$VALUES$fieldsValues"
+        return "$INSERT_OR_REPLACE ${dao.fullTableName} $fieldsForQuery$VALUES$fieldsValues"
     }
 
     fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
