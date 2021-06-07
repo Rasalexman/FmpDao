@@ -639,7 +639,6 @@ class FmpDaoProcessor : AbstractProcessor() {
             element.kind == ElementKind.CLASS
         }
 
-        println("-------> element = $element annotationName = $annotationName")
         val hasAbstractError = hasKindError || !element.modifiers.contains(Modifier.ABSTRACT)
         if (hasAbstractError) {
             throw IllegalStateException(
