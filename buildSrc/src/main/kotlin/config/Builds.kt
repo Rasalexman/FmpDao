@@ -22,7 +22,7 @@ object Builds {
     }
 
     object Processor {
-        const val VERSION_CODE = 10202
-        const val VERSION_NAME = "1.2.2"
+        const val VERSION_CODE = 10300
+        const val VERSION_NAME = "1.3.0"
     }
 }
