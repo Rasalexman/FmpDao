@@ -21,7 +21,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import pro.krit.hiveprocessor.annotations.FmpDao
 import pro.krit.hiveprocessor.annotations.FmpDatabase
-import pro.krit.hiveprocessor.annotations.FmpFieldsDao
+import pro.krit.hiveprocessor.annotations.FmpLocalDao
 import pro.krit.hiveprocessor.annotations.FmpQuery
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.DaoFieldsData
@@ -131,9 +131,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         )
         // Create files for FmpLocalDao annotation
         val fmpLocalResult = collectAnnotationData(
-            roundEnv.getElementsAnnotatedWith(FmpFieldsDao::class.java),
+            roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
             modulesMap,
-            ::getDataFromFmpFieldsDao
+            ::getDataFromFmpLocalDao
         )
         // If we has generated files for database without errors
         if (!fmpResult && !fmpLocalResult) {
@@ -300,7 +300,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                     .superclass(statusParentClaas.parameterizedBy(modelClass))
 
                 val baseClassType = if (bindData.isLocal) {
-                    IDao.IFmpFieldsDao::class.asTypeName()
+                    IDao.IFmpLocalDao::class.asTypeName()
                 } else {
                     IDao.IFmpDao::class.asTypeName()
                 }
@@ -563,8 +563,8 @@ class FmpDaoProcessor : AbstractProcessor() {
         )
     }
 
-    private fun getDataFromFmpFieldsDao(element: Element): BindData {
-        val jClass = FmpFieldsDao::class.java
+    private fun getDataFromFmpLocalDao(element: Element): BindData {
+        val jClass = FmpLocalDao::class.java
         val annotation = element.getAnnotation(jClass)
         return createAnnotationData(
             annotationName = jClass.simpleName,
@@ -787,7 +787,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     override fun getSupportedAnnotationTypes(): Set<String> {
         return setOf(
             FmpDao::class.java.canonicalName,
-            FmpFieldsDao::class.java.canonicalName,
+            FmpLocalDao::class.java.canonicalName,
             FmpDatabase::class.java.canonicalName
         )
     }

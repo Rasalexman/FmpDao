@@ -15,66 +15,66 @@
 package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.IDao.IFmpFieldsDao
+import pro.krit.hiveprocessor.base.IDao.IFmpLocalDao
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.createTable(): StatusSelectTable<E> {
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTable(): StatusSelectTable<E> {
     return createTable<E>()
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.createTableAsync(): StatusSelectTable<E> {
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.createTableAsync(): StatusSelectTable<E> {
     return createTableAsync<E>()
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.insertOrReplace(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     item: E,
     notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return insertOrReplace<E>(item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.insertOrReplaceAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     item: E,
     notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return insertOrReplaceAsync<E>(item, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.insertOrReplace(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return insertOrReplace<E>(items, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.insertOrReplaceAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>,
     notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return insertOrReplaceAsync<E>(items, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.delete(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
     item: E,
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
     return delete<E>(item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.deleteAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     item: E,
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
     return deleteAsync<E>(item, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.delete(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.delete(
     items: List<E>,
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
     return delete<E>(items, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpFieldsDao<E, S>.deleteAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpLocalDao<E, S>.deleteAsync(
     items: List<E>,
     notifyAll: Boolean = true
 ): StatusSelectTable<E> {
