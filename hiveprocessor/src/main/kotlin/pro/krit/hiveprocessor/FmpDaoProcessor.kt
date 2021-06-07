@@ -49,6 +49,8 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val CLASS_POSTFIX = "Impl"
         private const val MODEL_POSTFIX = "Model"
         private const val STATUS_POSTFIX = "Status"
+        private const val PREFIX_UPPER = 'I'
+        private const val PREFIX_LOWER = 'i'
 
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
@@ -58,6 +60,8 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
         private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
+        private const val FMP_DATABASE_ANNOTATION_NAME = "FmpDatabase"
+        private const val FMP_FIELDS_DAO_NAME = "FieldsDao"
 
         private const val INIT_CREATE_TABLE = "createTable"
 
@@ -78,9 +82,15 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val LIST_RETURN_TYPE = "java.util.List"
         private const val SUSPEND_QUALIFIER = "kotlin.coroutines.Continuation"
 
+        private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
+        private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
+        private const val MOBRUN_BASE_NAME = "BaseStatus"
+
         private const val KOTLIN_PATH = "kotlin"
-        private const val KOTLIN_LIST_PATH = "kotlin.collections"
+        private const val KOTLIN_COLLECTION_PATH = "kotlin.collections"
+        private const val KOTLIN_MAP_OF_NAME = "mapOf"
         private const val KOTLIN_LIST_NAME = "List"
+        private const val KOTLIN_STRING_TYPE_NAME = "String"
 
         private const val NULL_INITIALIZER = "null"
         private const val TAG_CLASS_NAME = "%T"
@@ -294,7 +304,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                 val modelClass = ClassName(DAO_PACKAGE_NAME, fileModelName)
                 val statusClass = ClassName(DAO_PACKAGE_NAME, fileStatusName)
-                val statusParentClaas = ClassName("com.mobrun.plugin.models", "StatusSelectTable")
+                val statusParentClaas = ClassName(MOBRUN_MODEL_PATH, MOBRUN_SELECTABLE_NAME)
                 val modelTypeSpec = TypeSpec.classBuilder(fileModelName)
                 val statusTypeSpec = TypeSpec.classBuilder(fileStatusName)
                     .superclass(statusParentClaas.parameterizedBy(modelClass))
@@ -304,13 +314,10 @@ class FmpDaoProcessor : AbstractProcessor() {
                 } else {
                     IDao.IFmpDao::class.asTypeName()
                 }
-                val hyperHiveProvider =
-                    ParameterSpec.builder(FIELD_PROVIDER, IFmpDatabase::class)
-                        .build()
 
                 val constructorSpec = FunSpec.constructorBuilder()
                 val annotationJvmField = AnnotationSpec.builder(JvmField::class).build()
-                val annotationPrimaryKey =  AnnotationSpec.builder(PrimaryKey::class).build()
+                val annotationPrimaryKey = AnnotationSpec.builder(PrimaryKey::class).build()
 
                 bindData.fields.forEach { field ->
                     val data = field.asModelFieldData()
@@ -325,7 +332,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                             .initializer(data.name)
                             .addAnnotation(annotationJvmField)
                             .apply {
-                                if(data.isPrimaryKey) {
+                                if (data.isPrimaryKey) {
                                     addAnnotation(annotationPrimaryKey)
                                 }
                             }
@@ -440,7 +447,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         mapOfParams += ")"
 
         val statement = "return $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
-        val returnType = ClassName("com.mobrun.plugin.models", "BaseStatus")
+        val returnType = ClassName(MOBRUN_MODEL_PATH, MOBRUN_BASE_NAME)
         val updateFuncName = if (isAsync) {
             REQUEST_ASYNC_STATEMENT
         } else {
@@ -449,7 +456,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         return funcSpec.addStatement(
             statement,
             MemberName(EXTENSIONS_PATH, updateFuncName),
-            MemberName("kotlin.collections", "mapOf")
+            MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
         ).returns(returnType).apply {
             if (isAsync) {
                 addModifiers(KModifier.SUSPEND)
@@ -591,8 +598,11 @@ class FmpDaoProcessor : AbstractProcessor() {
         isLocal: Boolean = false
     ): BindData {
 
-        val realDaoForCheck = if (fields.isNotEmpty()) "FieldsDao" else annotationName
-        checkElementForRestrictions(element = element, annotationName = realDaoForCheck)
+        if(fields.isNotEmpty()) {
+            checkElementForRestrictions(element = element, annotationName = FMP_FIELDS_DAO_NAME)
+        } else {
+            checkElementForRestrictions(element = element, annotationName = annotationName)
+        }
 
         val annotationType = element.asType()
         val elementClassName = ClassName.bestGuess(annotationType.toString())
@@ -616,42 +626,45 @@ class FmpDaoProcessor : AbstractProcessor() {
         )
     }
 
-    private fun checkElementForRestrictions(annotationName: String, element: Element) {
+    private fun checkElementForRestrictions(
+        annotationName: String,
+        element: Element
+    ) {
+        val realAnnotationName = element.annotationMirrors.firstOrNull()?.annotationType.toString()
         val annotationType = element.asType()
-        val hasKindError = if (annotationName == "FmpDatabase") {
+
+        val hasKindError = if (annotationName == FMP_DATABASE_ANNOTATION_NAME) {
             element.kind == ElementKind.INTERFACE
         } else {
             element.kind == ElementKind.CLASS
         }
-        val realAnnotationName = if (!annotationName.contains("Fmp")) {
-            "Fmp$annotationName"
-        } else {
-            annotationName
-        }
+
+        println("-------> element = $element annotationName = $annotationName")
         val hasAbstractError = hasKindError || !element.modifiers.contains(Modifier.ABSTRACT)
         if (hasAbstractError) {
             throw IllegalStateException(
                 "$annotationType with $realAnnotationName annotation should be an interface and " +
-                        "implement I${annotationName}.kt to be correctly processed"
+                        "implement $annotationName to be correctly processed"
             )
         }
 
         if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
-                "$annotationType with $realAnnotationName annotation should implement I${annotationName}.kt or have annotation parameter \'fields\' to be correctly processed"
+                "$annotationType with $realAnnotationName annotation should implement pro.krit.hiveprocessor.IDao.I${annotationName}" +
+                        " or have annotation parameter \'fields\' to be correctly processed"
             )
         }
     }
 
-    private fun checkExtendedInterface(element: Element, compatorName: String): Boolean {
+    private fun checkExtendedInterface(element: Element, comparatorName: String): Boolean {
         var hasElement = false
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         val extendedElements = extendedTypeMirrors.mapToInterfaceElements()
         if (!extendedElements.isNullOrEmpty()) {
             extendedElements.forEach {
-                hasElement = it.simpleName.toString().contains(compatorName)
+                hasElement = it.simpleName.toString().contains(comparatorName)
                 if (!hasElement) {
-                    hasElement = checkExtendedInterface(it, compatorName)
+                    hasElement = checkExtendedInterface(it, comparatorName)
                 } else {
                     return hasElement
                 }
@@ -692,7 +705,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun String.createReturnType(returnPack: String, returnClass: String): TypeName {
         val isList = this.contains(LIST_RETURN_TYPE)
         return if (isList) {
-            val list = ClassName(KOTLIN_LIST_PATH, KOTLIN_LIST_NAME)
+            val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
             list.parameterizedBy(ClassName(returnPack, returnClass))
         } else {
             ClassName(returnPack, returnClass)
@@ -739,7 +752,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     }
 
     private fun String.screenParameter(className: String): String {
-        return if (className == "String") {
+        return if (className == KOTLIN_STRING_TYPE_NAME) {
             "\'$$this\'"
         } else {
             "$$this"
@@ -827,7 +840,7 @@ class FmpDaoProcessor : AbstractProcessor() {
     private fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
         var className = this
         val classNameFirstChar = className.first()
-        if (classNameFirstChar == 'I' || classNameFirstChar == 'i') {
+        if (classNameFirstChar == PREFIX_UPPER || classNameFirstChar == PREFIX_LOWER) {
             className = className.substring(1)
         }
         return className + postFix
