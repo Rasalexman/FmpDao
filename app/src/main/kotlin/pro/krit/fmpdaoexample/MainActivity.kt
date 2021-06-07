@@ -1,23 +1,27 @@
 package pro.krit.fmpdaoexample
 
-import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.appcompat.app.AppCompatActivity
 import com.mobrun.plugin.api.HyperHiveState
+import pro.krit.generated.dao.PmDataFieldsDaoModel
+import pro.krit.generated.dao.PmDataFieldsDaoStatus
+import pro.krit.generated.database.MainDatabaseImpl
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
-import pro.krit.generated.dao.PmDataFieldsDaoModel
-import pro.krit.generated.dao.PmDataFieldsDaoStatus
-import pro.krit.generated.database.MainDatabaseImpl
+import pro.krit.generated.request.ZtMp01RequestImpl
+import pro.krit.generated.request.ZtMp01RequestRespondStatus
+import pro.krit.generated.request.ZtMp01RequestResultModel
 import pro.krit.hiveprocessor.extensions.*
 import pro.krit.hiveprocessor.provider.DatabaseConfig
 import java.util.*
 import kotlin.random.Random
 
+@Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE")
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,12 +49,21 @@ class MainActivity : AppCompatActivity() {
             dbPath = dbPath
         )
 
+
         val mainDb: IMainDatabase = MainDatabaseImpl.initialize(
             hState = HyperHiveState(this).setHandler(Handler(Looper.getMainLooper())),
             config = hyperHiveConfig
         )
         val dbState = mainDb.openDatabase()
         println("-----> dbState = $dbState")
+
+        val request: IZtMp01Request = ZtMp01RequestImpl(mainDb.provideHyperHive(), mapOf())
+        val result = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>()
+        result.fold(onSuccess = {
+
+        }, onFailure = {
+
+        })
 
         val pmLocalDao = mainDb.providePmLocalDao()
         val pmRemoteDao = mainDb.providePmDao()
@@ -62,7 +75,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun exampleWithFieldsDao(pmFieldDao: IPmDataFieldsDao) {
-        val resultList = pmFieldDao.select<PmDataFieldsDaoModel>()
+        /*val resultList = pmFieldDao.select<PmDataFieldsDaoModel>()
         println("----> IPmDataFieldsDao all count = ${resultList.size}")
 
         val scope = CoroutineScope(Dispatchers.Main)
@@ -72,7 +85,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        insertFieldsList(pmFieldDao)
+        insertFieldsList(pmFieldDao)*/
     }
 
     private fun exampleWithLocalDao(pmLocalDao: IPmDataLocalDao) {
@@ -167,7 +180,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun insertFieldsList(dao: IPmDataFieldsDao) {
-        val localListToInsert = mutableListOf<PmDataFieldsDaoModel>()
+        /*val localListToInsert = mutableListOf<PmDataFieldsDaoModel>()
         val randomCount = Random.nextInt(21, 50)
         repeat(randomCount) {
             localListToInsert.add(PmDataFieldsDaoModel(
@@ -176,7 +189,7 @@ class MainActivity : AppCompatActivity() {
             ))
         }
         val insertAllStatus = dao.insertOrReplace<PmDataFieldsDaoModel>(localListToInsert)
-        println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
+        println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")*/
     }
 
     private fun insertLocalList(dao: IPmDataLocalDao) {

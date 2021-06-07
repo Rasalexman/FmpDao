@@ -16,44 +16,40 @@ package pro.krit.hiveprocessor
 
 import com.google.auto.service.AutoService
 import com.google.gson.annotations.SerializedName
+import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import pro.krit.hiveprocessor.annotations.FmpDao
-import pro.krit.hiveprocessor.annotations.FmpDatabase
-import pro.krit.hiveprocessor.annotations.FmpLocalDao
-import pro.krit.hiveprocessor.annotations.FmpQuery
+import pro.krit.hiveprocessor.annotations.*
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.common.DaoFieldsData
 import pro.krit.hiveprocessor.data.BindData
-import pro.krit.hiveprocessor.data.FieldData
 import pro.krit.hiveprocessor.data.TypeData
+import pro.krit.hiveprocessor.extensions.*
 import pro.krit.hiveprocessor.provider.IFmpDatabase
+import pro.krit.hiveprocessor.request.BaseFmpRawModel
+import pro.krit.hiveprocessor.request.ObjectRawStatus
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
-import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 import kotlin.properties.Delegates
-import kotlin.reflect.KClass
 
 
 @AutoService(Processor::class)
 class FmpDaoProcessor : AbstractProcessor() {
 
     companion object {
-        private const val CLASS_POSTFIX = "Impl"
-        private const val MODEL_POSTFIX = "Model"
-        private const val STATUS_POSTFIX = "Status"
-        private const val PREFIX_UPPER = 'I'
-        private const val PREFIX_LOWER = 'i'
+
 
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
+        private const val REQUEST_PACKAGE_NAME = "pro.krit.generated.request"
 
         private const val EXTENSIONS_PATH = "pro.krit.hiveprocessor.extensions"
         private const val QUERY_EXECUTER_PATH = "pro.krit.hiveprocessor.common"
@@ -79,24 +75,12 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val FIELD_IS_DELTA = "isDelta"
         private const val FIELD_DAO_FIELDS = "fieldsData"
 
-        private const val LIST_RETURN_TYPE = "java.util.List"
-        private const val SUSPEND_QUALIFIER = "kotlin.coroutines.Continuation"
-
         private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
         private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
         private const val MOBRUN_BASE_NAME = "BaseStatus"
 
-        private const val KOTLIN_PATH = "kotlin"
-        private const val KOTLIN_COLLECTION_PATH = "kotlin.collections"
-        private const val KOTLIN_MAP_OF_NAME = "mapOf"
-        private const val KOTLIN_LIST_NAME = "List"
-        private const val KOTLIN_STRING_TYPE_NAME = "String"
-
         private const val NULL_INITIALIZER = "null"
         private const val TAG_CLASS_NAME = "%T"
-
-        private const val MODEL_FIELD_TYPE_INT = "int"
-        private const val MODEL_FIELD_PRIMARY_KEY = "primary"
 
         private const val QUERY_VALUE = "val query: String = "
         private const val QUERY_RETURN = "return %T.executeQuery(this, query)"
@@ -154,6 +138,12 @@ class FmpDaoProcessor : AbstractProcessor() {
                 processDatabase(currentDatabase, modulesMap)
             }
         }
+        // Web Requests
+        val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
+        processWebRequest(webElementRequests)
+        // Rest Requests
+        val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
+        processRestRequest(restElementRequests)
 
         println("HyperHiveProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
         return false
@@ -184,17 +174,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         // than create function for database
         createFunctions(classTypeSpec, databaseElement, daoList, annotation.asDaoProvider)
 
-        val fileBuilder = FileSpec.builder(DATABASE_PACKAGE_NAME, fileName)
-            .addComment(FILE_COMMENT)
-            .addType(classTypeSpec.build())
-
-        val file = fileBuilder.build()
-        try {
-            file.writeTo(filer)
-        } catch (e: IOException) {
-            val message = java.lang.String.format("Unable to write file: %s", e.message)
-            messager.printMessage(Diagnostic.Kind.ERROR, message)
-        }
+        saveFiles(DATABASE_PACKAGE_NAME, fileName, listOf(classTypeSpec))
     }
 
     private fun createDatabaseExtendedFunction(
@@ -407,26 +387,11 @@ class FmpDaoProcessor : AbstractProcessor() {
                 }
             }
 
-            saveFile(classFileName, builders = classBuilders)
+            saveFiles(DAO_PACKAGE_NAME, classFileName, builders = classBuilders)
         }
     }
 
-    private fun saveFile(classFileName: String, builders: List<TypeSpec.Builder>) {
-        val file = FileSpec.builder(DAO_PACKAGE_NAME, classFileName)
-            .addComment(FILE_COMMENT)
-            .apply {
-                builders.forEach { builder ->
-                    addType(builder.build())
-                }
-            }
-            .build()
-        try {
-            file.writeTo(filer)
-        } catch (e: IOException) {
-            val message = java.lang.String.format("Unable to write file: %s", e.message)
-            messager.printMessage(Diagnostic.Kind.ERROR, message)
-        }
-    }
+
 
     private fun createRequestFunction(
         parameters: List<String>,
@@ -701,116 +666,6 @@ class FmpDaoProcessor : AbstractProcessor() {
         return this.kind == ElementKind.METHOD && this.modifiers.contains(Modifier.ABSTRACT)
     }
 
-    private fun String.createReturnType(returnPack: String, returnClass: String): TypeName {
-        val isList = this.contains(LIST_RETURN_TYPE)
-        return if (isList) {
-            val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
-            list.parameterizedBy(ClassName(returnPack, returnClass))
-        } else {
-            ClassName(returnPack, returnClass)
-        }
-    }
-
-    private fun String.getPackAndClass(): Pair<String, String> {
-        val withoutSuspend = this.withoutSuspend()
-        val withoutBraces = withoutSuspend.replace("()", "")
-        val replaced = withoutBraces.splitArray()
-
-        val splitted = replaced.split(".")
-        val className = splitted.last()
-        val packName = splitted.subList(0, splitted.size - 1).joinToString(".")
-        return packName to className
-    }
-
-    private fun String.withoutSuspend(): String {
-        val isSuspend = this.contains(SUSPEND_QUALIFIER)
-        return if (isSuspend) {
-            val indexStart = this.indexOf(LIST_RETURN_TYPE)
-            val lastIndex = this.lastIndexOf(">")
-            this.substring(indexStart, lastIndex)
-        } else {
-            this
-        }
-    }
-
-    private fun String.replaceTablePattern(returnClass: String, bindData: BindData): String {
-        val tablePattern = ":$returnClass"
-        return if (this.contains(tablePattern)) {
-            val tableName = "${bindData.resourceName}_${bindData.tableName}"
-            this.replace(tablePattern, tableName)
-        } else this
-    }
-
-    private fun String.splitArray(): String {
-        val ifArray = this.contains(LIST_RETURN_TYPE)
-        return if (ifArray) {
-            this.split("<")[1].replace(">", "")
-        } else {
-            this
-        }
-    }
-
-    private fun String.screenParameter(className: String): String {
-        return if (className == KOTLIN_STRING_TYPE_NAME) {
-            "\'$$this\'"
-        } else {
-            "$$this"
-        }
-    }
-
-    private fun String.asModelFieldData(): FieldData {
-        val propSplit = this.split("_").map { it.lowercase() }.toMutableList()
-        var type: KClass<*> = String::class
-        val indexOfInt = propSplit.indexOf(MODEL_FIELD_TYPE_INT)
-        if (indexOfInt > -1) {
-            type = Int::class
-            propSplit.removeAt(indexOfInt)
-        }
-
-        val indexOfPrimaryKey = propSplit.indexOf(MODEL_FIELD_PRIMARY_KEY)
-        val isPrimaryKey = indexOfPrimaryKey > -1
-
-        if (isPrimaryKey) {
-            propSplit.removeAt(indexOfPrimaryKey)
-        }
-
-        val fieldSmallName = buildString {
-            propSplit.forEachIndexed { index, s ->
-                if (index > 0) append(s.capitalizeFirst())
-                else append(s)
-            }
-        }
-        val fieldNameBig = buildString {
-            val size = propSplit.size - 1
-            propSplit.forEachIndexed { index, s ->
-                append(s.uppercase())
-                if (index < size) append("_")
-            }
-        }
-
-        return FieldData(
-            name = fieldSmallName,
-            type = type,
-            annotate = fieldNameBig,
-            isPrimaryKey = isPrimaryKey
-        )
-    }
-
-    override fun getSupportedAnnotationTypes(): Set<String> {
-        return setOf(
-            FmpDao::class.java.canonicalName,
-            FmpLocalDao::class.java.canonicalName,
-            FmpDatabase::class.java.canonicalName
-        )
-    }
-
-    override fun getSupportedOptions(): Set<String?>? {
-        return Collections.singleton("org.gradle.annotation.processing.aggregating")
-        //return Collections.singleton("org.gradle.annotation.processing.isolating")
-    }
-
-    override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
-
     @Suppress("SameParameterValue")
     private fun collectAnnotationData(
         elementsSet: Set<Element>,
@@ -832,17 +687,281 @@ class FmpDaoProcessor : AbstractProcessor() {
         return false
     }
 
-    private fun String.capitalizeFirst(): String {
-        return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+
+
+    ///////----------- REQUESTS
+    private fun processWebRequest(elementsSet: Set<Element>) {
+        val requestInterface = IRequest.IWebRequest::class.asTypeName()
+        elementsSet.forEach { element ->
+            val annotation = element.getAnnotation(FmpWebRequest::class.java)
+            val resourceName = annotation.resourceName
+            processRequest(element, requestInterface, resourceName)
+        }
     }
 
-    private fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
-        var className = this
-        val classNameFirstChar = className.first()
-        if (classNameFirstChar == PREFIX_UPPER || classNameFirstChar == PREFIX_LOWER) {
-            className = className.substring(1)
+    private fun processRestRequest(elementsSet: Set<Element>) {
+        val requestInterface = IRequest.IRestRequest::class.asTypeName()
+        elementsSet.forEach { element ->
+            val annotation = element.getAnnotation(FmpRestRequest::class.java)
+            val resourceName = annotation.resourceName
+            processRequest(element, requestInterface, resourceName)
         }
-        return className + postFix
     }
+
+    private fun processRequest(element: Element, requestInterface: ClassName, resourceName: String) {
+        val kind = element.kind
+
+        if (kind == ElementKind.METHOD && kind != ElementKind.INTERFACE) {
+            messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                "Only classes and interfaces can be annotated as @FmpDao, @FmpLocalDao or @FmpDatabase"
+            )
+            return
+        }
+
+
+        val elementEnclosed = element.enclosedElements
+
+        println(" elementEnclosed = $elementEnclosed")
+        if (elementEnclosed.isNotEmpty()) {
+            val (mainPackName, mainClassName) = element.asType().toString().getPackAndClass()
+            val typeClassName = mainClassName.createFileName()
+
+            //------ Main Request Class
+            val mainClassTypeSpec = TypeSpec.classBuilder(typeClassName)
+                .addSuperinterface(ClassName(mainPackName, mainClassName))
+
+            val mainClassPropSpec = FunSpec.constructorBuilder()
+            createMainRequestClass(resourceName, mainClassPropSpec, mainClassTypeSpec)
+            ///-------
+
+            //------ Result models
+            val resultModelClassName = ClassName(
+                REQUEST_PACKAGE_NAME,
+                mainClassName.createFileName(RESULT_MODEL_POSTFIX)
+            )
+            val resultModelTypeSpec =
+                TypeSpec.classBuilder(resultModelClassName)
+            resultModelTypeSpec.addModifiers(KModifier.DATA)
+            val resultConstructorSpec = FunSpec.constructorBuilder()
+
+            val elementsFiles = mutableListOf<TypeSpec.Builder>()
+            elementsFiles.add(mainClassTypeSpec)
+
+            // Result Model Fields
+            elementEnclosed.forEach { inter ->
+                println("elementEnclosed = ${inter.modifiers}")
+                val tableAnnotation = inter.getAnnotation(FmpTable::class.java)
+                if (tableAnnotation == null || inter.kind != ElementKind.INTERFACE) {
+                    throw IllegalStateException("Cannot use annotation")
+                }
+
+                val propClassFields = tableAnnotation.fields
+                if (propClassFields.isEmpty()) {
+                    throw IllegalStateException("Cannot use annotation")
+                }
+
+                // название таблицы
+                val propName = inter.simpleName.toString()
+
+                val propTypeClassName = propName.createFileName(MODEL_POSTFIX).capitalizeFirst()
+                val propClassName = ClassName(REQUEST_PACKAGE_NAME, propTypeClassName)
+                val propClassSpec = TypeSpec.classBuilder(propTypeClassName)
+                    .addModifiers(KModifier.DATA)
+
+                // table constructor properties
+                val constructorPropSpec = FunSpec.constructorBuilder()
+                propClassFields.forEach {
+                    addTableModelProperty(it, constructorPropSpec, propClassSpec)
+                }
+                propClassSpec.primaryConstructor(constructorPropSpec.build())
+                elementsFiles.add(propClassSpec)
+
+                // result model property
+                createResultModelProperty(
+                    propName,
+                    tableAnnotation.name,
+                    propClassName,
+                    resultConstructorSpec,
+                    resultModelTypeSpec
+                )
+            }
+            // add result model class
+            resultModelTypeSpec.primaryConstructor(resultConstructorSpec.build())
+            elementsFiles.add(resultModelTypeSpec)
+
+            // Raw Model Class
+            val rawModelClassName = ClassName(
+                REQUEST_PACKAGE_NAME,
+                mainClassName.createFileName(RAW_MODEL_POSTFIX)
+            )
+            val rawModelTypeSpec = createRawModelClass(rawModelClassName, resultModelClassName)
+            elementsFiles.add(rawModelTypeSpec)
+
+            // Raw Status Class
+            val respondStatusClassName = ClassName(
+                REQUEST_PACKAGE_NAME,
+                mainClassName.createFileName(RESPOND_STATUS_POSTFIX)
+            )
+            val rawStatusTypeSpec = createRawStatusClass(respondStatusClassName, rawModelClassName)
+            elementsFiles.add(rawStatusTypeSpec)
+
+
+            val parametrizedInterface = requestInterface.parameterizedBy(resultModelClassName, respondStatusClassName)
+            mainClassTypeSpec.addSuperinterface(parametrizedInterface)
+
+            // save all classes in one file
+            saveFiles(REQUEST_PACKAGE_NAME, typeClassName, elementsFiles)
+        }
+    }
+
+    private fun createRawStatusClass(respondStatusClassName: ClassName, rawModelClassName: ClassName): TypeSpec.Builder {
+        val respondStatusTypeSpec = TypeSpec.classBuilder(respondStatusClassName)
+        val baseRespondStatusClassType = ObjectRawStatus::class.asTypeName().parameterizedBy(rawModelClassName)
+        return respondStatusTypeSpec.superclass(baseRespondStatusClassType)
+    }
+
+    private fun createRawModelClass(rawModelClassName: ClassName, resultModelClassName: ClassName): TypeSpec.Builder {
+        val rawModelTypeSpec = TypeSpec.classBuilder(rawModelClassName)
+        val baseRawModelClassType = BaseFmpRawModel::class.asTypeName().parameterizedBy(resultModelClassName)
+        return rawModelTypeSpec.superclass(baseRawModelClassType)
+    }
+
+    private fun createResultModelProperty(
+        name: String,
+        annotationSerializedName: String,
+        parameterClassName: ClassName,
+        constructorSpec: FunSpec.Builder,
+        classTypeSpec: TypeSpec.Builder
+    ) {
+        val annotationSerialize = AnnotationSpec.builder(SerializedName::class)
+            .addMember("%S", annotationSerializedName)
+            .build()
+
+        val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
+        val listClassParametrized =
+            list.parameterizedBy(parameterClassName).copy(nullable = true)
+
+        val propBuilder = PropertySpec.builder(name, listClassParametrized)
+            .initializer(name)
+            .addModifiers(KModifier.PUBLIC)
+            .addAnnotation(annotationSerialize)
+            .build()
+
+        val paramBuilder =
+            ParameterSpec.builder(name, listClassParametrized)
+                .defaultValue("null")
+                .build()
+
+        constructorSpec.addParameter(paramBuilder)
+        classTypeSpec.addProperty(propBuilder)
+    }
+
+    private fun addTableModelProperty(
+        name: String,
+        constructorSpec: FunSpec.Builder,
+        classTypeSpec: TypeSpec.Builder
+    ) {
+
+        val modelData = name.asModelFieldData()
+        val propName = modelData.name
+
+        val annotationSerialize = AnnotationSpec.builder(SerializedName::class)
+            .addMember("%S", modelData.annotate)
+            .build()
+
+        val propSpec =
+            PropertySpec.builder(propName, modelData.type.asTypeName().copy(nullable = true))
+                .initializer(propName)
+                .addModifiers(KModifier.PUBLIC)
+                .addAnnotation(annotationSerialize)
+                .build()
+        val paramSpec =
+            ParameterSpec.builder(propName, modelData.type.asTypeName().copy(nullable = true))
+                .defaultValue("null")
+                .build()
+        constructorSpec.addParameter(paramSpec)
+        classTypeSpec.addProperty(propSpec)
+    }
+
+    private fun createMainRequestClass(
+        resourceName: String,
+        constructorSpec: FunSpec.Builder,
+        classTypeSpec: TypeSpec.Builder
+    ) {
+        val hyperHivePropName = "hyperHive"
+        val propHyperSpec = PropertySpec.builder(hyperHivePropName, HyperHive::class.java)
+            .initializer(hyperHivePropName)
+            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+            .build()
+        val paramHyperSpec = ParameterSpec.builder(hyperHivePropName, HyperHive::class.java)
+            .build()
+
+        val headersPropName = "defaultHeaders"
+        val stringTypeName = String::class.asTypeName()
+        val mapTypeName = Map::class.asTypeName().parameterizedBy(stringTypeName, stringTypeName)
+        val propHeadersSpec = PropertySpec.builder(headersPropName, mapTypeName)
+            .initializer(headersPropName)
+            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+            .build()
+        val paramHeadersSpec = ParameterSpec.builder(headersPropName, mapTypeName)
+            .defaultValue(CodeBlock.of("%M()", MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)))
+            .build()
+
+        val resourcePropName = "resourceName"
+        val propResourceSpec = PropertySpec.builder(resourcePropName, String::class)
+            .initializer(resourcePropName)
+            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+            .build()
+
+        val paramResourceSpec = ParameterSpec.builder(resourcePropName, String::class)
+            .defaultValue("\"${resourceName}\"")
+            .build()
+
+        constructorSpec.addParameter(paramHyperSpec)
+        constructorSpec.addParameter(paramHeadersSpec)
+        constructorSpec.addParameter(paramResourceSpec)
+
+        classTypeSpec.addProperty(propHyperSpec)
+        classTypeSpec.addProperty(propHeadersSpec)
+        classTypeSpec.addProperty(propResourceSpec)
+
+        classTypeSpec.primaryConstructor(constructorSpec.build())
+    }
+
+    private fun saveFiles(packageName: String, classFileName: String, builders: List<TypeSpec.Builder>) {
+        val file = FileSpec.builder(packageName, classFileName)
+            .addComment(FILE_COMMENT)
+            .apply {
+                builders.forEach { builder ->
+                    addType(builder.build())
+                }
+            }
+            .build()
+        try {
+            file.writeTo(filer)
+        } catch (e: IOException) {
+            val message = java.lang.String.format("Unable to write file: %s", e.message)
+            messager.printMessage(Diagnostic.Kind.ERROR, message)
+        }
+    }
+
+    override fun getSupportedAnnotationTypes(): Set<String> {
+        return setOf(
+            FmpDao::class.java.canonicalName,
+            FmpLocalDao::class.java.canonicalName,
+            FmpDatabase::class.java.canonicalName,
+            FmpWebRequest::class.java.canonicalName,
+            FmpRestRequest::class.java.canonicalName
+        )
+    }
+
+    override fun getSupportedOptions(): Set<String?>? {
+        return Collections.singleton("org.gradle.annotation.processing.aggregating")
+        //return Collections.singleton("org.gradle.annotation.processing.isolating")
+    }
+
+    //override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
+
 
 }
