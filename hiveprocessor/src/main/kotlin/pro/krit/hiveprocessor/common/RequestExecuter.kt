@@ -6,8 +6,6 @@ import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.models.BaseStatus
 import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.errors.RequestException
-import pro.krit.hiveprocessor.extensions.getFailure
-import pro.krit.hiveprocessor.extensions.isNotBad
 import pro.krit.hiveprocessor.request.BaseFmpRawModel
 import pro.krit.hiveprocessor.request.ObjectRawStatus
 
@@ -40,6 +38,10 @@ object RequestExecuter {
     ): Result<S> {
         val statusString = execute(request, params)
         return statusString.getStatusResultWithData(request.resourceName, T::class.java)
+    }
+
+    fun BaseStatus.isNotBad(): Boolean {
+        return this.isOk || this.httpStatus?.status == 304
     }
 
     inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> String.getStatusResultWithData(
@@ -126,7 +128,6 @@ object RequestExecuter {
     }
     inline fun<reified S : Any> BaseStatus.getErrorRawModel(): BaseFmpRawModel<S> {
         val errorStatus = BaseFmpRawModel<S>()
-        this.getFailure()
         errorStatus.errorDescription = this.errors.firstOrNull()?.descriptions?.firstOrNull().orEmpty()
         errorStatus.errorMessage = this.errors.firstOrNull()?.description.orEmpty()
         errorStatus.statusCode = this.httpStatus?.status ?: -1
