@@ -35,6 +35,8 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     private var hyperHive: HyperHive? = null
     private var hyperHiveState: HyperHiveState? = null
 
+    private var requestHeaders: Map<String, String>? = null
+
     override val databasePath: String
         get() = hyperHiveState?.dbPathDefault.orEmpty()
 
@@ -80,6 +82,14 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
                 hyperHive = buildHyperHive().setupLogs(config.logLevel)
             }
         return this as T
+    }
+
+    override fun setDefaultHeaders(headers: Map<String, String>) {
+        this.requestHeaders = headers
+    }
+
+    override fun getDefaultHeaders(): Map<String, String> {
+        return this.requestHeaders.orEmpty()
     }
 
     override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {

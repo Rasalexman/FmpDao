@@ -32,4 +32,7 @@ interface IFmpDatabase {
     fun openDatabase(dbKey: String = "", pathBase: String = ""): DatabaseState
     fun closeDatabase(pathBase: String = ""): DatabaseState
     fun closeAndClearProviders(pathBase: String = "")
+
+    fun setDefaultHeaders(headers: Map<String, String>)
+    fun getDefaultHeaders(): Map<String, String>
 }
