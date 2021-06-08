@@ -1,12 +1,13 @@
 package pro.krit.fmpdaoexample
 
+import pro.krit.hiveprocessor.annotations.FmpRestRequest
 import pro.krit.hiveprocessor.annotations.FmpTable
-import pro.krit.hiveprocessor.annotations.FmpWebRequest
 import pro.krit.hiveprocessor.base.IRequest
 
 
-@FmpWebRequest(
-    resourceName = "zt_mp_01"
+@FmpRestRequest(
+    resourceName = "zt_mp_01",
+    parameters = ["IV_LGORT", "IV_WERKS"]
 )
 interface IZtMp01Request : IRequest.IBaseRequest {
 
@@ -14,7 +15,7 @@ interface IZtMp01Request : IRequest.IBaseRequest {
         name = "ET_DATA",
         fields = [
             "IV_WERKS",  // Предприятие INT
-            "IV_LGORT_Int",  // Склад INT
+            "IV_LGORT",  // Склад INT
             "IV_USER"   // Логин пользователя STRING
         ]
     )

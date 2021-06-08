@@ -8,6 +8,7 @@ import pro.krit.generated.dao.PmDataFieldsDaoStatus
 import pro.krit.generated.database.MainDatabaseImpl
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -24,13 +25,25 @@ import kotlin.random.Random
 @Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE")
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        const val DEBUG_LOGIN = "Petrov"
+        const val DEBUG_PASSWORD = "1q2w3e4r"
+    }
+
+    data class EtDataParams(
+        @SerializedName("IV_LGORT")
+        val lgort: String,
+        @SerializedName("IV_WERKS")
+        val werks: String
+    )
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val serverAddress = "http://your.server.address"
-        val environment = "android_environment"
-        val project = "project"
+        val serverAddress = "https://t19075.krit.pro"
+        val environment = "MVP_test"
+        val project = "GPN_MVP"
 
         val fmpDbName = serverAddress
             .replace("/", "")
@@ -54,24 +67,31 @@ class MainActivity : AppCompatActivity() {
             hState = HyperHiveState(this).setHandler(Handler(Looper.getMainLooper())),
             config = hyperHiveConfig
         )
-        val dbState = mainDb.openDatabase()
+        val dbState = mainDb.openDatabase(DEBUG_LOGIN)
+
         println("-----> dbState = $dbState")
 
-        val request: IZtMp01Request = ZtMp01RequestImpl(mainDb.provideHyperHive(), mapOf())
-        val result = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>()
-        result.fold(onSuccess = {
+        /*val status = mainDb.provideHyperHive().authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
+        if(status.isOk) {
+            val request: IZtMp01Request = ZtMp01RequestImpl(mainDb.provideHyperHive())
+            val result1 = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+                mapOf("IV_LGORT" to "0001", "IV_WERKS" to "0001")
+            )
+            result1.fold(onSuccess = {
 
-        }, onFailure = {
+            }, onFailure = {
 
-        })
+            })
+        }*/
 
-        val pmLocalDao = mainDb.providePmLocalDao()
+
+        /*val pmLocalDao = mainDb.providePmLocalDao()
         val pmRemoteDao = mainDb.providePmDao()
         val pmFieldDao = mainDb.provideFieldsDao()
         pmFieldDao.createTable<PmDataFieldsDaoModel>()
 
         exampleWithLocalDao(pmLocalDao)
-        exampleWithFieldsDao(pmFieldDao)
+        exampleWithFieldsDao(pmFieldDao)*/
     }
 
     private fun exampleWithFieldsDao(pmFieldDao: IPmDataFieldsDao) {

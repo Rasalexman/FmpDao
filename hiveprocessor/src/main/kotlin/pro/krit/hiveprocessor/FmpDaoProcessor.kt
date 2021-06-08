@@ -34,6 +34,7 @@ import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
 import javax.lang.model.element.*
+import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
@@ -70,6 +71,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
 
         private const val FIELD_PROVIDER = "fmpDatabase"
+        private const val FIELD_HYPER_HIVE = "hyperHive"
         private const val FIELD_RESOURCE = "resourceName"
         private const val FIELD_TABLE = "tableName"
         private const val FIELD_IS_DELTA = "isDelta"
@@ -116,34 +118,36 @@ class FmpDaoProcessor : AbstractProcessor() {
     ): Boolean {
         val startTime = System.currentTimeMillis()
         println("HyperHiveProcessor started")
-        val modulesMap = mutableListOf<BindData>()
+        val daoListMap = mutableListOf<BindData>()
         // Create files for FmpDao annotation
         val fmpResult = collectAnnotationData(
             roundEnv.getElementsAnnotatedWith(FmpDao::class.java),
-            modulesMap,
+            daoListMap,
             ::getDataFromFmpDao
         )
         // Create files for FmpLocalDao annotation
         val fmpLocalResult = collectAnnotationData(
             roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
-            modulesMap,
+            daoListMap,
             ::getDataFromFmpLocalDao
         )
+
+        // Web Requests
+        val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
+        processWebRequest(webElementRequests, daoListMap)
+        // Rest Requests
+        val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
+        processRestRequest(restElementRequests, daoListMap)
+
         // If we has generated files for database without errors
         if (!fmpResult && !fmpLocalResult) {
-            processDaos(modulesMap)
+            processDaos(daoListMap)
 
             val databases = roundEnv.getElementsAnnotatedWith(FmpDatabase::class.java)
             databases?.forEach { currentDatabase ->
-                processDatabase(currentDatabase, modulesMap)
+                processDatabase(currentDatabase, daoListMap)
             }
         }
-        // Web Requests
-        val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
-        processWebRequest(webElementRequests)
-        // Rest Requests
-        val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
-        processRestRequest(restElementRequests)
 
         println("HyperHiveProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
         return false
@@ -185,11 +189,12 @@ class FmpDaoProcessor : AbstractProcessor() {
     ) {
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         if (extendedTypeMirrors != null && extendedTypeMirrors.isNotEmpty()) {
+
             val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter {
                 !it.simpleName.toString().contains("IFmpDatabase")
             }
             //println("----------------> createDatabaseExtendedFunction")
-            //println("checkExtendedInterface $element - $extendedElements ")
+            //println("checkExtendedInterface $element - extendedElements ")
             extendedElements.forEach {
                 createFunctions(classTypeSpec, it, daoList, asProvider)
                 createDatabaseExtendedFunction(classTypeSpec, it, daoList, asProvider)
@@ -204,19 +209,33 @@ class FmpDaoProcessor : AbstractProcessor() {
         asProvide: Boolean = false
     ) {
         val methods = element.enclosedElements
-        //println("----------------> createFunctions")
-        //println("element $element | enclosedElements = $methods")
+        println("----------------> createFunctions")
+        println("------> element = $element | enclosedElements = $methods")
+
         methods.forEach { enclose ->
             if (enclose.isAbstractMethod()) {
                 val (returnPack, returnClass) = enclose.asType().toString().getPackAndClass()
                 val funcName = enclose.simpleName.toString()
                 val returnedClass = ClassName(returnPack, returnClass)
+
                 val returnElementData = daoList.find { it.mainData.className == returnClass }
 
-                returnElementData?.let {
-                    val returnedClassName = ClassName(DAO_PACKAGE_NAME, it.fileName)
+                val topLevel = returnElementData
+                println("------> returnedClass = $returnedClass | topLevel = $topLevel ")
 
-                    val instanceStatement = "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
+                returnElementData?.let {
+                    val instancePackName = if (returnElementData.isRequest) {
+                        REQUEST_PACKAGE_NAME
+                    } else {
+                        DAO_PACKAGE_NAME
+                    }
+                    val returnedClassName = ClassName(instancePackName, it.fileName)
+
+                    val instanceStatement = if (returnElementData.isRequest) {
+                        "$TAG_CLASS_NAME($FIELD_HYPER_HIVE = this.provideHyperHive())"
+                    } else {
+                        "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
+                    }
                     val funcSpec = FunSpec.builder(funcName)
                         .addModifiers(KModifier.OVERRIDE)
                         .returns(returnedClass).apply {
@@ -250,12 +269,14 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                     classTypeSpec.addFunction(funcSpec)
                 }
+
+
             }
         }
     }
 
     private fun processDaos(moduleElements: List<BindData>) {
-        moduleElements.forEach { bindData ->
+        moduleElements.filter { !it.isRequest }.forEach { bindData ->
             val classFileName = bindData.fileName
             val className = bindData.mainData.className
             val packageName = bindData.mainData.packName
@@ -390,7 +411,6 @@ class FmpDaoProcessor : AbstractProcessor() {
             saveFiles(DAO_PACKAGE_NAME, classFileName, builders = classBuilders)
         }
     }
-
 
 
     private fun createRequestFunction(
@@ -563,7 +583,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         isLocal: Boolean = false
     ): BindData {
 
-        if(fields.isNotEmpty()) {
+        if (fields.isNotEmpty()) {
             checkElementForRestrictions(element = element, annotationName = FMP_FIELDS_DAO_NAME)
         } else {
             checkElementForRestrictions(element = element, annotationName = annotationName)
@@ -587,7 +607,8 @@ class FmpDaoProcessor : AbstractProcessor() {
             resourceName = resourceName,
             tableName = tableName,
             isDelta = isDelta,
-            isLocal = isLocal
+            isLocal = isLocal,
+            isRequest = false
         )
     }
 
@@ -688,42 +709,57 @@ class FmpDaoProcessor : AbstractProcessor() {
     }
 
 
-
     ///////----------- REQUESTS
-    private fun processWebRequest(elementsSet: Set<Element>) {
+    private fun processWebRequest(elementsSet: Set<Element>, daoListMap: MutableList<BindData>) {
         val requestInterface = IRequest.IWebRequest::class.asTypeName()
         elementsSet.forEach { element ->
             val annotation = element.getAnnotation(FmpWebRequest::class.java)
             val resourceName = annotation.resourceName
-            processRequest(element, requestInterface, resourceName)
+            val parameters = annotation.parameters.toList()
+            val bindData = processRequest(element, parameters, requestInterface, resourceName)
+            bindData?.let {
+                daoListMap.add(it)
+            }
         }
     }
 
-    private fun processRestRequest(elementsSet: Set<Element>) {
+    private fun processRestRequest(elementsSet: Set<Element>, daoListMap: MutableList<BindData>) {
         val requestInterface = IRequest.IRestRequest::class.asTypeName()
         elementsSet.forEach { element ->
             val annotation = element.getAnnotation(FmpRestRequest::class.java)
             val resourceName = annotation.resourceName
-            processRequest(element, requestInterface, resourceName)
+            val parameters = annotation.parameters.toList()
+            val bindData = processRequest(element, parameters, requestInterface, resourceName)
+            bindData?.let {
+                daoListMap.add(it)
+            }
         }
     }
 
-    private fun processRequest(element: Element, requestInterface: ClassName, resourceName: String) {
+    private fun processRequest(
+        element: Element,
+        parameters: List<String>,
+        requestInterface: ClassName,
+        resourceName: String
+    ): BindData? {
         val kind = element.kind
+
+        var bindData: BindData? = null
 
         if (kind == ElementKind.METHOD && kind != ElementKind.INTERFACE) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
                 "Only classes and interfaces can be annotated as @FmpDao, @FmpLocalDao or @FmpDatabase"
             )
-            return
+            return null
         }
 
 
         val elementEnclosed = element.enclosedElements
 
-        println(" elementEnclosed = $elementEnclosed")
+        //println(" elementEnclosed = $elementEnclosed")
         if (elementEnclosed.isNotEmpty()) {
+            // main class implementation
             val (mainPackName, mainClassName) = element.asType().toString().getPackAndClass()
             val typeClassName = mainClassName.createFileName()
 
@@ -732,7 +768,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                 .addSuperinterface(ClassName(mainPackName, mainClassName))
 
             val mainClassPropSpec = FunSpec.constructorBuilder()
-            createMainRequestClass(resourceName, mainClassPropSpec, mainClassTypeSpec)
+            createMainRequestClass(resourceName, parameters, mainClassPropSpec, mainClassTypeSpec)
             ///-------
 
             //------ Result models
@@ -750,7 +786,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
             // Result Model Fields
             elementEnclosed.forEach { inter ->
-                println("elementEnclosed = ${inter.modifiers}")
+                //println("elementEnclosed = ${inter.modifiers}")
                 val tableAnnotation = inter.getAnnotation(FmpTable::class.java)
                 if (tableAnnotation == null || inter.kind != ElementKind.INTERFACE) {
                     throw IllegalStateException("Cannot use annotation")
@@ -763,7 +799,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                 // название таблицы
                 val propName = inter.simpleName.toString()
-
+                val propModelData = tableAnnotation.name.asModelFieldData()
                 val propTypeClassName = propName.createFileName(MODEL_POSTFIX).capitalizeFirst()
                 val propClassName = ClassName(REQUEST_PACKAGE_NAME, propTypeClassName)
                 val propClassSpec = TypeSpec.classBuilder(propTypeClassName)
@@ -779,7 +815,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                 // result model property
                 createResultModelProperty(
-                    propName,
+                    propModelData.name,
                     tableAnnotation.name,
                     propClassName,
                     resultConstructorSpec,
@@ -807,23 +843,50 @@ class FmpDaoProcessor : AbstractProcessor() {
             elementsFiles.add(rawStatusTypeSpec)
 
 
-            val parametrizedInterface = requestInterface.parameterizedBy(resultModelClassName, respondStatusClassName)
+            val parametrizedInterface =
+                requestInterface.parameterizedBy(resultModelClassName, respondStatusClassName)
             mainClassTypeSpec.addSuperinterface(parametrizedInterface)
 
             // save all classes in one file
             saveFiles(REQUEST_PACKAGE_NAME, typeClassName, elementsFiles)
+
+            bindData = BindData(
+                element = element,
+                fileName = typeClassName,
+                createTableOnInit = false,
+                parameters = emptyList(),
+                fields = emptyList(),
+                mainData = TypeData(
+                    packName = mainPackName,
+                    className = mainClassName
+                ),
+                resourceName = resourceName,
+                tableName = resourceName,
+                isDelta = false,
+                isRequest = true,
+                isLocal = true
+            )
         }
+        return bindData
     }
 
-    private fun createRawStatusClass(respondStatusClassName: ClassName, rawModelClassName: ClassName): TypeSpec.Builder {
+    private fun createRawStatusClass(
+        respondStatusClassName: ClassName,
+        rawModelClassName: ClassName
+    ): TypeSpec.Builder {
         val respondStatusTypeSpec = TypeSpec.classBuilder(respondStatusClassName)
-        val baseRespondStatusClassType = ObjectRawStatus::class.asTypeName().parameterizedBy(rawModelClassName)
+        val baseRespondStatusClassType =
+            ObjectRawStatus::class.asTypeName().parameterizedBy(rawModelClassName)
         return respondStatusTypeSpec.superclass(baseRespondStatusClassType)
     }
 
-    private fun createRawModelClass(rawModelClassName: ClassName, resultModelClassName: ClassName): TypeSpec.Builder {
+    private fun createRawModelClass(
+        rawModelClassName: ClassName,
+        resultModelClassName: ClassName
+    ): TypeSpec.Builder {
         val rawModelTypeSpec = TypeSpec.classBuilder(rawModelClassName)
-        val baseRawModelClassType = BaseFmpRawModel::class.asTypeName().parameterizedBy(resultModelClassName)
+        val baseRawModelClassType =
+            BaseFmpRawModel::class.asTypeName().parameterizedBy(resultModelClassName)
         return rawModelTypeSpec.superclass(baseRawModelClassType)
     }
 
@@ -886,6 +949,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
     private fun createMainRequestClass(
         resourceName: String,
+        parameters: List<String>,
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder
     ) {
@@ -901,11 +965,17 @@ class FmpDaoProcessor : AbstractProcessor() {
         val stringTypeName = String::class.asTypeName()
         val mapTypeName = Map::class.asTypeName().parameterizedBy(stringTypeName, stringTypeName)
         val propHeadersSpec = PropertySpec.builder(headersPropName, mapTypeName)
+            .mutable()
             .initializer(headersPropName)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
+
+        val mapOfStatement = CodeBlock.of(
+            "%M()",
+            MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
+        )
         val paramHeadersSpec = ParameterSpec.builder(headersPropName, mapTypeName)
-            .defaultValue(CodeBlock.of("%M()", MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)))
+            .defaultValue(mapOfStatement)
             .build()
 
         val resourcePropName = "resourceName"
@@ -918,6 +988,39 @@ class FmpDaoProcessor : AbstractProcessor() {
             .defaultValue("\"${resourceName}\"")
             .build()
 
+        var commentOfParams = "This function was autogenerated."
+        val returnStatement = buildString {
+            if (parameters.isEmpty()) {
+                commentOfParams += " Use annotation field - \'parameters\' to add request params"
+                append("return %M()")
+            } else {
+                val paramSize = parameters.size - 1
+                commentOfParams += " Please specify ${parameters.size} vararg param: "
+                parameters.forEachIndexed { index, _ ->
+                    append("val param${index + 1}: String = params.getOrNull($index).orEmpty()")
+                    appendLine()
+                }
+                append("return %M(")
+                parameters.forEachIndexed { index, param ->
+                    append("\"$param\" to param${index + 1}")
+                    commentOfParams += "\'$param\'"
+                    if (index < paramSize) {
+                        append(", ")
+                        commentOfParams += ", "
+                    }
+                }
+                append(")")
+            }
+        }
+
+        val createParamsFunSpec = FunSpec.builder("createParamsMap")
+            .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+            .addParameter("params", String::class, KModifier.VARARG)
+            .addStatement(returnStatement, MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME))
+            .returns(mapTypeName)
+            .addKdoc(commentOfParams)
+            .build()
+
         constructorSpec.addParameter(paramHyperSpec)
         constructorSpec.addParameter(paramHeadersSpec)
         constructorSpec.addParameter(paramResourceSpec)
@@ -927,9 +1030,14 @@ class FmpDaoProcessor : AbstractProcessor() {
         classTypeSpec.addProperty(propResourceSpec)
 
         classTypeSpec.primaryConstructor(constructorSpec.build())
+        classTypeSpec.addFunction(createParamsFunSpec)
     }
 
-    private fun saveFiles(packageName: String, classFileName: String, builders: List<TypeSpec.Builder>) {
+    private fun saveFiles(
+        packageName: String,
+        classFileName: String,
+        builders: List<TypeSpec.Builder>
+    ) {
         val file = FileSpec.builder(packageName, classFileName)
             .addComment(FILE_COMMENT)
             .apply {
@@ -960,6 +1068,14 @@ class FmpDaoProcessor : AbstractProcessor() {
         return Collections.singleton("org.gradle.annotation.processing.aggregating")
         //return Collections.singleton("org.gradle.annotation.processing.isolating")
     }
+
+    private inline fun <reified T : Annotation> Element.getAnnotationClassValue(f: T.() -> Unit) =
+        try {
+            getAnnotation(T::class.java).f()
+            throw Exception("Expected to get a MirroredTypeException")
+        } catch (e: MirroredTypeException) {
+            e.typeMirror
+        }
 
     //override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 
