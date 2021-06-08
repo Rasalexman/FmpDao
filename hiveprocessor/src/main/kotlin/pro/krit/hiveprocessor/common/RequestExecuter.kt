@@ -1,9 +1,25 @@
+// Copyright (c) 2021 Aleksandr Minkin aka Rasalexman (sphc@yandex.ru)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+// and associated documentation files (the "Software"), to deal in the Software without restriction,
+// including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+// and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so,
+// subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
+// THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
 package pro.krit.hiveprocessor.common
 
 import com.google.gson.GsonBuilder
 import com.mobrun.plugin.api.callparams.RequestCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.models.BaseStatus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.errors.RequestException
 import pro.krit.hiveprocessor.request.BaseFmpRawModel
@@ -24,7 +40,14 @@ object RequestExecuter {
         }
     }
 
-    fun<T : BaseStatus>  executeStatus(
+    suspend fun executeAsync(
+        request: IRequest,
+        params: Any? = null
+    ): String {
+        return withContext(Dispatchers.IO) { execute(request, params) }
+    }
+
+    fun <T : BaseStatus> executeBaseStatus(
         request: IRequest,
         params: Any? = null,
         clazz: Class<T>
@@ -34,7 +57,7 @@ object RequestExecuter {
         return when (params) {
             is WebCallParams -> requestApi.web(resourceName, params, clazz).execute()
             is RequestCallParams -> requestApi.request(resourceName, params, clazz).execute()
-            else ->requestApi.web(resourceName).execute().let { respond ->
+            else -> requestApi.web(resourceName).execute().let { respond ->
                 BaseStatus().apply {
                     raw = respond
                 }
@@ -42,7 +65,15 @@ object RequestExecuter {
         }
     }
 
-    inline fun<reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatus(
+    suspend fun <T : BaseStatus> executeBaseStatusAsync(
+        request: IRequest,
+        params: Any? = null,
+        clazz: Class<T>
+    ): BaseStatus {
+        return withContext(Dispatchers.IO) { executeBaseStatus(request, params, clazz) }
+    }
+
+    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatus(
         request: IRequest,
         params: Any? = null
     ): BaseFmpRawModel<S> {
@@ -50,12 +81,26 @@ object RequestExecuter {
         return statusString.tryParseRawStatus<S, T>(T::class.java)
     }
 
-    inline fun<reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeResult(
+    suspend inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatusAsync(
+        request: IRequest,
+        params: Any? = null
+    ): BaseFmpRawModel<S> {
+        return withContext(Dispatchers.IO) { executeStatus(request, params) }
+    }
+
+    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeResult(
         request: IRequest,
         params: Any? = null
     ): Result<S> {
         val statusString = execute(request, params)
         return statusString.getStatusResultWithData(request.resourceName, T::class.java)
+    }
+
+    suspend inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeResultAsync(
+        request: IRequest,
+        params: Any? = null
+    ): Result<S> {
+        return withContext(Dispatchers.IO) { executeResult(request, params) }
     }
 
     fun BaseStatus.isNotBad(): Boolean {
@@ -73,19 +118,19 @@ object RequestExecuter {
             if (status.isNotBad()) {
                 val result = status.result
                 if (result != null) {
-                    println( "result: $result" )
+                    println("result: $result")
                     val raw = result.raw
                     if (raw != null) {
-                        println( "raw: $raw" )
+                        println("raw: $raw")
                         val errorMessage = raw.errorMessage
                         val errorDescription = raw.errorDescription
                         when {
                             errorMessage != null -> {
-                                println( "errorMessage = $errorMessage | resourceName = '$resourceName'" )
+                                println("errorMessage = $errorMessage | resourceName = '$resourceName'")
                                 Result.failure(RequestException.SapError(message = errorMessage))
                             }
                             errorDescription != null -> {
-                                println( "errorDescription = $errorDescription | resourceName = '$resourceName'" )
+                                println("errorDescription = $errorDescription | resourceName = '$resourceName'")
                                 Result.failure(RequestException.SapError(message = errorDescription))
                             }
                             else -> {
@@ -93,17 +138,17 @@ object RequestExecuter {
                                 if (rawData != null) {
                                     Result.success(rawData)
                                 } else {
-                                    println( "raw.Data is null | resourceName = '$resourceName'" )
+                                    println("raw.Data is null | resourceName = '$resourceName'")
                                     Result.failure(RequestException.RawDataNullError)
                                 }
                             }
                         }
                     } else {
-                        println( "raw result is null | resourceName = '$resourceName'" )
+                        println("raw result is null | resourceName = '$resourceName'")
                         Result.failure(RequestException.ResultRawNullError)
                     }
                 } else {
-                    println( "status result is null | resourceName = '$resourceName'" )
+                    println("status result is null | resourceName = '$resourceName'")
                     Result.failure(RequestException.StatusResultNullError)
                 }
             } else {
@@ -129,10 +174,10 @@ object RequestExecuter {
         }
     }
 
-    inline fun<reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> String.tryParseRawStatus(
+    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> String.tryParseRawStatus(
         clazz: Class<T>
     ): BaseFmpRawModel<S> {
-         return try {
+        return try {
             val gson = GsonBuilder().create()
             val status = gson.fromJson(this, clazz)
             if (status.isNotBad()) {
@@ -150,9 +195,11 @@ object RequestExecuter {
             }
         }
     }
-    inline fun<reified S : Any> BaseStatus.getErrorRawModel(): BaseFmpRawModel<S> {
+
+    inline fun <reified S : Any> BaseStatus.getErrorRawModel(): BaseFmpRawModel<S> {
         val errorStatus = BaseFmpRawModel<S>()
-        errorStatus.errorDescription = this.errors.firstOrNull()?.descriptions?.firstOrNull().orEmpty()
+        errorStatus.errorDescription =
+            this.errors.firstOrNull()?.descriptions?.firstOrNull().orEmpty()
         errorStatus.errorMessage = this.errors.firstOrNull()?.description.orEmpty()
         errorStatus.statusCode = this.httpStatus?.status ?: -1
         errorStatus.version = ""

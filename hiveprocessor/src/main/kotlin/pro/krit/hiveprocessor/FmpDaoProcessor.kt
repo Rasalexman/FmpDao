@@ -67,11 +67,13 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val REQUEST_ASYNC_STATEMENT = "requestAsync"
         private const val REQUEST_ASYNC_NAME = "requestWithParamsAsync"
 
+        private const val TAG_MEMBER_FULL = "%M()"
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
 
         private const val FIELD_PROVIDER = "fmpDatabase"
         private const val FIELD_HYPER_HIVE = "hyperHive"
+        private const val FIELD_DEFAULT_HEADERS = "defaultHeaders"
         private const val FIELD_RESOURCE = "resourceName"
         private const val FIELD_TABLE = "tableName"
         private const val FIELD_IS_DELTA = "isDelta"
@@ -82,6 +84,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         private const val MOBRUN_BASE_NAME = "BaseStatus"
 
         private const val NULL_INITIALIZER = "null"
+        private const val RETURN_STATEMENT = "return"
         private const val TAG_CLASS_NAME = "%T"
 
         private const val QUERY_VALUE = "val query: String = "
@@ -230,7 +233,15 @@ class FmpDaoProcessor : AbstractProcessor() {
                     val returnedClassName = ClassName(instancePackName, it.fileName)
 
                     val instanceStatement = if (returnElementData.isRequest) {
-                        "$TAG_CLASS_NAME($FIELD_HYPER_HIVE = this.provideHyperHive())"
+                        buildString {
+                            append("$TAG_CLASS_NAME(")
+                            appendLine()
+                            append("$FIELD_HYPER_HIVE = this.provideHyperHive(),")
+                            appendLine()
+                            append("$FIELD_DEFAULT_HEADERS = this.getDefaultHeaders()")
+                            appendLine()
+                            append(")")
+                        }
                     } else {
                         "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
                     }
@@ -238,7 +249,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .returns(returnedClass).apply {
                             if (asProvide) {
-                                addStatement("return $instanceStatement", returnedClassName)
+                                addStatement("$RETURN_STATEMENT $instanceStatement", returnedClassName)
                             } else {
 
                                 val propName = funcName.createFileName()
@@ -256,7 +267,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                                 val statementIf = "if($propName == $NULL_INITIALIZER) "
                                 val statementCreate = "$propName = $instanceStatement"
-                                val statementReturn = "return $propName!!"
+                                val statementReturn = "$RETURN_STATEMENT $propName!!"
                                 beginControlFlow(statementIf)
                                 addStatement(statementCreate, returnedClassName)
                                 endControlFlow()
@@ -341,7 +352,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                     constructorSpec.addParameter(
                         ParameterSpec.builder(data.name, currentType)
-                            .defaultValue("null")
+                            .defaultValue(NULL_INITIALIZER)
                             .build()
                     )
                     modelTypeSpec.addProperty(prop)
@@ -429,7 +440,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         }
         mapOfParams += ")"
 
-        val statement = "return $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
+        val statement = "$RETURN_STATEMENT $FUNC_MEMBER_PARAMS_STATEMENT(params = $mapOfParams)"
         val returnType = ClassName(MOBRUN_MODEL_PATH, MOBRUN_BASE_NAME)
         val updateFuncName = if (isAsync) {
             REQUEST_ASYNC_STATEMENT
@@ -794,17 +805,17 @@ class FmpDaoProcessor : AbstractProcessor() {
                 //println("-------> elementEnclosed = ${inter} | inter.kind = ${inter.kind}")
                 val tableAnnotation = inter.getAnnotation(FmpTable::class.java)
                 if (tableAnnotation == null || inter.kind != ElementKind.INTERFACE) {
-                    throw IllegalStateException("You can use @FmpTable annotation only with interfaces")
+                    throw IllegalStateException("You can use \'@FmpTable\' annotation only with interfaces")
                 }
 
                 val annotationTableName = tableAnnotation.name
                 if(annotationTableName.isEmpty()) {
-                    throw IllegalStateException("Please specify annotation property 'name'. It can not be empty")
+                    throw IllegalStateException("Please specify annotation property \'name\'. It can not be empty")
                 }
 
                 val propClassFields = tableAnnotation.fields
                 if (propClassFields.isEmpty()) {
-                    throw IllegalStateException("You cannot use @FmpTable annotation with empty 'fields' property")
+                    throw IllegalStateException("You cannot use \'@FmpTable\' annotation with empty \'fields\' property")
                 }
 
                 // название таблицы
@@ -878,7 +889,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                 isLocal = true
             )
         } else {
-            val message = java.lang.String.format(" Please set private inner interfaces with annotation @FmpTable for request \'$element\'. ")
+            val message = java.lang.String.format(" Please set private inner interfaces with annotation \'@FmpTable\' for request \'$element\'. ")
             messager.printMessage(Diagnostic.Kind.WARNING, message)
         }
         return bindData
@@ -931,7 +942,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
         val paramBuilder =
             ParameterSpec.builder(name, returnClassName)
-                .defaultValue("null")
+                .defaultValue(NULL_INITIALIZER)
                 .build()
 
         constructorSpec.addParameter(paramBuilder)
@@ -959,7 +970,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                 .build()
         val paramSpec =
             ParameterSpec.builder(propName, modelData.type.asTypeName().copy(nullable = true))
-                .defaultValue("null")
+                .defaultValue(NULL_INITIALIZER)
                 .build()
         constructorSpec.addParameter(paramSpec)
         classTypeSpec.addProperty(propSpec)
@@ -971,7 +982,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder
     ) {
-        val hyperHivePropName = "hyperHive"
+        val hyperHivePropName = FIELD_HYPER_HIVE
         val propHyperSpec = PropertySpec.builder(hyperHivePropName, HyperHive::class.java)
             .initializer(hyperHivePropName)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
@@ -989,7 +1000,7 @@ class FmpDaoProcessor : AbstractProcessor() {
             .build()
 
         val mapOfStatement = CodeBlock.of(
-            "%M()",
+            TAG_MEMBER_FULL,
             MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
         )
         val paramHeadersSpec = ParameterSpec.builder(headersPropName, mapTypeName)
@@ -1010,7 +1021,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         val returnStatement = buildString {
             if (parameters.isEmpty()) {
                 commentOfParams += " Use annotation field - \'parameters\' to add request params"
-                append("return %M()")
+                append("$RETURN_STATEMENT $TAG_MEMBER_FULL")
             } else {
                 val paramSize = parameters.size - 1
                 commentOfParams += " Please specify ${parameters.size} vararg param: "
@@ -1018,7 +1029,7 @@ class FmpDaoProcessor : AbstractProcessor() {
                     append("val param${index + 1}: String = params.getOrNull($index).orEmpty()")
                     appendLine()
                 }
-                append("return %M(")
+                append("$RETURN_STATEMENT %M(")
                 parameters.forEachIndexed { index, param ->
                     append("\"$param\" to param${index + 1}")
                     commentOfParams += "\'$param\'"
