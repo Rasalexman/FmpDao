@@ -33,8 +33,8 @@ import pro.krit.hiveprocessor.request.ObjectRawStatus
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
+import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
-import javax.lang.model.type.MirroredTypeException
 import javax.lang.model.type.TypeMirror
 import javax.lang.model.util.Elements
 import javax.lang.model.util.Types
@@ -43,7 +43,7 @@ import kotlin.properties.Delegates
 
 
 @AutoService(Processor::class)
-class FmpDaoProcessor : AbstractProcessor() {
+class FmpProcessor : AbstractProcessor() {
 
     companion object {
 
@@ -120,39 +120,39 @@ class FmpDaoProcessor : AbstractProcessor() {
         roundEnv: RoundEnvironment
     ): Boolean {
         val startTime = System.currentTimeMillis()
-        println("HyperHiveProcessor started with annotations: $annotations")
-        val daoListMap = mutableListOf<BindData>()
+        println("FmpProcessor started with annotations: $annotations")
+        val bindingDataList = mutableListOf<BindData>()
         // Create files for FmpDao annotation
         val fmpResult = collectAnnotationData(
             roundEnv.getElementsAnnotatedWith(FmpDao::class.java),
-            daoListMap,
+            bindingDataList,
             ::getDataFromFmpDao
         )
         // Create files for FmpLocalDao annotation
         val fmpLocalResult = collectAnnotationData(
             roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
-            daoListMap,
+            bindingDataList,
             ::getDataFromFmpLocalDao
         )
 
         // Web Requests
         val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
-        processWebRequest(webElementRequests, daoListMap)
+        processWebRequest(webElementRequests, bindingDataList)
         // Rest Requests
         val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
-        processRestRequest(restElementRequests, daoListMap)
+        processRestRequest(restElementRequests, bindingDataList)
 
         // If we has generated files for database without errors
         if (!fmpResult && !fmpLocalResult) {
-            processDaos(daoListMap)
+            processDaos(bindingDataList)
 
             val databases = roundEnv.getElementsAnnotatedWith(FmpDatabase::class.java)
             databases?.forEach { currentDatabase ->
-                processDatabase(currentDatabase, daoListMap)
+                processDatabase(currentDatabase, bindingDataList)
             }
         }
 
-        println("HyperHiveProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
+        println("FmpProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
         return false
     }
 
@@ -1098,15 +1098,5 @@ class FmpDaoProcessor : AbstractProcessor() {
         //return Collections.singleton("org.gradle.annotation.processing.isolating")
     }
 
-    private inline fun <reified T : Annotation> Element.getAnnotationClassValue(f: T.() -> Unit) =
-        try {
-            getAnnotation(T::class.java).f()
-            throw Exception("Expected to get a MirroredTypeException")
-        } catch (e: MirroredTypeException) {
-            e.typeMirror
-        }
-
-    //override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
-
-
+    override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
 }
