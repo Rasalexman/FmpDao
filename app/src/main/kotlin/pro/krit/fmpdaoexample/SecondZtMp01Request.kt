@@ -6,10 +6,10 @@ import pro.krit.hiveprocessor.base.IRequest
 
 
 @FmpRestRequest(
-    resourceName = "zt_mp_01",
+    resourceName = "zt_mp_02",
     parameters = ["IV_LGORT", "IV_WERKS"]
 )
-interface IZtMp01Request : IRequest.IBaseRequest {
+interface SecondZtMp01Request : IRequest.IBaseRequest {
 
     @FmpTable(
         name = "ET_DATA",
