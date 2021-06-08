@@ -249,7 +249,10 @@ class FmpProcessor : AbstractProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .returns(returnedClass).apply {
                             if (asProvide) {
-                                addStatement("$RETURN_STATEMENT $instanceStatement", returnedClassName)
+                                addStatement(
+                                    "$RETURN_STATEMENT $instanceStatement",
+                                    returnedClassName
+                                )
                             } else {
 
                                 val propName = funcName.createFileName()
@@ -508,11 +511,9 @@ class FmpProcessor : AbstractProcessor() {
             }
         }.build()
 
-        val parameterName = ParameterSpec.builder(FIELD_TABLE, String::class).apply {
-            if (bindData.tableName.isNotEmpty()) {
-                defaultValue("\"${bindData.tableName}\"")
-            }
-        }.build()
+        val parameterName = ParameterSpec.builder(FIELD_TABLE, String::class)
+            .defaultValue("\"${bindData.tableName}\"")
+            .build()
 
         val isCached = ParameterSpec.builder(FIELD_IS_DELTA, Boolean::class)
             .defaultValue("${bindData.isDelta}")
@@ -756,11 +757,12 @@ class FmpProcessor : AbstractProcessor() {
 
         var bindData: BindData? = null
 
-        if(resourceName.isEmpty()) {
+        if (resourceName.isEmpty()) {
             throw IllegalStateException("\'$element\' can not have empty \'resourceName\' property for annotation $annotation")
         }
 
-        val isErrorType = (kind == ElementKind.METHOD || kind == ElementKind.CONSTRUCTOR || kind == ElementKind.CLASS)
+        val isErrorType =
+            (kind == ElementKind.METHOD || kind == ElementKind.CONSTRUCTOR || kind == ElementKind.CLASS)
         if (isErrorType && kind != ElementKind.INTERFACE) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
@@ -809,7 +811,7 @@ class FmpProcessor : AbstractProcessor() {
                 }
 
                 val annotationTableName = tableAnnotation.name
-                if(annotationTableName.isEmpty()) {
+                if (annotationTableName.isEmpty()) {
                     throw IllegalStateException("Please specify annotation property \'name\'. It can not be empty")
                 }
 
@@ -889,7 +891,8 @@ class FmpProcessor : AbstractProcessor() {
                 isLocal = true
             )
         } else {
-            val message = java.lang.String.format(" Please set private inner interfaces with annotation \'@FmpTable\' for request \'$element\'. ")
+            val message =
+                java.lang.String.format(" Please set private inner interfaces with annotation \'@FmpTable\' for request \'$element\'. ")
             messager.printMessage(Diagnostic.Kind.WARNING, message)
         }
         return bindData
@@ -927,7 +930,7 @@ class FmpProcessor : AbstractProcessor() {
             .addMember("%S", annotationSerializedName)
             .build()
 
-        val returnClassName = if(fieldReturnList) {
+        val returnClassName = if (fieldReturnList) {
             val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
             list.parameterizedBy(parameterClassName).copy(nullable = true)
         } else {
