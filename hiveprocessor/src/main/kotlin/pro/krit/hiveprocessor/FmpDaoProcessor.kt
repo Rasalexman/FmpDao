@@ -117,7 +117,7 @@ class FmpDaoProcessor : AbstractProcessor() {
         roundEnv: RoundEnvironment
     ): Boolean {
         val startTime = System.currentTimeMillis()
-        println("HyperHiveProcessor started")
+        println("HyperHiveProcessor started with annotations: $annotations")
         val daoListMap = mutableListOf<BindData>()
         // Create files for FmpDao annotation
         val fmpResult = collectAnnotationData(
@@ -208,9 +208,9 @@ class FmpDaoProcessor : AbstractProcessor() {
         daoList: List<BindData>,
         asProvide: Boolean = false
     ) {
-        val methods = element.enclosedElements
-        println("----------------> createFunctions")
-        println("------> element = $element | enclosedElements = $methods")
+        val methods = element.enclosedElements.orEmpty()
+        //println("----------------> createFunctions")
+        //println("------> element = $element | enclosedElements = $methods")
 
         methods.forEach { enclose ->
             if (enclose.isAbstractMethod()) {
@@ -220,9 +220,7 @@ class FmpDaoProcessor : AbstractProcessor() {
 
                 val returnElementData = daoList.find { it.mainData.className == returnClass }
 
-                val topLevel = returnElementData
-                println("------> returnedClass = $returnedClass | topLevel = $topLevel ")
-
+                //println("------> returnedClass = $returnedClass | topLevel = $topLevel ")
                 returnElementData?.let {
                     val instancePackName = if (returnElementData.isRequest) {
                         REQUEST_PACKAGE_NAME
@@ -743,19 +741,26 @@ class FmpDaoProcessor : AbstractProcessor() {
         resourceName: String
     ): BindData? {
         val kind = element.kind
+        val annotation = element.annotationMirrors.firstOrNull()
 
         var bindData: BindData? = null
 
-        if (kind == ElementKind.METHOD && kind != ElementKind.INTERFACE) {
+        if(resourceName.isEmpty()) {
+            throw IllegalStateException("\'$element\' can not have empty \'resourceName\' property for annotation $annotation")
+        }
+
+        val isErrorType = (kind == ElementKind.METHOD || kind == ElementKind.CONSTRUCTOR || kind == ElementKind.CLASS)
+        if (isErrorType && kind != ElementKind.INTERFACE) {
             messager.printMessage(
                 Diagnostic.Kind.ERROR,
-                "Only classes and interfaces can be annotated as @FmpDao, @FmpLocalDao or @FmpDatabase"
+                "Only interfaces can be annotated as \'@FmpRestRequest\' or \'@FmpWebRequest\' "
             )
             return null
         }
 
-
-        val elementEnclosed = element.enclosedElements
+        val elementEnclosed = element.enclosedElements?.filter {
+            it.kind != ElementKind.CLASS && it.kind != ElementKind.CONSTRUCTOR
+        }.orEmpty()
 
         //println(" elementEnclosed = $elementEnclosed")
         if (elementEnclosed.isNotEmpty()) {
@@ -786,20 +791,25 @@ class FmpDaoProcessor : AbstractProcessor() {
 
             // Result Model Fields
             elementEnclosed.forEach { inter ->
-                //println("elementEnclosed = ${inter.modifiers}")
+                //println("-------> elementEnclosed = ${inter} | inter.kind = ${inter.kind}")
                 val tableAnnotation = inter.getAnnotation(FmpTable::class.java)
                 if (tableAnnotation == null || inter.kind != ElementKind.INTERFACE) {
-                    throw IllegalStateException("Cannot use annotation")
+                    throw IllegalStateException("You can use @FmpTable annotation only with interfaces")
+                }
+
+                val annotationTableName = tableAnnotation.name
+                if(annotationTableName.isEmpty()) {
+                    throw IllegalStateException("Please specify annotation property 'name'. It can not be empty")
                 }
 
                 val propClassFields = tableAnnotation.fields
                 if (propClassFields.isEmpty()) {
-                    throw IllegalStateException("Cannot use annotation")
+                    throw IllegalStateException("You cannot use @FmpTable annotation with empty 'fields' property")
                 }
 
                 // название таблицы
-                val propName = inter.simpleName.toString()
-                val propModelData = tableAnnotation.name.asModelFieldData()
+                val propName = mainClassName + inter.simpleName.toString().capitalizeFirst()
+                val propModelData = annotationTableName.asModelFieldData()
                 val propTypeClassName = propName.createFileName(MODEL_POSTFIX).capitalizeFirst()
                 val propClassName = ClassName(REQUEST_PACKAGE_NAME, propTypeClassName)
                 val propClassSpec = TypeSpec.classBuilder(propTypeClassName)
@@ -819,7 +829,8 @@ class FmpDaoProcessor : AbstractProcessor() {
                     tableAnnotation.name,
                     propClassName,
                     resultConstructorSpec,
-                    resultModelTypeSpec
+                    resultModelTypeSpec,
+                    tableAnnotation.isList
                 )
             }
             // add result model class
@@ -866,6 +877,9 @@ class FmpDaoProcessor : AbstractProcessor() {
                 isRequest = true,
                 isLocal = true
             )
+        } else {
+            val message = java.lang.String.format(" Please set private inner interfaces with annotation @FmpTable for request \'$element\'. ")
+            messager.printMessage(Diagnostic.Kind.WARNING, message)
         }
         return bindData
     }
@@ -895,24 +909,28 @@ class FmpDaoProcessor : AbstractProcessor() {
         annotationSerializedName: String,
         parameterClassName: ClassName,
         constructorSpec: FunSpec.Builder,
-        classTypeSpec: TypeSpec.Builder
+        classTypeSpec: TypeSpec.Builder,
+        fieldReturnList: Boolean = false,
     ) {
         val annotationSerialize = AnnotationSpec.builder(SerializedName::class)
             .addMember("%S", annotationSerializedName)
             .build()
 
-        val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
-        val listClassParametrized =
+        val returnClassName = if(fieldReturnList) {
+            val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
             list.parameterizedBy(parameterClassName).copy(nullable = true)
+        } else {
+            parameterClassName.copy(nullable = true)
+        }
 
-        val propBuilder = PropertySpec.builder(name, listClassParametrized)
+        val propBuilder = PropertySpec.builder(name, returnClassName)
             .initializer(name)
             .addModifiers(KModifier.PUBLIC)
             .addAnnotation(annotationSerialize)
             .build()
 
         val paramBuilder =
-            ParameterSpec.builder(name, listClassParametrized)
+            ParameterSpec.builder(name, returnClassName)
                 .defaultValue("null")
                 .build()
 

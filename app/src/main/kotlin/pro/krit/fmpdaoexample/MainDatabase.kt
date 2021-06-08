@@ -26,4 +26,5 @@ interface IMainRemoteDatabase {
 
 interface IMainRequest {
     fun provideIZtMp01Request(): IZtMp01Request
+    fun provideSecondRequest(): SecondZtMp01Request
 }
