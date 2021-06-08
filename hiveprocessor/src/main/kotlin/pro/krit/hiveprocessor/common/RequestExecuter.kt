@@ -24,6 +24,24 @@ object RequestExecuter {
         }
     }
 
+    fun<T : BaseStatus>  executeStatus(
+        request: IRequest,
+        params: Any? = null,
+        clazz: Class<T>
+    ): BaseStatus {
+        val requestApi = request.hyperHive.requestAPI
+        val resourceName = request.resourceName
+        return when (params) {
+            is WebCallParams -> requestApi.web(resourceName, params, clazz).execute()
+            is RequestCallParams -> requestApi.request(resourceName, params, clazz).execute()
+            else ->requestApi.web(resourceName).execute().let { respond ->
+                BaseStatus().apply {
+                    raw = respond
+                }
+            }
+        }
+    }
+
     inline fun<reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatus(
         request: IRequest,
         params: Any? = null
@@ -92,12 +110,18 @@ object RequestExecuter {
                 val raw = status.result?.raw
                 val errors = status.errors
                 val firstError = errors.firstOrNull()
-                val errorMessage = firstError?.source ?: raw?.errorMessage.orEmpty()
-                val errorDescription = firstError?.description ?: raw?.errorDescription.orEmpty()
-                println( "status is bad | errorMessage = $errorMessage " +
-                        "| errorDescription = $errorDescription " +
-                        "| resourceName = '$resourceName'" )
-                Result.failure(RequestException.SapError(errorDescription))
+                val firstDescription = firstError?.description ?: raw?.errorMessage
+                val errorMessage = firstError?.source ?: firstDescription
+                val errorFirsDescription = firstError?.descriptions?.firstOrNull()
+                val errorDetails = raw?.detail ?: raw?.errorDescription
+                val errorDescription = errorDetails ?: errorFirsDescription
+
+                val errorText = "status is bad | errorMessage = '$errorMessage' " +
+                        "| errorDescription = '$errorDescription' " +
+                        "| description = '$firstDescription' " +
+                        "| resourceName = '$resourceName'" +
+                        "| errorDetails = '$errorDetails'"
+                Result.failure(RequestException.SapError(errorText))
             }
         } catch (e: Throwable) {
             e.printStackTrace()

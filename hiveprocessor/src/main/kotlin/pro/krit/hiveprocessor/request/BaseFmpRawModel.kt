@@ -11,6 +11,8 @@ open class BaseFmpRawModel<T> {
     var errorMessage: String? = null
     @SerializedName("error_description")
     var errorDescription: String? = null
+    @SerializedName("detail")
+    var detail: String? = null
     @SerializedName("Data")
     val data: T? = null
 }

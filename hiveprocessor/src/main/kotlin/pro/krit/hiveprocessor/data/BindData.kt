@@ -23,8 +23,9 @@ internal data class BindData(
     val createTableOnInit: Boolean,
     val parameters: List<String> = emptyList(),
     val fields: List<String> = emptyList(),
-    val resourceName: String = "",
-    val tableName: String = "",
-    val isDelta: Boolean = false,
-    val isLocal: Boolean = false
+    val resourceName: String = "",  // current resource name
+    val tableName: String = "",  // current table name
+    val isDelta: Boolean = false, // using deltaStream
+    val isLocal: Boolean = false, // is this a local dao
+    val isRequest: Boolean = false // is this a request interface with @FmpWebRequest or @FmpRestRequest
 )
