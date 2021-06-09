@@ -28,6 +28,7 @@ const val STATUS_POSTFIX = "Status"
 const val RESULT_MODEL_POSTFIX = "ResultModel"
 const val RESPOND_STATUS_POSTFIX = "RespondStatus"
 const val RAW_MODEL_POSTFIX = "RawModel"
+const val PARAMS_POSTFIX = "Params"
 
 
 const val PREFIX_UPPER = 'I'

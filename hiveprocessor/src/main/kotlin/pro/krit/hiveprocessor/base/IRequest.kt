@@ -26,6 +26,7 @@ sealed interface IRequest {
     val resourceName: String
 
     fun createParamsMap(vararg params: String): Map<String, String>
+    fun createParams(vararg params: String): Any?
 
     interface IBaseRequest : IRequest
 
