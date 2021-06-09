@@ -7,6 +7,8 @@ import pro.krit.generated.dao.PmDataFieldsDaoModel
 import pro.krit.generated.dao.PmDataFieldsDaoStatus
 import pro.krit.generated.database.MainDatabaseImpl
 import android.os.Bundle
+import android.widget.Button
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.CoroutineScope
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import pro.krit.generated.request.ZtMp01RequestImpl
+import pro.krit.generated.request.ZtMp01RequestParams
 import pro.krit.generated.request.ZtMp01RequestRespondStatus
 import pro.krit.generated.request.ZtMp01RequestResultModel
 import pro.krit.hiveprocessor.extensions.*
@@ -30,16 +33,15 @@ class MainActivity : AppCompatActivity() {
         const val DEBUG_PASSWORD = "1q2w3e4r"
     }
 
-    data class EtDataParams(
-        @SerializedName("IV_LGORT")
-        val lgort: String,
-        @SerializedName("IV_WERKS")
-        val werks: String
-    )
+    lateinit var mainDb: IMainDatabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        this.findViewById<Button>(R.id.request01Button)?.setOnClickListener {
+            makeRequest01Map()
+        }
 
         val serverAddress = "https://t19075.krit.pro"
         val environment = "MVP_test"
@@ -63,7 +65,7 @@ class MainActivity : AppCompatActivity() {
         )
 
 
-        val mainDb: IMainDatabase = MainDatabaseImpl.initialize(
+        mainDb = MainDatabaseImpl.initialize(
             hState = HyperHiveState(this).setHandler(Handler(Looper.getMainLooper())),
             config = hyperHiveConfig
         )
@@ -71,19 +73,7 @@ class MainActivity : AppCompatActivity() {
 
         println("-----> dbState = $dbState")
 
-        /*val status = mainDb.provideHyperHive().authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
-        if(status.isOk) {
-            val request: IZtMp01Request = ZtMp01RequestImpl(mainDb.provideHyperHive())
-            val result1 = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
-                mapOf("IV_LGORT" to "0001", "IV_WERKS" to "0001")
-            )
-            result1.fold(onSuccess = {
-
-            }, onFailure = {
-
-            })
-        }*/
-
+        val status = mainDb.provideHyperHive().authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
 
         /*val pmLocalDao = mainDb.providePmLocalDao()
         val pmRemoteDao = mainDb.providePmDao()
@@ -92,6 +82,26 @@ class MainActivity : AppCompatActivity() {
 
         exampleWithLocalDao(pmLocalDao)
         exampleWithFieldsDao(pmFieldDao)*/
+    }
+
+    private fun makeRequest01Map() {
+        val request: IZtMp01Request = mainDb.provideIZtMp01Request()
+        val paramsMap = request.createParamsMap("0001", "0001")
+        val params = request.createParams("0001", "0001")
+        makeRequest01(params)
+    }
+
+    private fun makeRequest01(params: Any?) {
+        val request: IZtMp01Request = mainDb.provideIZtMp01Request()
+        val result1 = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+            params
+        )
+        result1.fold(onSuccess = {
+            Toast.makeText(this, "SUCCESS", Toast.LENGTH_SHORT).show()
+        }, onFailure = {
+            it.printStackTrace()
+            Toast.makeText(this, "FAIL REQUEST", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun exampleWithFieldsDao(pmFieldDao: IPmDataFieldsDao) {
