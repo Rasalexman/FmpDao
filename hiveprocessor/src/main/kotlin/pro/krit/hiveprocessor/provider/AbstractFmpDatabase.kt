@@ -84,12 +84,12 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return this as T
     }
 
-    override fun setDefaultHeaders(headers: Map<String, String>) {
+    override fun setDefaultHeaders(headers: Map<String, String>?) {
         this.requestHeaders = headers
     }
 
-    override fun getDefaultHeaders(): Map<String, String> {
-        return this.requestHeaders.orEmpty()
+    override fun getDefaultHeaders(): Map<String, String>? {
+        return this.requestHeaders
     }
 
     override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {

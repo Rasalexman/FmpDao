@@ -14,6 +14,7 @@
 
 package pro.krit.hiveprocessor.extensions
 
+import com.mobrun.plugin.models.BaseStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
@@ -33,6 +34,19 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestA
     requestData: Any? = null
 ): S? {
     return withContext(Dispatchers.IO) { request<S, T>(requestData) }
+}
+
+inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
+    requestData: Any? = null
+): BaseStatus {
+    val params = RequestBuilder.createParams(this, requestData)
+    return RequestExecuter.executeBaseStatus(this, params, T::class.java)
+}
+
+suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
+    requestData: Any? = null
+): BaseStatus {
+    return withContext(Dispatchers.IO) { requestStatus<S, T>(requestData) }
 }
 
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(

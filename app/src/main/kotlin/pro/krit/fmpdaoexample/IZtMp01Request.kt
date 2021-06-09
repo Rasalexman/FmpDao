@@ -1,11 +1,11 @@
 package pro.krit.fmpdaoexample
 
+import pro.krit.hiveprocessor.annotations.FmpRestRequest
 import pro.krit.hiveprocessor.annotations.FmpTable
-import pro.krit.hiveprocessor.annotations.FmpWebRequest
 import pro.krit.hiveprocessor.base.IRequest
 
 
-@FmpWebRequest(
+@FmpRestRequest(
     resourceName = "zt_mp_01",
     parameters = ["IV_LGORT", "IV_WERKS"]
 )

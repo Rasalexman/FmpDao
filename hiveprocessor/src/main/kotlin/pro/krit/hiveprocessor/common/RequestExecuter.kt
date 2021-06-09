@@ -112,25 +112,25 @@ object RequestExecuter {
         clazz: Class<T>
     ): Result<S> {
         return try {
-            println("status: $this")
+            //println("status: $this")
             val gson = GsonBuilder().create()
             val status = gson.fromJson(this, clazz)
             if (status.isNotBad()) {
                 val result = status.result
                 if (result != null) {
-                    println("result: $result")
+                    //println("result: $result")
                     val raw = result.raw
                     if (raw != null) {
-                        println("raw: $raw")
+                        //println("raw: $raw")
                         val errorMessage = raw.errorMessage
                         val errorDescription = raw.errorDescription
                         when {
                             errorMessage != null -> {
-                                println("errorMessage = $errorMessage | resourceName = '$resourceName'")
+                                //println("errorMessage = $errorMessage | resourceName = '$resourceName'")
                                 Result.failure(RequestException.SapError(message = errorMessage))
                             }
                             errorDescription != null -> {
-                                println("errorDescription = $errorDescription | resourceName = '$resourceName'")
+                                //println("errorDescription = $errorDescription | resourceName = '$resourceName'")
                                 Result.failure(RequestException.SapError(message = errorDescription))
                             }
                             else -> {
@@ -138,17 +138,17 @@ object RequestExecuter {
                                 if (rawData != null) {
                                     Result.success(rawData)
                                 } else {
-                                    println("raw.Data is null | resourceName = '$resourceName'")
+                                    //println("raw.Data is null | resourceName = '$resourceName'")
                                     Result.failure(RequestException.RawDataNullError)
                                 }
                             }
                         }
                     } else {
-                        println("raw result is null | resourceName = '$resourceName'")
+                        //println("raw result is null | resourceName = '$resourceName'")
                         Result.failure(RequestException.ResultRawNullError)
                     }
                 } else {
-                    println("status result is null | resourceName = '$resourceName'")
+                    //println("status result is null | resourceName = '$resourceName'")
                     Result.failure(RequestException.StatusResultNullError)
                 }
             } else {

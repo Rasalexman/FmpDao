@@ -1011,7 +1011,8 @@ class FmpProcessor : AbstractProcessor() {
 
         val stringTypeName = String::class.asTypeName()
         val mapTypeName = Map::class.asTypeName().parameterizedBy(stringTypeName, stringTypeName)
-        val propHeadersSpec = PropertySpec.builder(FIELD_DEFAULT_HEADERS, mapTypeName)
+        val nullableMapType = mapTypeName.copy(nullable = true)
+        val propHeadersSpec = PropertySpec.builder(FIELD_DEFAULT_HEADERS, nullableMapType)
             .mutable()
             .initializer(FIELD_DEFAULT_HEADERS)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
@@ -1019,12 +1020,8 @@ class FmpProcessor : AbstractProcessor() {
 
         val anyTypeName = Any::class.asTypeName().copy(nullable = true)
 
-        val mapOfStatement = CodeBlock.of(
-            TAG_MEMBER_FULL,
-            MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
-        )
-        val paramHeadersSpec = ParameterSpec.builder(FIELD_DEFAULT_HEADERS, mapTypeName)
-            .defaultValue(mapOfStatement)
+        val paramHeadersSpec = ParameterSpec.builder(FIELD_DEFAULT_HEADERS, nullableMapType)
+            .defaultValue(NULL_INITIALIZER)
             .build()
 
         val propResourceSpec = PropertySpec.builder(FIELD_RESOURCE_NAME, String::class)

@@ -22,7 +22,7 @@ typealias RawStatus<S> = ObjectRawStatus<out BaseFmpRawModel<S>>
 
 sealed interface IRequest {
     val hyperHive: HyperHive
-    var defaultHeaders: Map<String, String>
+    var defaultHeaders: Map<String, String>?
     val resourceName: String
 
     fun createParamsMap(vararg params: String): Map<String, String>

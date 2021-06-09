@@ -49,17 +49,45 @@ const val ERROR_CODE_COUNT_WHERE = 10003
 inline fun <reified E : Any> IDao.flowable(
     where: String = "",
     withStart: Boolean = true,
+    emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ) = flow {
     val trigger = this@flowable
     this@flowable.fmpDatabase.getTrigger(trigger).collect {
-        kotlinx.coroutines.delay(100L)
+        if(emitDelay > 0) {
+            kotlinx.coroutines.delay(emitDelay)
+        }
         val result = selectAsync<E>(where)
         emit(result)
     }
 }.onStart {
     if (withStart) {
         val result = selectAsync<E>(where)
+        emit(result)
+    }
+}.apply {
+    if (withDistinct) {
+        distinctUntilChanged()
+    }
+}
+
+fun IDao.flowableCount(
+    where: String = "",
+    withStart: Boolean = true,
+    emitDelay: Long = 100L,
+    withDistinct: Boolean = false
+) = flow {
+    val trigger = this@flowableCount
+    this@flowableCount.fmpDatabase.getTrigger(trigger).collect {
+        if(emitDelay > 0) {
+            kotlinx.coroutines.delay(emitDelay)
+        }
+        val result = countAsync(where)
+        emit(result)
+    }
+}.onStart {
+    if (withStart) {
+        val result = countAsync(where)
         emit(result)
     }
 }.apply {
@@ -88,21 +116,43 @@ suspend inline fun <reified E : Any> IDao.selectAsync(
     return withContext(Dispatchers.IO) { select(where, limit) }
 }
 
-inline fun <reified E : Any> IDao.count(
-    where: String = ""
-): List<E> {
-    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.COUNT_QUERY, where)
-    return QueryExecuter.executeQuery(
+inline fun <reified E : Any> IDao.selectResult(
+    where: String = "",
+    limit: Int = 0
+): Result<List<E>> {
+    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.SELECT_QUERY, where, limit)
+    return QueryExecuter.executeResultQuery(
         dao = this,
+        query = selectQuery,
+        errorCode = ERROR_CODE_SELECT_WHERE,
+        methodName = "selectWhere"
+    )
+}
+
+suspend inline fun <reified E : Any> IDao.selectResultAsync(
+    where: String = "",
+    limit: Int = 0
+): Result<List<E>> {
+    return withContext(Dispatchers.IO) { selectResult(where, limit) }
+}
+
+fun IDao.count(
+    where: String = ""
+): Int {
+    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.COUNT_QUERY, where)
+    val result = QueryExecuter.executeKeyQuery(
+        dao = this,
+        key = QueryBuilder.COUNT_KEY,
         query = selectQuery,
         errorCode = ERROR_CODE_COUNT_WHERE,
         methodName = "countWhere"
     )
+    return result.toIntOrNull() ?: 0
 }
 
-suspend inline fun <reified E : Any> IDao.countAsync(
+suspend fun IDao.countAsync(
     where: String = ""
-): List<E> {
+): Int {
     return withContext(Dispatchers.IO) { count(where) }
 }
 
@@ -206,7 +256,7 @@ suspend inline fun <reified E : Any> IFieldsDao.insertOrReplaceAsync(
 
 inline fun <reified E : Any> IFieldsDao.delete(
     item: E,
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     val query = QueryBuilder.createDeleteQuery(this, item)
     return QueryExecuter.executeStatus(
@@ -220,14 +270,14 @@ inline fun <reified E : Any> IFieldsDao.delete(
 
 suspend inline fun <reified E : Any> IFieldsDao.deleteAsync(
     item: E,
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { delete(item, notifyAll) }
 }
 
 inline fun <reified E : Any> IFieldsDao.delete(
     items: List<E>,
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     val query = QueryBuilder.createDeleteQuery(this, items)
     return QueryExecuter.executeTransactionStatus(
@@ -241,7 +291,7 @@ inline fun <reified E : Any> IFieldsDao.delete(
 
 suspend inline fun <reified E : Any> IFieldsDao.deleteAsync(
     items: List<E>,
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return withContext(Dispatchers.IO) { delete(items, notifyAll) }
 }
