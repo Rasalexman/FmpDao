@@ -29,17 +29,22 @@ object RequestBuilder {
         request: IRequest,
         requestData: Any? = null
     ): Any {
+        val defaultHeaders = request.defaultHeaders
         val isWeb = request is IRequest.IWebRequest<*,*>
         return if (isWeb) {
             WebCallParams().apply {
+                if(!defaultHeaders.isNullOrEmpty()) {
+                    headers = defaultHeaders
+                }
                 requestData.tryParseParams()?.let {
                     this.data = it
                 }
-                headers = request.defaultHeaders
             }
         } else {
             RequestCallParams().apply {
-                headers = request.defaultHeaders
+                if(!defaultHeaders.isNullOrEmpty()) {
+                    headers = defaultHeaders
+                }
                 (requestData as? Map<String, String>)?.takeIf { it.isNotEmpty() }?.let {
                     this.args = it
                 } ?:

@@ -17,7 +17,6 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.extensions.fullTableName
 import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
@@ -33,32 +32,81 @@ object QueryExecuter {
     ): List<E> {
         return try {
             val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
-            status.result.database.records
+            status.result.database.records.orEmpty()
         } catch (e: Exception) {
             e.printStackTrace()
-            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
+        }
+    }
+
+    fun executeKeyQuery(
+        dao: IDao,
+        key: String,
+        query: String,
+        errorCode: Int = DEFAULT_ERRORCODE,
+        methodName: String = "",
+        notifyAll: Boolean = false
+    ): String {
+        return try {
+            val status = executeStatus<Map<String, String>, StatusSelectTable<Map<String, String>>>(
+                dao,
+                query,
+                errorCode,
+                methodName,
+                notifyAll
+            )
+            status.result.database.records.firstOrNull()?.get(key).orEmpty()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            ""
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeResultQuery(
+        dao: IDao,
+        query: String,
+        errorCode: Int = DEFAULT_ERRORCODE,
+        methodName: String = "",
+        notifyAll: Boolean = false
+    ): Result<List<E>> {
+        return try {
+            val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
+            if (status is S) {
+                Result.success(status.result.database.records.orEmpty())
+            } else {
+                val firstError = status.errors.firstOrNull()
+                val message = firstError?.run {
+                    description ?: descriptions.firstOrNull()
+                }.orEmpty()
+                Result.failure(IllegalStateException(message))
+            }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
         }
     }
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeStatus(
         dao: IDao,
         query: String,
-        errorCode: Int = 1001,
-        methodName: String = "",
+        errorCode: Int = DEFAULT_ERRORCODE,
+        methodName: String = "executeStatus",
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
         return try {
             val hyperHiveDatabaseApi = dao.fmpDatabase.databaseApi
-            hyperHiveDatabaseApi.query(query, S::class.java).execute()!!
+            hyperHiveDatabaseApi.query(query, S::class.java).execute()!!.apply {
+                if (notifyAll) this.triggerFlow(dao)
+            }
         } catch (e: Exception) {
-            createErrorStatus<E>(
+            createErrorStatus(
                 ex = e,
                 codeType = errorCode,
                 method = methodName
-            ) as S
-        }.apply {
-            if (notifyAll) this.triggerFlow(dao)
+            )
         }
     }
 

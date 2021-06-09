@@ -20,8 +20,9 @@ import pro.krit.hiveprocessor.base.IDao.IFmpDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable(
     where: String = "",
     withStart: Boolean = true,
+    emitDelay: Long = 100L,
     withDistinct: Boolean = false
-) = flowable<E>(where, withStart, withDistinct)
+) = flowable<E>(where, withStart, emitDelay, withDistinct)
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.select(
     where: String = "",
@@ -33,13 +34,15 @@ suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E
     limit: Int = 0
 ): List<E> = selectAsync<E>(where, limit)
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.count(
-    where: String = ""
-): List<E> = count<E>(where)
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectResult(
+    where: String = "",
+    limit: Int = 0
+): Result<List<E>> = selectResult<E>(where, limit)
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.countAsync(
-    where: String = ""
-): List<E> = countAsync<E>(where)
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectResultAsync(
+    where: String = "",
+    limit: Int = 0
+): Result<List<E>> = selectResultAsync<E>(where, limit)
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.delete(
     where: String = "",

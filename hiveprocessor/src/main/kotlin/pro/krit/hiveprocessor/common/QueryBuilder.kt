@@ -21,6 +21,7 @@ import pro.krit.hiveprocessor.extensions.fullTableName
 
 object QueryBuilder {
 
+    const val COUNT_KEY = "count(*)"
     const val SELECT_QUERY = "SELECT * FROM"
     const val COUNT_QUERY = "SELECT count(*) FROM"
     const val DELETE_QUERY = "DELETE FROM"
