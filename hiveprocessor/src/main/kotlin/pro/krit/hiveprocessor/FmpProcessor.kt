@@ -131,7 +131,7 @@ class FmpProcessor : AbstractProcessor() {
         roundEnv: RoundEnvironment
     ): Boolean {
         val startTime = System.currentTimeMillis()
-        println("FmpProcessor started with annotations: $annotations")
+        //println("FmpProcessor started with annotations: $annotations")
         val bindingDataList = mutableListOf<BindData>()
         // Create files for FmpDao annotation
         val fmpResult = collectAnnotationData(
@@ -583,7 +583,6 @@ class FmpProcessor : AbstractProcessor() {
                             val genSize = superTypeGenerics.size - 1
                             superTypeGenerics.forEachIndexed { index, className ->
                                 append(className)
-                                //println("-----> className = $className")
                                 if(index < genSize) {
                                     append(",")
                                 }
@@ -917,19 +916,19 @@ class FmpProcessor : AbstractProcessor() {
             elementsFiles.add(resultModelTypeSpec)
 
             // Raw Model Class
-            val rawModelClassName = ClassName(
+            /*val rawModelClassName = ClassName(
                 REQUEST_PACKAGE_NAME,
                 mainClassName.createFileName(RAW_MODEL_POSTFIX)
             )
             val rawModelTypeSpec = createRawModelClass(rawModelClassName, resultModelClassName)
-            elementsFiles.add(rawModelTypeSpec)
+            elementsFiles.add(rawModelTypeSpec)*/
 
             // Raw Status Class
             val respondStatusClassName = ClassName(
                 REQUEST_PACKAGE_NAME,
                 mainClassName.createFileName(RESPOND_STATUS_POSTFIX)
             )
-            val rawStatusTypeSpec = createRawStatusClass(respondStatusClassName, rawModelClassName)
+            val rawStatusTypeSpec = createRawStatusClass(respondStatusClassName, resultModelClassName)
             elementsFiles.add(rawStatusTypeSpec)
 
             val parametrizedInterface =

@@ -14,18 +14,26 @@
 
 package pro.krit.hiveprocessor.common
 
+import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.mobrun.plugin.api.callparams.RequestCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.models.BaseStatus
+import com.mobrun.plugin.models.Error
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
+import pro.krit.hiveprocessor.base.RawStatus
 import pro.krit.hiveprocessor.errors.RequestException
 import pro.krit.hiveprocessor.request.BaseFmpRawModel
 import pro.krit.hiveprocessor.request.ObjectRawStatus
 
 object RequestExecuter {
+
+    val gson: Gson by lazy {
+        GsonBuilder().create()
+    }
 
     fun execute(
         request: IRequest,
@@ -38,13 +46,6 @@ object RequestExecuter {
             is RequestCallParams -> requestApi.request(resourceName, params).execute()
             else -> requestApi.web(resourceName).execute()
         }
-    }
-
-    suspend fun executeAsync(
-        request: IRequest,
-        params: Any? = null
-    ): String {
-        return withContext(Dispatchers.IO) { execute(request, params) }
     }
 
     fun <T : BaseStatus> executeBaseStatus(
@@ -65,134 +66,74 @@ object RequestExecuter {
         }
     }
 
-    suspend fun <T : BaseStatus> executeBaseStatusAsync(
-        request: IRequest,
-        params: Any? = null,
-        clazz: Class<T>
-    ): BaseStatus {
-        return withContext(Dispatchers.IO) { executeBaseStatus(request, params, clazz) }
-    }
-
-    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatus(
+    inline fun <reified S : Any, reified T : RawStatus<S>> executeStatus(
         request: IRequest,
         params: Any? = null
-    ): BaseFmpRawModel<S> {
+    ): T? {
         val statusString = execute(request, params)
-        return statusString.tryParseRawStatus<S, T>(T::class.java)
+        return statusString.tryParseRawStatus<S, T>()
     }
 
-    suspend inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeStatusAsync(
-        request: IRequest,
-        params: Any? = null
-    ): BaseFmpRawModel<S> {
-        return withContext(Dispatchers.IO) { executeStatus(request, params) }
-    }
-
-    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeResult(
+    inline fun <reified S : Any, reified T : RawStatus<S>> executeResult(
         request: IRequest,
         params: Any? = null
     ): Result<S> {
         val statusString = execute(request, params)
-        return statusString.getStatusResultWithData(request.resourceName, T::class.java)
+        return statusString.getStatusResultWithData<S, T>(request.resourceName)
     }
 
-    suspend inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> executeResultAsync(
-        request: IRequest,
-        params: Any? = null
+    inline fun <reified S : Any, reified T : RawStatus<S>> String.getStatusResultWithData(
+        resourceName: String
     ): Result<S> {
-        return withContext(Dispatchers.IO) { executeResult(request, params) }
-    }
-
-    fun BaseStatus.isNotBad(): Boolean {
-        return this.isOk || this.httpStatus?.status == 304
-    }
-
-    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> String.getStatusResultWithData(
-        resourceName: String,
-        clazz: Class<T>
-    ): Result<S> {
-        return try {
+        val result = try {
             println("status: $this")
-            val gson = GsonBuilder().create()
-            val status = gson.fromJson(this, clazz)
+            val typeToken = object : TypeToken<T>() {}.type
+            val status: T = gson.fromJson<T>(this, typeToken)
             if (status.isNotBad()) {
                 val result = status.result
                 if (result != null) {
                     println("result: $result")
                     val raw = result.raw
-                    if (raw != null) {
-                        println("raw: $raw")
-                        val errorMessage = raw.errorMessage
-                        val errorDescription = raw.errorDescription
-                        when {
-                            errorMessage != null -> {
-                                println("errorMessage = $errorMessage | resourceName = '$resourceName'")
-                                Result.failure(RequestException.SapError(message = errorMessage))
-                            }
-                            errorDescription != null -> {
-                                println("errorDescription = $errorDescription | resourceName = '$resourceName'")
-                                Result.failure(RequestException.SapError(message = errorDescription))
-                            }
-                            else -> {
-                                val rawData = raw.data
-                                if (rawData != null) {
-                                    Result.success(rawData)
-                                } else {
-                                    println("raw.Data is null | resourceName = '$resourceName'")
-                                    Result.failure(RequestException.RawDataNullError)
-                                }
-                            }
-                        }
-                    } else {
-                        println("raw result is null | resourceName = '$resourceName'")
-                        Result.failure(RequestException.ResultRawNullError)
-                    }
+                    raw?.let { currentResult ->
+                        Result.success(currentResult)
+                    } ?: Result.failure(RequestException.ResultRawNullError)
                 } else {
                     println("status result is null | resourceName = '$resourceName'")
                     Result.failure(RequestException.StatusResultNullError)
                 }
             } else {
-                val raw = status.result?.raw
                 val errors = status.errors
                 val firstError = errors.firstOrNull()
-                val firstDescription = firstError?.description ?: raw?.errorMessage
+                val firstDescription = firstError?.description.orEmpty() //?: raw?.errorMessage
                 val errorMessage = firstError?.source ?: firstDescription
-                val errorFirsDescription = firstError?.descriptions?.firstOrNull()
-                val errorDetails = raw?.detail ?: raw?.errorDescription
-                val errorDescription = errorDetails ?: errorFirsDescription
+                val errorFirsDescription = firstError?.descriptions?.firstOrNull().orEmpty()
 
                 val errorText = "status is bad | errorMessage = '$errorMessage' " +
-                        "| errorDescription = '$errorDescription' " +
+                        "| errorDescription = '$errorFirsDescription' " +
                         "| description = '$firstDescription' " +
-                        "| resourceName = '$resourceName'" +
-                        "| errorDetails = '$errorDetails'"
+                        "| resourceName = '$resourceName'"
                 Result.failure(RequestException.SapError(errorText))
             }
         } catch (e: Throwable) {
             e.printStackTrace()
             Result.failure(RequestException.WebCallError)
         }
+        println("final result = $result")
+        return result
     }
 
-    inline fun <reified S : Any, reified T : ObjectRawStatus<out BaseFmpRawModel<S>>> String.tryParseRawStatus(
-        clazz: Class<T>
-    ): BaseFmpRawModel<S> {
+    inline fun <reified S : Any, reified T : RawStatus<S>> String.tryParseRawStatus(): T? {
         return try {
-            val gson = GsonBuilder().create()
-            val status = gson.fromJson(this, clazz)
-            if (status.isNotBad()) {
-                val resultData = status.result?.raw
-                resultData ?: status.getErrorRawModel()
-            } else {
-                status.getErrorRawModel()
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            BaseFmpRawModel<S>().apply {
-                errorDescription = e.localizedMessage
-                errorMessage = e.message.orEmpty()
-                statusCode = -1
-            }
+            val status: T = gson.fromJson<T>(this, T::class.java)
+            status
+        } catch (ex: Exception) {
+            ex.printStackTrace()
+            ObjectRawStatus<S>().apply {
+                val error = Error()
+                error.code = 0
+                error.description = ex.message ?: "tryParseRawStatus HyperHive Error with $ex"
+                errors.add(error)
+            } as? T
         }
     }
 
@@ -204,6 +145,10 @@ object RequestExecuter {
         errorStatus.statusCode = this.httpStatus?.status ?: -1
         errorStatus.version = ""
         return errorStatus
+    }
+
+    fun BaseStatus.isNotBad(): Boolean {
+        return this.isOk || this.httpStatus?.status == 304
     }
 
 }
