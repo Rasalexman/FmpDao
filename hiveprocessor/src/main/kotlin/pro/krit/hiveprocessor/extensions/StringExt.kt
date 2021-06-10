@@ -109,6 +109,31 @@ internal fun String.splitArray(): String {
     }
 }
 
+internal fun String?.splitGenericsArray(): List<String> {
+    val genericsList = mutableListOf<String>()
+    //println("------> splitGenericsArray = $this")
+    this?.let { currentSupertype ->
+        val splittedTypes = currentSupertype.split("<")
+        if(splittedTypes.size > 1) {
+            val secondPart = splittedTypes.getOrNull(1).orEmpty()
+            if(secondPart.isNotEmpty()) {
+                val secondSplitted = secondPart.replace(">","").split(",")
+                if(secondSplitted.isNotEmpty()) {
+                    val firstGeneric = secondSplitted.first()
+                    val secondGeneric = secondSplitted.getOrNull(1).orEmpty()
+                    if(firstGeneric.isNotEmpty()) {
+                        genericsList.add(firstGeneric)
+                    }
+                    if(secondGeneric.isNotEmpty()) {
+                        genericsList.add(secondGeneric)
+                    }
+                }
+            }
+        }
+    }
+    return genericsList
+}
+
 internal fun String.screenParameter(className: String): String {
     return if (className == KOTLIN_STRING_TYPE_NAME) {
         "\'$$this\'"

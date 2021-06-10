@@ -95,18 +95,18 @@ object QueryExecuter {
         errorCode: Int = DEFAULT_ERRORCODE,
         methodName: String = "executeStatus",
         notifyAll: Boolean = false
-    ): StatusSelectTable<E> {
+    ): S {
         return try {
             val hyperHiveDatabaseApi = dao.fmpDatabase.databaseApi
             hyperHiveDatabaseApi.query(query, S::class.java).execute()!!.apply {
                 if (notifyAll) this.triggerFlow(dao)
             }
         } catch (e: Exception) {
-            createErrorStatus(
+            createErrorStatus<E>(
                 ex = e,
                 codeType = errorCode,
                 method = methodName
-            )
+            ) as S
         }
     }
 
@@ -116,7 +116,7 @@ object QueryExecuter {
         errorCode: Int = 1001,
         methodName: String = "",
         notifyAll: Boolean = false
-    ): StatusSelectTable<E> {
+    ): S {
         var status = executeStatus<E, S>(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
         if (status.isOk) {
             status = executeStatus<E, S>(dao, query, errorCode, methodName)
