@@ -20,11 +20,11 @@ import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.base.IDao.*
-import pro.krit.hiveprocessor.common.FieldsBuilder
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -45,31 +45,18 @@ val IDao.fullTableName: String
 const val ERROR_CODE_SELECT_WHERE = 10001
 const val ERROR_CODE_REMOVE_WHERE = 10002
 const val ERROR_CODE_COUNT_WHERE = 10003
+const val ERROR_CODE_CREATE = 10004
+const val ERROR_CODE_INSERT = 10005
+const val ERROR_CODE_DELETE = 10006
 
-inline fun <reified E : Any> IDao.flowable(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowable(
+    dao: IDao,
     where: String = "",
+    limit: Int = 0,
     withStart: Boolean = true,
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
-) = flow {
-    val trigger = this@flowable
-    this@flowable.fmpDatabase.getTrigger(trigger).collect {
-        if(emitDelay > 0) {
-            kotlinx.coroutines.delay(emitDelay)
-        }
-        val result = selectAsync<E>(where)
-        emit(result)
-    }
-}.onStart {
-    if (withStart) {
-        val result = selectAsync<E>(where)
-        emit(result)
-    }
-}.apply {
-    if (withDistinct) {
-        distinctUntilChanged()
-    }
-}
+) = DaoInstance.flowable<E, S>(dao, where, limit, withStart, emitDelay, withDistinct)
 
 fun IDao.flowableCount(
     where: String = "",
@@ -80,7 +67,7 @@ fun IDao.flowableCount(
     val trigger = this@flowableCount
     this@flowableCount.fmpDatabase.getTrigger(trigger).collect {
         if(emitDelay > 0) {
-            kotlinx.coroutines.delay(emitDelay)
+            delay(emitDelay)
         }
         val result = countAsync(where)
         emit(result)
@@ -96,46 +83,37 @@ fun IDao.flowableCount(
     }
 }
 
-inline fun <reified E : Any> IDao.select(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> select(
+    dao: IDao,
+    where: String = "",
+    limit: Int = 0
+): List<E> = DaoInstance.select<E, S>(dao, where, limit)
+
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectAsync(
+    dao: IDao,
     where: String = "",
     limit: Int = 0
 ): List<E> {
-    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.SELECT_QUERY, where, limit)
-    return QueryExecuter.executeQuery(
-        dao = this,
-        query = selectQuery,
-        errorCode = ERROR_CODE_SELECT_WHERE,
-        methodName = "selectWhere"
-    )
+    return DaoInstance.selectAsync<E, S>(dao, where, limit)
 }
 
-suspend inline fun <reified E : Any> IDao.selectAsync(
-    where: String = "",
-    limit: Int = 0
-): List<E> {
-    return withContext(Dispatchers.IO) { select(where, limit) }
-}
-
-inline fun <reified E : Any> IDao.selectResult(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResult(
+    dao: IDao,
     where: String = "",
     limit: Int = 0
 ): Result<List<E>> {
-    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.SELECT_QUERY, where, limit)
-    return QueryExecuter.executeResultQuery(
-        dao = this,
-        query = selectQuery,
-        errorCode = ERROR_CODE_SELECT_WHERE,
-        methodName = "selectWhere"
-    )
+    return DaoInstance.selectResult<E, S>(dao, where, limit)
 }
 
-suspend inline fun <reified E : Any> IDao.selectResultAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResultAsync(
+    dao: IDao,
     where: String = "",
     limit: Int = 0
 ): Result<List<E>> {
-    return withContext(Dispatchers.IO) { selectResult(where, limit) }
+    return withContext(Dispatchers.IO) { selectResult<E, S>(dao, where, limit) }
 }
 
+/// Counts Queries
 fun IDao.count(
     where: String = ""
 ): Int {
@@ -156,162 +134,19 @@ suspend fun IDao.countAsync(
     return withContext(Dispatchers.IO) { count(where) }
 }
 
-inline fun <reified E : Any> IDao.delete(
-    where: String = "",
-    notifyAll: Boolean = true
-): StatusSelectTable<E> {
-    val deleteQuery = QueryBuilder.createQuery(this, QueryBuilder.DELETE_QUERY, where)
-    return QueryExecuter.executeStatus(
-        dao = this,
-        query = deleteQuery,
-        errorCode = ERROR_CODE_REMOVE_WHERE,
-        methodName = "delete",
-        notifyAll = notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any> IDao.deleteAsync(
-    where: String = "",
-    notifyAll: Boolean = true
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { delete(where, notifyAll) }
-}
-
-const val ERROR_CODE_CREATE = 10004
-const val ERROR_CODE_INSERT = 10005
-const val ERROR_CODE_DELETE = 10006
-
-inline fun <reified E : Any> IFieldsDao.initFields() {
-    FieldsBuilder.initFields(this, E::class.java.fields)
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.initFieldsAsync() {
-    withContext(Dispatchers.IO) {
-        FieldsBuilder.initFields(
-            this@initFieldsAsync,
-            E::class.java.fields
-        )
-    }
-}
-
-inline fun <reified E : Any> IFieldsDao.createTable(): StatusSelectTable<E> {
-    initFields<E>()
-    val query = QueryBuilder.createTableQuery(this)
-    return QueryExecuter.executeStatus(
-        dao = this,
-        query = query,
-        errorCode = ERROR_CODE_CREATE,
-        methodName = "createTable"
-    )
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.createTableAsync(): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) {
-        initFieldsAsync<E>()
-        createTable()
-    }
-}
-
-inline fun <reified E : Any> IFieldsDao.insertOrReplace(
-    item: E,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    val query = QueryBuilder.createInsertOrReplaceQuery(this, item)
-    return QueryExecuter.executeStatus(
-        dao = this,
-        query = query,
-        errorCode = ERROR_CODE_INSERT,
-        methodName = "insertOrReplace",
-        notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.insertOrReplaceAsync(
-    item: E,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { insertOrReplace(item, notifyAll) }
-}
-
-inline fun <reified E : Any> IFieldsDao.insertOrReplace(
-    items: List<E>,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    val query = QueryBuilder.createInsertOrReplaceQuery(this, items)
-    return QueryExecuter.executeTransactionStatus(
-        dao = this,
-        query = query,
-        errorCode = ERROR_CODE_INSERT,
-        methodName = "insertOrReplaceList",
-        notifyAll = notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.insertOrReplaceAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { insertOrReplace(items, notifyAll) }
-}
-
-inline fun <reified E : Any> IFieldsDao.delete(
-    item: E,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    val query = QueryBuilder.createDeleteQuery(this, item)
-    return QueryExecuter.executeStatus(
-        dao = this,
-        query = query,
-        errorCode = ERROR_CODE_DELETE,
-        methodName = "delete",
-        notifyAll = notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.deleteAsync(
-    item: E,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { delete(item, notifyAll) }
-}
-
-inline fun <reified E : Any> IFieldsDao.delete(
-    items: List<E>,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    val query = QueryBuilder.createDeleteQuery(this, items)
-    return QueryExecuter.executeTransactionStatus(
-        dao = this,
-        query = query,
-        errorCode = ERROR_CODE_DELETE,
-        methodName = "deleteList",
-        notifyAll = notifyAll
-    )
-}
-
-suspend inline fun <reified E : Any> IFieldsDao.deleteAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): StatusSelectTable<E> {
-    return withContext(Dispatchers.IO) { delete(items, notifyAll) }
-}
-
 ////------ TRIGGERS
-
 fun IDao.triggerFlow() {
     (fmpDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(fullTableName)
 }
 
-fun <E : Any> StatusSelectTable<E>.triggerFlow(dao: IDao): StatusSelectTable<E> {
+fun <E : Any> StatusSelectTable<E>.triggerFlow(dao: IDao) {
     if (this.status.name == "OK") {
         dao.triggerFlow()
     }
-    return this
 }
 
 
 ///------Update Section
-
 fun IDao.request(
     params: ScalarMap? = null
 ): BaseStatus {

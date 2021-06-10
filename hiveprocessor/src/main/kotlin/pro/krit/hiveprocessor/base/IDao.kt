@@ -23,10 +23,9 @@ sealed interface IDao {
     val resourceName: String
     val tableName: String
     val isDelta: Boolean
+    var fieldsData: DaoFieldsData?
 
-    interface IFieldsDao : IDao {
-        var fieldsData: DaoFieldsData?
-    }
+    interface IFieldsDao : IDao
 
     /**
      * Base abstraction for annotation processing works with remotely fmp database structures
@@ -36,5 +35,5 @@ sealed interface IDao {
     /**
      * Base abstraction for annotation processing works with local fmp database structures
      */
-    interface IFmpLocalDao<E : Any, T : StatusSelectTable<E>> : IFmpDao<E, T>, IFieldsDao
+    interface IFmpLocalDao<E : Any, T : StatusSelectTable<E>> : IFieldsDao
 }

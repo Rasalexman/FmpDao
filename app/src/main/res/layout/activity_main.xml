@@ -36,4 +36,23 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/request01Button"/>
 
+    <Button
+        android:id="@+id/request03Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Add Local Items"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginTop="@dimen/size_24dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/request02Button"/>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginBottom="@dimen/size_56dp"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/statusTV"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

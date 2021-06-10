@@ -13,43 +13,41 @@
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 package pro.krit.hiveprocessor.extensions
-
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.hiveprocessor.base.IDao.IFmpDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import pro.krit.hiveprocessor.base.IDao
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.flowable(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.flowable(
     where: String = "",
+    limit: Int = 0,
     withStart: Boolean = true,
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
-) = flowable<E>(where, withStart, emitDelay, withDistinct)
+) = flowable<E, S>(this, where, limit, withStart, emitDelay, withDistinct)
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.select(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.select(
     where: String = "",
     limit: Int = 0
-): List<E> = select<E>(where, limit)
+): List<E> = select<E, S>(this, where, limit)
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
     where: String = "",
     limit: Int = 0
-): List<E> = selectAsync<E>(where, limit)
+): List<E> {
+    return selectAsync<E, S>(this, where, limit)
+}
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectResult(
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResult(
     where: String = "",
     limit: Int = 0
-): Result<List<E>> = selectResult<E>(where, limit)
+): Result<List<E>> {
+    return selectResult<E, S>(this, where, limit)
+}
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.selectResultAsync(
+suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResultAsync(
     where: String = "",
     limit: Int = 0
-): Result<List<E>> = selectResultAsync<E>(where, limit)
-
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.delete(
-    where: String = "",
-    notifyAll: Boolean = true
-): StatusSelectTable<E> = delete<E>(where, notifyAll)
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IFmpDao<E, S>.deleteAsync(
-    where: String = "",
-    notifyAll: Boolean = true
-): StatusSelectTable<E> = deleteAsync<E>(where, notifyAll)
+): Result<List<E>> {
+    return selectResultAsync<E, S>(this, where, limit)
+}
