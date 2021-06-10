@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Button
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.mobrun.plugin.api.HyperHiveState
 import kotlinx.coroutines.CoroutineScope
@@ -81,7 +80,14 @@ class MainActivity : AppCompatActivity() {
         val dbState = mainDb.openDatabase(DEBUG_LOGIN)
 
         println("-----> dbState = $dbState")
-
+        val headers = mapOf(
+            "X-SUP-DOMAIN" to "DM-MAIN",
+            "Content-Type" to "application/json",
+            "X-Version-App" to "2.0",
+            "X-Phone" to "X-OS",
+            "Device-Id" to "sasasdw9272sadsadsda"
+        )
+        mainDb.setDefaultHeaders(headers)
         val status = mainDb.provideHyperHive().authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
 
         println("auth status = $status")
@@ -90,8 +96,8 @@ class MainActivity : AppCompatActivity() {
         pmFieldDao = mainDb.provideFieldsDao()
         pmFieldDao.createTable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()
 
-        exampleWithLocalDao(pmLocalDao)
-        exampleWithFieldsDao(pmFieldDao)
+        //exampleWithLocalDao(pmLocalDao)
+        //exampleWithFieldsDao(pmFieldDao)
     }
 
     private fun makeRequest01Map() {
@@ -102,16 +108,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun makeRequest01(params: Any?) {
-        val request: IZtMp01Request = mainDb.provideIZtMp01Request()
-        val result1 = request.requestResult<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
-            params
-        )
-        result1.fold(onSuccess = {
-            Toast.makeText(this, "SUCCESS", Toast.LENGTH_SHORT).show()
-        }, onFailure = {
-            it.printStackTrace()
-            Toast.makeText(this, "FAIL REQUEST", Toast.LENGTH_SHORT).show()
-        })
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            val request: IZtMp01Request = mainDb.provideIZtMp01Request()
+            /*val result1 = request.requestResultAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+                params
+            )
+            result1.fold(onSuccess = {
+                Toast.makeText(this@MainActivity, "SUCCESS", Toast.LENGTH_SHORT).show()
+            }, onFailure = {
+                it.printStackTrace()
+                Toast.makeText(this@MainActivity, "FAIL REQUEST", Toast.LENGTH_SHORT).show()
+            })*/
+
+            val request2 = request.requestStatusAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+                params
+            )
+            println("------> request2 = $request2")
+
+            val request3 = request.requestAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+                params
+            )
+            println("------> request3 = $request3")
+        }
+
     }
 
     private fun exampleWithLocalDao(pmLocalDao: IPmDataLocalDao) {

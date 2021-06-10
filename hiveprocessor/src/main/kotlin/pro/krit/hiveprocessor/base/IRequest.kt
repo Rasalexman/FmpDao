@@ -18,7 +18,7 @@ import com.mobrun.plugin.api.HyperHive
 import pro.krit.hiveprocessor.request.BaseFmpRawModel
 import pro.krit.hiveprocessor.request.ObjectRawStatus
 
-typealias RawStatus<S> = ObjectRawStatus<out BaseFmpRawModel<S>>
+typealias RawStatus<S> = ObjectRawStatus<S>
 
 sealed interface IRequest {
     val hyperHive: HyperHive

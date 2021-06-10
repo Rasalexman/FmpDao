@@ -27,26 +27,42 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
 ): S? {
     val params = RequestBuilder.createParams(this, requestData)
     val resultStatus = RequestExecuter.executeStatus<S, T>(this, params)
-    return resultStatus.data
+    return resultStatus?.result?.raw
 }
 
 suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestAsync(
     requestData: Any? = null
 ): S? {
-    return withContext(Dispatchers.IO) { request<S, T>(requestData) }
+    val currentRequest = this
+    return withContext(Dispatchers.IO) {
+        val params = withContext(Dispatchers.Default) {
+            RequestBuilder.createParams(
+                currentRequest,
+                requestData
+            )
+        }
+        RequestExecuter.executeStatus<S, T>(currentRequest, params)?.result?.raw
+    }
 }
 
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     requestData: Any? = null
 ): BaseStatus {
     val params = RequestBuilder.createParams(this, requestData)
-    return RequestExecuter.executeBaseStatus(this, params, T::class.java)
+    return RequestExecuter.executeBaseStatus<T>(this, params, T::class.java)
 }
 
 suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
     requestData: Any? = null
 ): BaseStatus {
-    return withContext(Dispatchers.IO) { requestStatus<S, T>(requestData) }
+    val currentRequest = this
+    return withContext(Dispatchers.IO) {
+        val params = RequestBuilder.createParams(
+            currentRequest,
+            requestData
+        )
+        RequestExecuter.executeBaseStatus<T>(currentRequest, params, T::class.java)
+    }
 }
 
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
@@ -59,5 +75,10 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
 suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResultAsync(
     requestData: Any? = null
 ): Result<S> {
-    return withContext(Dispatchers.IO) { requestResult<S, T>(requestData) }
+    val currentRequest = this
+    return withContext(Dispatchers.IO) {
+        val params = RequestBuilder.createParams(currentRequest, requestData)
+        RequestExecuter.executeResult<S, T>(currentRequest, params)
+    }
+
 }
