@@ -313,7 +313,7 @@ class FmpProcessor : AbstractProcessor() {
             val classTypeSpec =
                 TypeSpec.classBuilder(classFileName)
                     .addSuperinterface(mainClassName)
-                    .addProperties(createProperties(bindData))
+                    .addProperties(createProperties())
             classBuilders.add(classTypeSpec)
 
             if (bindData.parameters.isNotEmpty()) {
@@ -399,7 +399,7 @@ class FmpProcessor : AbstractProcessor() {
                 )
             }
 
-            println("------> genericsArray = $genericsArray")
+            //println("------> genericsArray = $genericsArray")
             // осноыной конструктор с дженериками
             classTypeSpec.primaryConstructor(constructorFunSpec(bindData, genericsArray))
 
@@ -494,7 +494,7 @@ class FmpProcessor : AbstractProcessor() {
         }
     }
 
-    private fun createProperties(bindData: BindData): List<PropertySpec> {
+    private fun createProperties(): List<PropertySpec> {
         val hyperHiveProviderProp =
             PropertySpec.builder(FIELD_PROVIDER, IFmpDatabase::class)
                 .initializer(FIELD_PROVIDER)

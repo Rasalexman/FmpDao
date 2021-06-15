@@ -21,12 +21,9 @@ import com.mobrun.plugin.api.callparams.RequestCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.Error
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.base.RawStatus
 import pro.krit.hiveprocessor.errors.RequestException
-import pro.krit.hiveprocessor.request.BaseFmpRawModel
 import pro.krit.hiveprocessor.request.ObjectRawStatus
 
 object RequestExecuter {
@@ -124,6 +121,7 @@ object RequestExecuter {
 
     inline fun <reified S : Any, reified T : RawStatus<S>> String.tryParseRawStatus(): T? {
         return try {
+            println("status: $this")
             val status: T = gson.fromJson<T>(this, T::class.java)
             status
         } catch (ex: Exception) {
@@ -135,16 +133,6 @@ object RequestExecuter {
                 errors.add(error)
             } as? T
         }
-    }
-
-    inline fun <reified S : Any> BaseStatus.getErrorRawModel(): BaseFmpRawModel<S> {
-        val errorStatus = BaseFmpRawModel<S>()
-        errorStatus.errorDescription =
-            this.errors.firstOrNull()?.descriptions?.firstOrNull().orEmpty()
-        errorStatus.errorMessage = this.errors.firstOrNull()?.description.orEmpty()
-        errorStatus.statusCode = this.httpStatus?.status ?: -1
-        errorStatus.version = ""
-        return errorStatus
     }
 
     fun BaseStatus.isNotBad(): Boolean {
