@@ -18,10 +18,10 @@ package pro.krit.hiveprocessor.provider
  * Config for create [AbstractFmpDatabase] instance
  */
 data class DatabaseConfig(
-    val dbKey: String = "",
     val serverAddress: String,
     val environment: String,
     val project: String,
+    val dbKey: String = "",
     val dbPath: String = "",
     val projectVersion: String = "app",
     val retryCount: Int = 5,
