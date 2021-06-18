@@ -49,6 +49,7 @@ object DaoInstance {
         limit: Int = 0
     ): List<E> {
         val selectQuery = QueryBuilder.createQuery(dao, QueryBuilder.SELECT_QUERY, where, limit)
+        println("------> selectQuery = $selectQuery")
         return QueryExecuter.executeQuery<E, S>(
             dao = dao,
             query = selectQuery,

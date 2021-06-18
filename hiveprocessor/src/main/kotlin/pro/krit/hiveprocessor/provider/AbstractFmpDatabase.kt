@@ -93,7 +93,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {
-        var isClosed = true
+        var isClosed = false
         var isOpened = tryToOpenDatabase(dbKey, pathBase)
         if(!isOpened) {
             isClosed = tryToCloseDatabase(pathBase)
@@ -134,7 +134,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     private fun generateKey(login: String): String {
-        return "${login}bjasbjasbjasew"
+        return login.takeIf { it.isNotEmpty() }?.let { "${login}bjasbjasbjasew" }.orEmpty()
     }
 
     private fun clearProviders() {

@@ -14,8 +14,6 @@
 
 package pro.krit.hiveprocessor.extensions
 import com.mobrun.plugin.models.StatusSelectTable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IDao
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.flowable(
@@ -24,30 +22,23 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     withStart: Boolean = true,
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
-) = flowable<E, S>(this, where, limit, withStart, emitDelay, withDistinct)
+) = DaoInstance.flowable<E, S>(this, where, limit, withStart, emitDelay, withDistinct)
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.select(
     where: String = "",
     limit: Int = 0
-): List<E> = select<E, S>(this, where, limit)
+): List<E> = DaoInstance.select<E, S>(this, where, limit)
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
     where: String = "",
     limit: Int = 0
 ): List<E> {
-    return selectAsync<E, S>(this, where, limit)
+    return DaoInstance.selectAsync<E, S>(this, where, limit)
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResult(
     where: String = "",
     limit: Int = 0
 ): Result<List<E>> {
-    return selectResult<E, S>(this, where, limit)
-}
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResultAsync(
-    where: String = "",
-    limit: Int = 0
-): Result<List<E>> {
-    return selectResultAsync<E, S>(this, where, limit)
+    return DaoInstance.selectResult<E, S>(this, where, limit)
 }
