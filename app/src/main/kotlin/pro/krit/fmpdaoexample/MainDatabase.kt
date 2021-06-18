@@ -1,5 +1,6 @@
 package pro.krit.fmpdaoexample
 
+import pro.krit.fmpdaoexample.fmpresources.IZsMp04Dao
 import pro.krit.hiveprocessor.annotations.FmpDatabase
 import pro.krit.hiveprocessor.provider.AbstractFmpDatabase
 import pro.krit.hiveprocessor.provider.IFmpDatabase
@@ -22,6 +23,9 @@ interface IMainLocalDatabase {
 interface IMainRemoteDatabase {
     fun providePmDao(): IPmDataDao
     fun provideFieldsDao(): IPmDataFieldsDao
+
+    fun provideZsMp01Dao(): IZsMp01Dao
+    fun provideZsMp04Dao(): IZsMp04Dao
 }
 
 interface IMainRequest {

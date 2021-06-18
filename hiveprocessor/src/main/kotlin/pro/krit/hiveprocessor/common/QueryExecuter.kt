@@ -17,6 +17,8 @@ package pro.krit.hiveprocessor.common
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.RequestExecuter.isNotBad
+import pro.krit.hiveprocessor.extensions.fullTableName
 import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
@@ -35,7 +37,7 @@ object QueryExecuter {
             status.result.database.records.orEmpty()
         } catch (e: Exception) {
             e.printStackTrace()
-            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
         }
     }
@@ -73,18 +75,22 @@ object QueryExecuter {
     ): Result<List<E>> {
         return try {
             val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
-            if (status is S) {
-                Result.success(status.result.database.records.orEmpty())
+            if (status.isNotBad()) {
+                val result = status.result.database.records.orEmpty()
+                println("[SUCCESS]: ${dao.fullTableName} result = $result")
+                Result.success(result)
             } else {
                 val firstError = status.errors.firstOrNull()
                 val message = firstError?.run {
                     description ?: descriptions.firstOrNull()
                 }.orEmpty()
+                println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
                 Result.failure(IllegalStateException(message))
             }
 
         } catch (e: Exception) {
             e.printStackTrace()
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             Result.failure(e)
         }
     }
@@ -97,11 +103,15 @@ object QueryExecuter {
         notifyAll: Boolean = false
     ): S {
         return try {
-            val hyperHiveDatabaseApi = dao.fmpDatabase.databaseApi
-            hyperHiveDatabaseApi.query(query, S::class.java).execute()!!.apply {
-                if (notifyAll) this.triggerFlow(dao)
+            val localDao: IDao = dao
+            val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
+            val clazz = S::class.java
+            hyperHiveDatabaseApi.query(query, clazz).execute()!!.apply {
+                if (notifyAll) this.triggerFlow(localDao)
             }
         } catch (e: Exception) {
+            e.printStackTrace()
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             createErrorStatus<E>(
                 ex = e,
                 codeType = errorCode,

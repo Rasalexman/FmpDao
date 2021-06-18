@@ -28,34 +28,27 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.f
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ): Flow<List<E>> {
-    return flowable<E,S>(this, where, limit, withStart, emitDelay, withDistinct)
+    return DaoInstance.flowable<E,S>(this, where, limit, withStart, emitDelay, withDistinct)
 }
 
 ///---- SELECT QUERIES
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.select(
     where: String = "",
     limit: Int = 0
-): List<E> = select<E, S>(this, where, limit)
+): List<E> = DaoInstance.select<E, S>(this, where, limit)
 
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectAsync(
     where: String = "",
     limit: Int = 0
 ): List<E> {
-    return selectAsync<E, S>(this, where, limit)
+    return DaoInstance.selectAsync<E, S>(this, where, limit)
 }
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectResult(
     where: String = "",
     limit: Int = 0
 ): Result<List<E>> {
-    return selectResult<E, S>(this, where, limit)
-}
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectResultAsync(
-    where: String = "",
-    limit: Int = 0
-): Result<List<E>> {
-    return selectResultAsync<E, S>(this, where, limit)
+    return DaoInstance.selectResult<E, S>(this, where, limit)
 }
 
 ///------- CREATE TABLE

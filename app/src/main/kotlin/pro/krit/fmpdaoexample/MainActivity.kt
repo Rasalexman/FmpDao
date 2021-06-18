@@ -6,14 +6,15 @@ import android.os.Looper
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.mobrun.plugin.api.HyperHiveState
+import com.mobrun.plugin.models.BaseStatus
+import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import pro.krit.generated.dao.PmDataFieldsDaoModel
-import pro.krit.generated.dao.PmDataFieldsDaoStatus
+import pro.krit.generated.dao.*
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.generated.request.ZtMp01RequestRespondStatus
 import pro.krit.generated.request.ZtMp01RequestResultModel
@@ -26,7 +27,7 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val DEBUG_LOGIN = "Petrov"
+        const val DEBUG_LOGIN = "Ivanov"
         const val DEBUG_PASSWORD = "1q2w3e4r"
     }
 
@@ -65,7 +66,6 @@ class MainActivity : AppCompatActivity() {
         val dbPath = this.applicationContext.getDatabasePath(fmpDbName).path
 
         val hyperHiveConfig = DatabaseConfig(
-            dbKey = "Main",
             serverAddress = serverAddress,
             environment = environment,
             project = project,
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity() {
             hState = HyperHiveState(this).setHandler(Handler(Looper.getMainLooper())),
             config = hyperHiveConfig
         )
-        val dbState = mainDb.openDatabase(DEBUG_LOGIN)
+        val dbState = mainDb.openDatabase()
 
         println("-----> dbState = $dbState")
         val headers = mapOf(
@@ -88,13 +88,83 @@ class MainActivity : AppCompatActivity() {
             "Device-Id" to "sasasdw9272sadsadsda"
         )
         mainDb.setDefaultHeaders(headers)
-        val status = mainDb.provideHyperHive().authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
 
+        val dbApi = mainDb.databaseApi
+        val hyperHive = mainDb.provideHyperHive()
+        val status = hyperHive.authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
+        val resultSchema = hyperHive.authAPI.resourcesBaseStatus().execute()
+        println("-----> Base schema status = $resultSchema")
+
+        val localdao = mainDb.providePmLocalDao()
+        val localStatus = localdao.insertOrReplace(listOf(
+            PmEtDataLocalEntity(
+                marker = UUID.randomUUID().toString().take(10),
+                auart = UUID.randomUUID().toString().take(19),
+                index = Random.nextInt(10, 50000),
+                type = PmType.ADMIN
+            )
+        ))
+        println("-----> LocalDao status = ${localStatus.isOk}")
+        val allData = localdao.selectResult()
+
+        val result = allData.fold(onSuccess = {
+            println("------> selectResult Success = $it")
+            it
+        }, onFailure = {
+            println("------> selectResult Failure = $it")
+            listOf()
+        })
+        println("-----> LocalDao result = ${result.mapNotNull { it.auart }}")
+
+        /*val zsmp02Dao = mainDb.provideZsMp04Dao()
+        val updateResult = zsmp02Dao.requestBuilder().streamCallAuto().execute()
+        println("------> updateResult = $updateResult")
+
+        val mainScope = CoroutineScope(Dispatchers.Main)
+        mainScope.launch {
+            val zsmp02Dao2 = mainDb.provideZsMp04Dao()
+            val result = withContext(Dispatchers.IO) { zsmp02Dao2.selectResult<ZsMp04DaoModel, ZsMp04DaoStatus>("TID = \'1\'") }
+            result.fold(onSuccess = {
+                println("------> selectResult Success = $it")
+            }, onFailure = {
+                println("------> selectResult Failure = $it")
+            })
+
+            val resultAsync = zsmp02Dao2.selectAsync<ZsMp04DaoModel, ZsMp04DaoStatus>("TID = \'3\'")
+            println("-------> resultAsync = $resultAsync")
+
+            zsmp02Dao2.flowable<ZsMp04DaoModel, ZsMp04DaoStatus>().collect {
+                println("-----> flowable result = $it")
+            }
+        }*/
+
+
+
+        /*val zsmp01Dao = mainDb.provideZsMp01Dao()
+
+        // Укажем путь для хранения временных файлов
+        //hyperHive.requestAPI.setDownloadPath(filesDir.absolutePath + "/tmp")
+        //hyperHive.requestAPI.setUseDownload(true)
+        println("------ resource name = ${zsmp01Dao.resourceName}")
+        val result = hyperHive.requestAPI.tableStream(zsmp01Dao.resourceName).execute()
+
+        val queryRequest = dbApi.getTablesName(
+            zsmp01Dao.resourceName, "", TableStreamStatus::class.java
+        ).execute()
+
+        val tableNameQuery = queryRequest.request?.source?.database?.statements?.firstOrNull().orEmpty()
+        val response = dbApi.query(tableNameQuery, BaseStatus::class.java).execute()
+        val zsDbResult = dbApi.query("SELECT * FROM zs_mp_01_output_table", StatusSelectTable::class.java).execute()
+        println("-----> zsDbResult = $zsDbResult")
+
+        val resultAll = zsmp01Dao.select<ZsMp01DaoModel, ZsMp01DaoStatus>()*/
+        println("-----> resultAll") //SELECT `name` FROM `sqlite_master` WHERE type='table' and name like 'zs_mp_01_37a6259cc0c1dae299a7866489dff0bd%';
+        /*
         println("auth status = $status")
         pmLocalDao = mainDb.providePmLocalDao()
         pmRemoteDao = mainDb.providePmDao()
         pmFieldDao = mainDb.provideFieldsDao()
-        pmFieldDao.createTable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()
+        pmFieldDao.createTable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()*/
 
         //exampleWithLocalDao(pmLocalDao)
         //exampleWithFieldsDao(pmFieldDao)
@@ -181,7 +251,7 @@ class MainActivity : AppCompatActivity() {
         //pmLocalDao.dele
 
         val resultList = pmLocalDao.selectAsync<PmEtDataLocalEntity, PmLocalStatus>()
-        pmLocalDao.selectResultAsync()
+        //pmLocalDao.selectResultAsync()
         println("----> all count = ${resultList.mapNotNull { it.convertTo() }}")
     }
 

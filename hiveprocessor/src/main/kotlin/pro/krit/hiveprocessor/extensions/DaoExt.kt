@@ -49,15 +49,6 @@ const val ERROR_CODE_CREATE = 10004
 const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowable(
-    dao: IDao,
-    where: String = "",
-    limit: Int = 0,
-    withStart: Boolean = true,
-    emitDelay: Long = 100L,
-    withDistinct: Boolean = false
-) = DaoInstance.flowable<E, S>(dao, where, limit, withStart, emitDelay, withDistinct)
-
 fun IDao.flowableCount(
     where: String = "",
     withStart: Boolean = true,
@@ -81,36 +72,6 @@ fun IDao.flowableCount(
     if (withDistinct) {
         distinctUntilChanged()
     }
-}
-
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> select(
-    dao: IDao,
-    where: String = "",
-    limit: Int = 0
-): List<E> = DaoInstance.select<E, S>(dao, where, limit)
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectAsync(
-    dao: IDao,
-    where: String = "",
-    limit: Int = 0
-): List<E> {
-    return DaoInstance.selectAsync<E, S>(dao, where, limit)
-}
-
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResult(
-    dao: IDao,
-    where: String = "",
-    limit: Int = 0
-): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(dao, where, limit)
-}
-
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResultAsync(
-    dao: IDao,
-    where: String = "",
-    limit: Int = 0
-): Result<List<E>> {
-    return withContext(Dispatchers.IO) { selectResult<E, S>(dao, where, limit) }
 }
 
 /// Counts Queries
