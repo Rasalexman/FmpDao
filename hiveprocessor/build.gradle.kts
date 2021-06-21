@@ -35,6 +35,12 @@ dependencies {
     kapt(config.Libs.Processor.autoService)
 }
 
+kapt {
+    useBuildCache = true
+    generateStubs = false
+    includeCompileClasspath = false
+}
+
 group = "pro.krit.hiveprocessor"
 version = Builds.Processor.VERSION_NAME
 

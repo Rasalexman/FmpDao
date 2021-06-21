@@ -6,14 +6,13 @@ import android.os.Looper
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.mobrun.plugin.api.HyperHiveState
-import com.mobrun.plugin.models.BaseStatus
-import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import pro.krit.fmpdaoexample.fmpresources.IZtMp01Request
 import pro.krit.generated.dao.*
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.generated.request.ZtMp01RequestRespondStatus
