@@ -35,6 +35,7 @@ const val PREFIX_UPPER = 'I'
 const val PREFIX_LOWER = 'i'
 
 const val MODEL_FIELD_TYPE_INT = "int"
+const val MODEL_FIELD_TYPE_LIST = "list"
 const val MODEL_FIELD_PRIMARY_KEY = "primary"
 
 const val LIST_RETURN_TYPE = "java.util.List"
@@ -73,7 +74,13 @@ internal fun String.createReturnType(returnPack: String, returnClass: String): T
 internal fun String.getPackAndClass(): Pair<String, String> {
     val withoutSuspend = this.withoutSuspend()
     val withoutBraces = withoutSuspend.replace("()", "")
-    val replaced = withoutBraces.splitArray()
+    //
+    val ifArray = withoutBraces.contains(LIST_RETURN_TYPE)
+    val replaced = if (ifArray) {
+        withoutBraces.split("<")[1].replace(">", "")
+    } else {
+        withoutBraces
+    }
 
     val splitted = replaced.split(".")
     val className = splitted.last()
@@ -98,15 +105,6 @@ internal fun String.replaceTablePattern(returnClass: String, bindData: BindData)
         val tableName = "${bindData.resourceName}_${bindData.tableName}"
         this.replace(tablePattern, tableName)
     } else this
-}
-
-internal fun String.splitArray(): String {
-    val ifArray = this.contains(LIST_RETURN_TYPE)
-    return if (ifArray) {
-        this.split("<")[1].replace(">", "")
-    } else {
-        this
-    }
 }
 
 internal fun String?.splitGenericsArray(): List<String> {
@@ -151,21 +149,30 @@ internal fun String.asModelFieldData(): FieldData {
         propSplit.removeAt(indexOfInt)
     }
 
+    // for list change input vararg to Any?
+    /*val indexOfList = propSplit.indexOf(MODEL_FIELD_TYPE_LIST)
+    if (indexOfInt > -1) {
+        type = List::class
+        propSplit.removeAt(indexOfList)
+        println("-----> LIST FOUNT")
+    }*/
+
     val indexOfPrimaryKey = propSplit.indexOf(MODEL_FIELD_PRIMARY_KEY)
     val isPrimaryKey = indexOfPrimaryKey > -1
 
     if (isPrimaryKey) {
         propSplit.removeAt(indexOfPrimaryKey)
     }
-
+    //
     val fieldSmallName = buildString {
         propSplit.forEachIndexed { index, s ->
             if (index > 0) append(s.capitalizeFirst())
             else append(s)
         }
     }
+    //
+    val size = propSplit.size - 1
     val fieldNameBig = buildString {
-        val size = propSplit.size - 1
         propSplit.forEachIndexed { index, s ->
             append(s.uppercase())
             if (index < size) append("_")
