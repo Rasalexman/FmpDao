@@ -84,6 +84,7 @@ class FmpProcessor : AbstractProcessor() {
         private const val FIELD_DAO_FIELDS = "fieldsData"
         private const val FIELD_PARAMS = "params"
         private const val FIELD_PARAMS_GET = "params.getOrNull(%s).orEmpty()"
+        private const val FIELD_PARAMS_GET_NULL = "params.getOrNull(%s)"
 
         private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
         private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
@@ -130,40 +131,42 @@ class FmpProcessor : AbstractProcessor() {
         annotations: MutableSet<out TypeElement>,
         roundEnv: RoundEnvironment
     ): Boolean {
-        val startTime = System.currentTimeMillis()
-        //println("FmpProcessor started with annotations: $annotations")
-        val bindingDataList = mutableListOf<BindData>()
-        // Create files for FmpDao annotation
-        val fmpResult = collectAnnotationData(
-            roundEnv.getElementsAnnotatedWith(FmpDao::class.java),
-            bindingDataList,
-            ::getDataFromFmpDao
-        )
-        // Create files for FmpLocalDao annotation
-        val fmpLocalResult = collectAnnotationData(
-            roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
-            bindingDataList,
-            ::getDataFromFmpLocalDao
-        )
+        if(annotations.isNotEmpty()) {
+            val startTime = System.currentTimeMillis()
+            //println("FmpProcessor started with annotations: $annotations")
+            val bindingDataList = mutableListOf<BindData>()
+            // Create files for FmpDao annotation
+            val fmpResult = collectAnnotationData(
+                roundEnv.getElementsAnnotatedWith(FmpDao::class.java),
+                bindingDataList,
+                ::getDataFromFmpDao
+            )
+            // Create files for FmpLocalDao annotation
+            val fmpLocalResult = collectAnnotationData(
+                roundEnv.getElementsAnnotatedWith(FmpLocalDao::class.java),
+                bindingDataList,
+                ::getDataFromFmpLocalDao
+            )
 
-        // Web Requests
-        val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
-        processWebRequest(webElementRequests, bindingDataList)
-        // Rest Requests
-        val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
-        processRestRequest(restElementRequests, bindingDataList)
+            // Web Requests
+            val webElementRequests = roundEnv.getElementsAnnotatedWith(FmpWebRequest::class.java)
+            processWebRequest(webElementRequests, bindingDataList)
+            // Rest Requests
+            val restElementRequests = roundEnv.getElementsAnnotatedWith(FmpRestRequest::class.java)
+            processRestRequest(restElementRequests, bindingDataList)
 
-        // If we has generated files for database without errors
-        if (!fmpResult && !fmpLocalResult) {
-            processDaos(bindingDataList)
+            // If we has generated files for database without errors
+            if (!fmpResult && !fmpLocalResult) {
+                processDaos(bindingDataList)
 
-            val databases = roundEnv.getElementsAnnotatedWith(FmpDatabase::class.java)
-            databases?.forEach { currentDatabase ->
-                processDatabase(currentDatabase, bindingDataList)
+                val databases = roundEnv.getElementsAnnotatedWith(FmpDatabase::class.java)
+                databases?.forEach { currentDatabase ->
+                    processDatabase(currentDatabase, bindingDataList)
+                }
             }
-        }
 
-        println("FmpProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
+            println("FmpProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
+        }
         return false
     }
 
@@ -808,8 +811,6 @@ class FmpProcessor : AbstractProcessor() {
         val kind = element.kind
         val annotation = element.annotationMirrors.firstOrNull()
 
-        var bindData: BindData? = null
-
         if (resourceName.isEmpty()) {
             throw IllegalStateException("\'$element\' can not have empty \'resourceName\' property for annotation $annotation")
         }
@@ -828,35 +829,35 @@ class FmpProcessor : AbstractProcessor() {
             it.kind != ElementKind.CLASS && it.kind != ElementKind.CONSTRUCTOR
         }.orEmpty()
 
-        //println(" elementEnclosed = $elementEnclosed")
+        // main class implementation
+        val (mainPackName, mainClassName) = element.asType().toString().getPackAndClass()
+        val typeClassName = mainClassName.createFileName()
+
+        //------ ALL ELEMENT CLASSES
+        val elementsFiles = mutableListOf<TypeSpec.Builder>()
+
+        //------ Main Request Class
+        val mainSuperInterface = ClassName(mainPackName, mainClassName)
+        val mainClassTypeSpec = TypeSpec.classBuilder(typeClassName)
+            .addSuperinterface(mainSuperInterface)
+
+        val mainClassPropSpec = FunSpec.constructorBuilder()
+        createMainRequestClass(
+            resourceName,
+            mainClassName,
+            parameters,
+            mainClassPropSpec,
+            mainClassTypeSpec
+        )
+        elementsFiles.add(mainClassTypeSpec)
+
+        //------ Request Params Class
+        if (parameters.isNotEmpty()) {
+            val paramsClass = createRequestParams(mainClassName, parameters)
+            elementsFiles.add(paramsClass)
+        }
+
         if (elementEnclosed.isNotEmpty()) {
-            // main class implementation
-            val (mainPackName, mainClassName) = element.asType().toString().getPackAndClass()
-            val typeClassName = mainClassName.createFileName()
-
-            //------ ALL ELEMENT CLASSES
-            val elementsFiles = mutableListOf<TypeSpec.Builder>()
-
-            //------ Main Request Class
-            val mainClassTypeSpec = TypeSpec.classBuilder(typeClassName)
-                .addSuperinterface(ClassName(mainPackName, mainClassName))
-
-            val mainClassPropSpec = FunSpec.constructorBuilder()
-            createMainRequestClass(
-                resourceName,
-                mainClassName,
-                parameters,
-                mainClassPropSpec,
-                mainClassTypeSpec
-            )
-            elementsFiles.add(mainClassTypeSpec)
-
-            //------ Request Params Class
-            if (parameters.isNotEmpty()) {
-                val paramsClass = createRequestParams(mainClassName, parameters)
-                elementsFiles.add(paramsClass)
-            }
-
             //------ Result models
             val resultModelClassName = ClassName(
                 REQUEST_PACKAGE_NAME,
@@ -935,31 +936,34 @@ class FmpProcessor : AbstractProcessor() {
                 requestInterface.parameterizedBy(resultModelClassName, respondStatusClassName)
             mainClassTypeSpec.addSuperinterface(parametrizedInterface)
 
-            // save all classes in one file
-            saveFiles(REQUEST_PACKAGE_NAME, typeClassName, elementsFiles)
 
-            bindData = BindData(
-                element = element,
-                fileName = typeClassName,
-                createTableOnInit = false,
-                parameters = emptyList(),
-                fields = emptyList(),
-                mainData = TypeData(
-                    packName = mainPackName,
-                    className = mainClassName
-                ),
-                resourceName = resourceName,
-                tableName = resourceName,
-                isDelta = false,
-                isRequest = true,
-                isLocal = true
-            )
-        } else {
+
+
+        } /*else {
             val message =
                 java.lang.String.format(" Please set private inner interfaces with annotation \'@FmpTable\' for request \'$element\'. ")
             messager.printMessage(Diagnostic.Kind.WARNING, message)
-        }
-        return bindData
+        }*/
+
+        // save all classes in one file
+        saveFiles(REQUEST_PACKAGE_NAME, typeClassName, elementsFiles)
+
+        return BindData(
+            element = element,
+            fileName = typeClassName,
+            createTableOnInit = false,
+            parameters = emptyList(),
+            fields = emptyList(),
+            mainData = TypeData(
+                packName = mainPackName,
+                className = mainClassName
+            ),
+            resourceName = resourceName,
+            tableName = resourceName,
+            isDelta = false,
+            isRequest = true,
+            isLocal = true
+        )
     }
 
     private fun createRawStatusClass(
@@ -1118,7 +1122,7 @@ class FmpProcessor : AbstractProcessor() {
                 val paramSize = parameters.size - 1
                 parameters.forEachIndexed { index, param ->
                     val paramName = param.asModelFieldData().name
-                    val fieldGet = FIELD_PARAMS_GET.format("$index")
+                    val fieldGet = FIELD_PARAMS_GET_NULL.format("$index")
                     append("$paramName = $fieldGet")
                     if (index < paramSize) {
                         append(", ")

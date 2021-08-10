@@ -125,7 +125,7 @@ object DaoInstance {
         where: String = "",
         notifyAll: Boolean = true
     ): S {
-        return withContext(Dispatchers.IO) { delete<E, S>(dao, where, notifyAll) }
+        return withContext(Dispatchers.IO) {  delete<E, S>(dao, where, notifyAll) }
     }
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(

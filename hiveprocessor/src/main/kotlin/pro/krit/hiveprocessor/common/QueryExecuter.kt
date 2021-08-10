@@ -153,7 +153,9 @@ object QueryExecuter {
         error.code = codeType
         error.description = ex.message ?: "$method HyperHive Error with $ex"
         return StatusSelectTable<E>().apply {
-            errors.add(error)
+            val currentErrors = errors ?: ArrayList()
+            currentErrors.add(error)
+            errors = currentErrors
         }
     }
 }
