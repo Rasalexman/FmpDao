@@ -90,11 +90,12 @@ class MainActivity : AppCompatActivity() {
 
         val dbApi = mainDb.databaseApi
         val hyperHive = mainDb.provideHyperHive()
+        pmLocalDao = mainDb.providePmLocalDao()
         val status = hyperHive.authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
         val resultSchema = hyperHive.authAPI.resourcesBaseStatus().execute()
         println("-----> Base schema status = $resultSchema")
 
-        val localdao = mainDb.providePmLocalDao()
+        /*val localdao = mainDb.providePmLocalDao()
         val localStatus = localdao.insertOrReplace(listOf(
             PmEtDataLocalEntity(
                 marker = UUID.randomUUID().toString().take(10),
@@ -113,7 +114,7 @@ class MainActivity : AppCompatActivity() {
             println("------> selectResult Failure = $it")
             listOf()
         })
-        println("-----> LocalDao result = ${result.mapNotNull { it.auart }}")
+        println("-----> LocalDao result = ${result.mapNotNull { it.auart }}")*/
 
         /*val zsmp02Dao = mainDb.provideZsMp04Dao()
         val updateResult = zsmp02Dao.requestBuilder().streamCallAuto().execute()
