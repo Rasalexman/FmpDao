@@ -1,5 +1,6 @@
 package pro.krit.fmpdaoexample
 
+import pro.krit.hiveprocessor.annotations.FmpParam
 import pro.krit.hiveprocessor.annotations.FmpRestRequest
 import pro.krit.hiveprocessor.annotations.FmpTable
 import pro.krit.hiveprocessor.base.IRequest
@@ -10,6 +11,18 @@ import pro.krit.hiveprocessor.base.IRequest
     parameters = ["IV_LGORT", "IV_WERKS"]
 )
 interface SecondZtMp01Request : IRequest.IBaseRequest {
+
+
+    @FmpParam(
+        name = "IV_LGORT",
+        fields = [
+            "IV_WERKS",  // Предприятие INT
+            "IV_LGORT",  // Склад INT
+            "IV_USER"   // Логин пользователя STRING
+        ],
+        isList = true
+    )
+    private interface IvLgort
 
     @FmpTable(
         name = "ET_DATA",
