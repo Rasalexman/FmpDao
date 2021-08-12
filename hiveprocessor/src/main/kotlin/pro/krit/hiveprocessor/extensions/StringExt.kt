@@ -14,9 +14,12 @@
 
 package pro.krit.hiveprocessor.extensions
 
+import com.google.gson.annotations.SerializedName
+import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
+import pro.krit.hiveprocessor.FmpProcessor
 import pro.krit.hiveprocessor.data.BindData
 import pro.krit.hiveprocessor.data.FieldData
 import java.util.*
@@ -37,6 +40,7 @@ const val PREFIX_LOWER = 'i'
 const val MODEL_FIELD_TYPE_INT = "int"
 const val MODEL_FIELD_TYPE_LIST = "list"
 const val MODEL_FIELD_PRIMARY_KEY = "primary"
+private const val TAG_STRING_FULL_TYPE = "%S"
 
 const val LIST_RETURN_TYPE = "java.util.List"
 const val SUSPEND_QUALIFIER = "kotlin.coroutines.Continuation"
@@ -185,4 +189,10 @@ internal fun String.asModelFieldData(): FieldData {
         annotate = fieldNameBig,
         isPrimaryKey = isPrimaryKey
     )
+}
+
+fun String.createSerializedAnnotation(): AnnotationSpec {
+    return AnnotationSpec.builder(SerializedName::class)
+        .addMember(TAG_STRING_FULL_TYPE, this)
+        .build()
 }

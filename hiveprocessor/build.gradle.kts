@@ -26,7 +26,7 @@ dependencies {
     compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
     implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
     implementation(config.Libs.Common.gson)
-    implementation(config.Libs.Core.coroutinesCore)
+    compileOnly(config.Libs.Core.coroutinesCore)
 
     //api(project(":hhive"))
 
