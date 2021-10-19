@@ -3,7 +3,7 @@ package config
 object Versions {
 
     const val gradle = "4.2.2"
-    const val kotlin = "1.5.21"
+    const val kotlin = "1.5.31"
     const val google = "4.3.3"
     const val crashlyticsPlugin = "2.2.0"
 

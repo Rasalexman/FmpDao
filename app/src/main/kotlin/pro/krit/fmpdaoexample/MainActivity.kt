@@ -26,8 +26,8 @@ import kotlin.random.Random
 class MainActivity : AppCompatActivity() {
 
     companion object {
-        const val DEBUG_LOGIN = "Ivanov"
-        const val DEBUG_PASSWORD = "1q2w3e4r"
+        const val DEBUG_LOGIN = "334455"
+        const val DEBUG_PASSWORD = "334455"
     }
 
     lateinit var mainDb: IMainDatabase
@@ -51,9 +51,9 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        val serverAddress = "https://t19075.krit.pro"
-        val environment = "MVP_test"
-        val project = "GPN_MVP"
+        val serverAddress = "http://10.100.205.123"
+        val environment = "MTORO"
+        val project = "project"
 
         val fmpDbName = serverAddress
             .replace("/", "")
