@@ -16,6 +16,7 @@ package pro.krit.hiveprocessor
 
 import com.google.auto.service.AutoService
 import com.mobrun.plugin.api.HyperHive
+import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -906,10 +907,26 @@ class FmpProcessor : AbstractProcessor() {
 
                 // table constructor properties
                 val constructorPropSpec = FunSpec.constructorBuilder()
-                propClassFields.forEach {
-                    addTableModelProperty(it, constructorPropSpec, propClassSpec)
+                // does table have enumeric parameter in annotaion
+                val isNumericModel = tableAnnotation?.isNumeric ?: false
+                propClassFields.forEachIndexed { index, name ->
+                    addTableModelProperty(
+                        name,
+                        constructorPropSpec,
+                        propClassSpec,
+                        null,
+                        isNumericModel,
+                        index
+                    )
                 }
-                propClassSpec.primaryConstructor(constructorPropSpec.build())
+                propClassSpec.primaryConstructor(constructorPropSpec.build()).apply {
+                    if(isNumericModel) {
+                       /* val (numPackName, numClassName) = NumeratedFields::class.java.toString().getPackAndClass()
+                        val numerateClassName = ClassName(numPackName, numClassName)*/
+                        addAnnotation(createCountFieldsAnnotation(propClassFields.size))
+                        addSuperinterface(NumeratedFields::class.java)
+                    }
+                }
                 elementsFiles.add(propClassSpec)
 
                 if(isTableAnnotation) {
@@ -1010,7 +1027,7 @@ class FmpProcessor : AbstractProcessor() {
         parameterClassName: ClassName,
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder,
-        fieldReturnList: Boolean = false,
+        fieldReturnList: Boolean = false
     ) {
         val annotationSerialize = annotationSerializedName.createSerializedAnnotation()
         val returnClassName = createListTypeName(parameterClassName, fieldReturnList)
@@ -1041,7 +1058,9 @@ class FmpProcessor : AbstractProcessor() {
         name: String,
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder,
-        modelTypeName: TypeName? = null
+        modelTypeName: TypeName? = null,
+        isNumericModel: Boolean = false,
+        numIndex: Int = -1
     ) {
 
         val modelData = name.asModelFieldData()
@@ -1052,7 +1071,12 @@ class FmpProcessor : AbstractProcessor() {
         val propSpec =
             PropertySpec.builder(propName, type, KModifier.PUBLIC)
                 .initializer(propName)
-                .addAnnotation(annotationSerialize)
+                .addAnnotation(annotationSerialize).apply {
+                    if(isNumericModel && numIndex >= 0) {
+                        addAnnotation(createJavaFieldAnnotation())
+                        addAnnotation(createParameterFieldAnnotation(numIndex))
+                    }
+                }
                 .build()
 
         val paramSpec =

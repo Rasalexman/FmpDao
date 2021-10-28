@@ -40,7 +40,8 @@ interface SecondZtMp01Request : IRequest.IBaseRequest {
             "TASK_NUM", "TASK_STAT", "USER_BLOCK", "STAT_TEXT",
             "TTN_NUM", "BE_NUM", "STAT_BLOCK", "SUP_NAME", "CAR_NUM"
         ],
-        isList = true
+        isList = true,
+        isNumeric = true
     )
     private interface EtTaskList
 }

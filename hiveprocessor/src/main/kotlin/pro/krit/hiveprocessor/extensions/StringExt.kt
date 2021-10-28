@@ -15,11 +15,12 @@
 package pro.krit.hiveprocessor.extensions
 
 import com.google.gson.annotations.SerializedName
+import com.mobrun.plugin.api.request_assistant.CountFields
+import com.mobrun.plugin.api.request_assistant.ParameterField
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
-import pro.krit.hiveprocessor.FmpProcessor
 import pro.krit.hiveprocessor.data.BindData
 import pro.krit.hiveprocessor.data.FieldData
 import java.util.*
@@ -194,5 +195,22 @@ internal fun String.asModelFieldData(): FieldData {
 fun String.createSerializedAnnotation(): AnnotationSpec {
     return AnnotationSpec.builder(SerializedName::class)
         .addMember(TAG_STRING_FULL_TYPE, this)
+        .build()
+}
+
+fun createCountFieldsAnnotation(count: Int): AnnotationSpec {
+    return AnnotationSpec.builder(CountFields::class)
+        .addMember("count = %L", count)
+        .build()
+}
+
+fun createParameterFieldAnnotation(position: Int): AnnotationSpec {
+    return AnnotationSpec.builder(ParameterField::class)
+        .addMember("position = %L", position)
+        .build()
+}
+
+fun createJavaFieldAnnotation(): AnnotationSpec {
+    return AnnotationSpec.builder(JvmField::class)
         .build()
 }

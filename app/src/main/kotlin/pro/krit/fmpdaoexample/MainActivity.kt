@@ -92,8 +92,13 @@ class MainActivity : AppCompatActivity() {
         val hyperHive = mainDb.provideHyperHive()
         pmLocalDao = mainDb.providePmLocalDao()
         val status = hyperHive.authAPI.auth(DEBUG_LOGIN, DEBUG_PASSWORD, true).execute()
-        val resultSchema = hyperHive.authAPI.resourcesBaseStatus().execute()
-        println("-----> Base schema status = $resultSchema")
+        /*try {
+            val resultSchema = hyperHive.authAPI.resourcesBaseStatus().execute()
+            println("-----> Base schema status = $resultSchema")
+        } catch (e: Exception) {
+            println("-----> Cannot load schema = ${e.message}")
+        }*/
+
 
         /*val localdao = mainDb.providePmLocalDao()
         val localStatus = localdao.insertOrReplace(listOf(
