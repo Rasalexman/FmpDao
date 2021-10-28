@@ -22,12 +22,12 @@ java {
 }
 
 dependencies {
-    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
-    //implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
+    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
+    implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
     implementation(config.Libs.Common.gson)
-    compileOnly(config.Libs.Core.coroutinesCore)
+    implementation(config.Libs.Core.coroutinesCore)
 
-    //api(project(":hhive"))
+    //implementation(project(":hhive"))
 
     implementation(config.Libs.Processor.kotlinPoet)
     implementation(config.Libs.Processor.autoService)

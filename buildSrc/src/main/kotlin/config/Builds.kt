@@ -4,7 +4,7 @@ object Builds {
     const val MIN_VERSION = 21
     const val COMPILE_VERSION = 30
     const val TARGET_VERSION = 30
-    const val BUILD_TOOLS = "30.0.2"
+    const val BUILD_TOOLS = "30.0.3"
     const val APP_ID = "pro.krit.fmpdaoexample"
 
     val codeDirs = arrayListOf(
@@ -22,7 +22,7 @@ object Builds {
     }
 
     object Processor {
-        const val VERSION_CODE = 103012
-        const val VERSION_NAME = "1.3.12"
+        const val VERSION_CODE = 103014
+        const val VERSION_NAME = "1.3.14"
     }
 }

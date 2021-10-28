@@ -8,14 +8,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion(Builds.COMPILE_VERSION)
+    compileSdk = (Builds.COMPILE_VERSION)
     buildToolsVersion = Builds.BUILD_TOOLS
     defaultConfig {
         applicationId = Builds.APP_ID
-        minSdkVersion(Builds.MIN_VERSION)
-        targetSdkVersion(Builds.TARGET_VERSION)
-        versionCode = Builds.App.VERSION_CODE
-        versionName = Builds.App.VERSION_NAME
+        minSdk = (Builds.MIN_VERSION)
+        targetSdk = (Builds.TARGET_VERSION)
+        //versionCode = Builds.App.VERSION_CODE
+        version = Builds.App.VERSION_NAME
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -24,7 +24,7 @@ android {
     buildTypes {
         getByName(Builds.Types.DEBUG) {
             isMinifyEnabled = false
-            isDebuggable = true
+           //isDebuggable = true
         }
 
         getByName(Builds.Types.RELEASE) {
@@ -40,6 +40,7 @@ android {
     packagingOptions {
         exclude("META-INF/notice.txt")
         exclude("META-INF/plugin_release.kotlin_module")
+        exclude("META-INF/fmp_release.kotlin_module")
     }
 
     // Declare the task that will monitor all configurations.
@@ -68,10 +69,13 @@ android {
     kotlinOptions {
         languageVersion = "1.5"
         apiVersion = "1.5"
+        jvmTarget = "1.8"
     }
 
     kapt {
         useBuildCache = true
+        generateStubs = false
+        includeCompileClasspath = false
     }
 }
 
