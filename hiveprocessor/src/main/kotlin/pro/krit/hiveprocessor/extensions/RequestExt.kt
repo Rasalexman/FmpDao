@@ -15,6 +15,7 @@
 package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.BaseStatus
+import com.mobrun.plugin.models.StatusRawDataListTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
@@ -49,7 +50,7 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     requestData: Any? = null
 ): BaseStatus {
     val params = RequestBuilder.createParams(this, requestData)
-    return RequestExecuter.executeBaseStatus<T>(this, params, T::class.java)
+    return RequestExecuter.executeBaseStatus(this, params, T::class.java)
 }
 
 suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
@@ -61,7 +62,7 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestS
             currentRequest,
             requestData
         )
-        RequestExecuter.executeBaseStatus<T>(currentRequest, params, T::class.java)
+        RequestExecuter.executeBaseStatus(currentRequest, params, T::class.java)
     }
 }
 
@@ -80,5 +81,13 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestR
         val params = RequestBuilder.createParams(currentRequest, requestData)
         RequestExecuter.executeResult<S, T>(currentRequest, params)
     }
+}
 
+fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable {
+    val params = RequestBuilder.createParams(this, requestData)
+    return RequestExecuter.executeBaseStatus(
+        this,
+        params,
+        StatusRawDataListTable::class.java
+    ) as StatusRawDataListTable
 }
