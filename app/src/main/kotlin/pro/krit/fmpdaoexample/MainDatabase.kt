@@ -1,9 +1,6 @@
 package pro.krit.fmpdaoexample
 
-import pro.krit.fmpdaoexample.fmpresources.IZsMp04Dao
-import pro.krit.fmpdaoexample.fmpresources.IZtMp01Request
-import pro.krit.fmpdaoexample.fmpresources.IZtMp05Request
-import pro.krit.fmpdaoexample.fmpresources.IZtMp08Request
+import pro.krit.fmpdaoexample.fmpresources.*
 import pro.krit.hiveprocessor.annotations.FmpDatabase
 import pro.krit.hiveprocessor.provider.AbstractFmpDatabase
 import pro.krit.hiveprocessor.provider.IFmpDatabase
@@ -36,4 +33,5 @@ interface IMainRequest {
     fun provideIZtMp05Request(): IZtMp05Request
     fun provideIZtMp08Request(): IZtMp08Request
     fun provideSecondRequest(): SecondZtMp01Request
+    fun provideZmGetSet(): IZfmPmGetSetRequest
 }

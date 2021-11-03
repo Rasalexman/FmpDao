@@ -908,7 +908,7 @@ class FmpProcessor : AbstractProcessor() {
                 // table constructor properties
                 val constructorPropSpec = FunSpec.constructorBuilder()
                 // does table have enumeric parameter in annotaion
-                val isNumericModel = tableAnnotation?.isNumeric ?: false
+                val isNumericModel = tableAnnotation?.isNumeric ?: paramAnnotation?.isNumeric ?: false
                 propClassFields.forEachIndexed { index, name ->
                     addTableModelProperty(
                         name,
@@ -1071,6 +1071,7 @@ class FmpProcessor : AbstractProcessor() {
         val propSpec =
             PropertySpec.builder(propName, type, KModifier.PUBLIC)
                 .initializer(propName)
+                .mutable(true)
                 .addAnnotation(annotationSerialize).apply {
                     if(isNumericModel && numIndex >= 0) {
                         addAnnotation(createJavaFieldAnnotation())

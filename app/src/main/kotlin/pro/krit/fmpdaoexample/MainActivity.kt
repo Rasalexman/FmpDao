@@ -6,6 +6,7 @@ import android.os.Looper
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.mobrun.plugin.api.HyperHiveState
+import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -15,12 +16,15 @@ import kotlinx.coroutines.withContext
 import pro.krit.fmpdaoexample.fmpresources.IZtMp01Request
 import pro.krit.generated.dao.*
 import pro.krit.generated.database.MainDatabaseImpl
+import pro.krit.generated.request.ZfmPmGetSetRequestEtDataModel
+import pro.krit.generated.request.ZfmPmGetSetRequestParams
 import pro.krit.generated.request.ZtMp01RequestRespondStatus
 import pro.krit.generated.request.ZtMp01RequestResultModel
 import pro.krit.hiveprocessor.extensions.*
 import pro.krit.hiveprocessor.provider.DatabaseConfig
 import java.util.*
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
 @Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE")
 class MainActivity : AppCompatActivity() {
@@ -99,80 +103,14 @@ class MainActivity : AppCompatActivity() {
             println("-----> Cannot load schema = ${e.message}")
         }*/
 
-
-        /*val localdao = mainDb.providePmLocalDao()
-        val localStatus = localdao.insertOrReplace(listOf(
-            PmEtDataLocalEntity(
-                marker = UUID.randomUUID().toString().take(10),
-                auart = UUID.randomUUID().toString().take(19),
-                index = Random.nextInt(10, 50000),
-                type = PmType.ADMIN
-            )
-        ))
-        println("-----> LocalDao status = ${localStatus.isOk}")
-        val allData = localdao.selectResult()
-
-        val result = allData.fold(onSuccess = {
-            println("------> selectResult Success = $it")
-            it
-        }, onFailure = {
-            println("------> selectResult Failure = $it")
-            listOf()
-        })
-        println("-----> LocalDao result = ${result.mapNotNull { it.auart }}")*/
-
-        /*val zsmp02Dao = mainDb.provideZsMp04Dao()
-        val updateResult = zsmp02Dao.requestBuilder().streamCallAuto().execute()
-        println("------> updateResult = $updateResult")
-
-        val mainScope = CoroutineScope(Dispatchers.Main)
-        mainScope.launch {
-            val zsmp02Dao2 = mainDb.provideZsMp04Dao()
-            val result = withContext(Dispatchers.IO) { zsmp02Dao2.selectResult<ZsMp04DaoModel, ZsMp04DaoStatus>("TID = \'1\'") }
-            result.fold(onSuccess = {
-                println("------> selectResult Success = $it")
-            }, onFailure = {
-                println("------> selectResult Failure = $it")
-            })
-
-            val resultAsync = zsmp02Dao2.selectAsync<ZsMp04DaoModel, ZsMp04DaoStatus>("TID = \'3\'")
-            println("-------> resultAsync = $resultAsync")
-
-            zsmp02Dao2.flowable<ZsMp04DaoModel, ZsMp04DaoStatus>().collect {
-                println("-----> flowable result = $it")
-            }
-        }*/
-
-
-
-        /*val zsmp01Dao = mainDb.provideZsMp01Dao()
-
-        // Укажем путь для хранения временных файлов
-        //hyperHive.requestAPI.setDownloadPath(filesDir.absolutePath + "/tmp")
-        //hyperHive.requestAPI.setUseDownload(true)
-        println("------ resource name = ${zsmp01Dao.resourceName}")
-        val result = hyperHive.requestAPI.tableStream(zsmp01Dao.resourceName).execute()
-
-        val queryRequest = dbApi.getTablesName(
-            zsmp01Dao.resourceName, "", TableStreamStatus::class.java
-        ).execute()
-
-        val tableNameQuery = queryRequest.request?.source?.database?.statements?.firstOrNull().orEmpty()
-        val response = dbApi.query(tableNameQuery, BaseStatus::class.java).execute()
-        val zsDbResult = dbApi.query("SELECT * FROM zs_mp_01_output_table", StatusSelectTable::class.java).execute()
-        println("-----> zsDbResult = $zsDbResult")
-
-        val resultAll = zsmp01Dao.select<ZsMp01DaoModel, ZsMp01DaoStatus>()*/
-        println("-----> resultAll") //SELECT `name` FROM `sqlite_master` WHERE type='table' and name like 'zs_mp_01_37a6259cc0c1dae299a7866489dff0bd%';
-        /*
-        println("auth status = $status")
-        pmLocalDao = mainDb.providePmLocalDao()
-        pmRemoteDao = mainDb.providePmDao()
-        pmFieldDao = mainDb.provideFieldsDao()
-        pmFieldDao.createTable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()*/
-
-        //exampleWithLocalDao(pmLocalDao)
-        //exampleWithFieldsDao(pmFieldDao)
+        val zmpGetSet = mainDb.provideZmGetSet()
+        val param = ZfmPmGetSetRequestParams(
+            ivUser = "bolonin_dn@vsw.ru"
+        )
+        val mp = mutableMapOf<String, Class<out NumeratedFields>>()
+        mp.put("ET_DATA", ZfmPmGetSetRequestEtDataModel::class.java)
+        val result = zmpGetSet.requestListStatus(param)
+        println("-----> ZfmPmGetSetRequestParams result = $result")
     }
 
     private fun makeRequest01Map() {
