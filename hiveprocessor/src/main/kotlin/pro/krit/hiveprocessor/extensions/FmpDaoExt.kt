@@ -16,18 +16,41 @@ package pro.krit.hiveprocessor.extensions
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 
+/**
+ * Создает Flow, который эмитит данные при подписке либо при старте
+ *
+ * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param withStart - начать эмитить данные при создании потока
+ * @param emitDelay - задержка при эмитинге данных
+ * @param withDistinct - использовать эмитинг только уникальных данных
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.flowable(
     where: String = "",
     limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = "",
     withStart: Boolean = true,
-    emitDelay: Long = 100L,
+    emitDelay: Long = 0L,
     withDistinct: Boolean = false
-) = DaoInstance.flowable<E, S>(this, where, limit, withStart, emitDelay, withDistinct)
+) = DaoInstance.flowable<E, S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
 
+/**
+ * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает список результатов
+ *
+ * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.select(
     where: String = "",
-    limit: Int = 0
-): List<E> = DaoInstance.select<E, S>(this, where, limit)
+    limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = ""
+): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
     where: String = "",
@@ -36,9 +59,19 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     return DaoInstance.selectAsync<E, S>(this, where, limit)
 }*/
 
+/**
+ * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
+ *
+ * @param where - тело запроса для SELECT
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResult(
     where: String = "",
-    limit: Int = 0
+    limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = ""
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit)
+    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
 }
