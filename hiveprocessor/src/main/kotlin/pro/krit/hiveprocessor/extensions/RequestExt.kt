@@ -35,10 +35,9 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     val params = RequestBuilder.createParams(this, requestData)
     println("------> Start request '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeStatus<S, T>(this, params)
-    val resultRaw = resultStatus?.result?.raw
     val resultError = resultStatus?.errors
-    println("------> Finish request '${this.resourceName}' with result: $resultRaw and errors: $resultError")
-    return resultRaw
+    println("------> Finish request '${this.resourceName}' with result: ${resultStatus?.raw} and errors: $resultError")
+    return resultStatus?.result?.raw
 }
 
 /*
@@ -71,7 +70,7 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     val params = RequestBuilder.createParams(this, requestData)
     println("------> Start requestStatus '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeBaseStatus(this, params, T::class.java)
-    println("------> Finish requestStatus '${this.resourceName}' with status: $resultStatus")
+    println("------> Finish requestStatus '${this.resourceName}' with status: ${resultStatus.raw}")
     return resultStatus
 }
 
@@ -130,7 +129,7 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
         params,
         StatusRawDataListTable::class.java
     ).also {
-        println("------> Finish requestListStatus '${this.resourceName}' with result: ${it.result} and errors: ${it.errors}")
+        println("------> Finish requestListStatus '${this.resourceName}' with result: ${it.raw} and errors: ${it.errors}")
     }
 }
 
@@ -143,11 +142,11 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
  */
 fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null): StatusRawDataListTable {
     val params = RequestBuilder.createTableParams(requestData)
-    println("------> Start tableListStatus '${this.resourceName}' with params: $params")
+    println("------> Start tableListStatus '${this.resourceName}' with params: ${params.data}")
     return RequestExecuter.executeBaseTableStatus(
         this,
         params
     ).also {
-        println("------> Finish tableListStatus '${this.resourceName}' with result: ${it.result} and errors: ${it.errors}")
+        println("------> Finish tableListStatus '${this.resourceName}' with result: ${it.raw} and errors: ${it.errors}")
     }
 }
