@@ -15,10 +15,7 @@
 package pro.krit.hiveprocessor.provider
 
 import com.google.gson.GsonBuilder
-import com.mobrun.plugin.api.DatabaseAPI
-import com.mobrun.plugin.api.HyperHive
-import com.mobrun.plugin.api.HyperHiveState
-import com.mobrun.plugin.api.VersionAPI
+import com.mobrun.plugin.api.*
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
@@ -62,7 +59,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun getTrigger(dao: IDao): Flow<String> {
-        return triggers.getOrPut(dao.fullTableName) { MutableSharedFlow(5, 5, BufferOverflow.DROP_OLDEST) }
+        return triggers.getOrPut(dao.fullTableName) { MutableSharedFlow(1, 1, BufferOverflow.DROP_OLDEST) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -145,6 +142,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     private fun HyperHive.setupLogs(logLevel: Int): HyperHive {
+        this.loggingAPI.setLogEnabled(logLevel > 0)
         this.loggingAPI.setLogLevel(logLevel)
         return this
     }

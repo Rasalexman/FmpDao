@@ -26,7 +26,7 @@ object DaoInstance {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }
-            val result = selectAsync<E, S>(dao, where, limit)
+            val result = select<E, S>(dao, where, limit)
             emit(result)
         }
     }.onStart {
@@ -34,7 +34,7 @@ object DaoInstance {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }
-            val startResult = selectAsync<E, S>(dao, where, limit)
+            val startResult = select<E, S>(dao, where, limit)
             emit(startResult)
         }
     }.apply {
@@ -46,9 +46,18 @@ object DaoInstance {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> select(
         dao: IDao,
         where: String = "",
-        limit: Int = 0
+        limit: Int = 0,
+        offset: Int = 0,
+        orderBy: String = ""
     ): List<E> {
-        val selectQuery = QueryBuilder.createQuery(dao, QueryBuilder.SELECT_QUERY, where, limit)
+        val selectQuery = QueryBuilder.createQuery(
+            dao = dao,
+            prefix = QueryBuilder.SELECT_QUERY,
+            where = where,
+            limit = limit,
+            offset = offset,
+            orderBy = orderBy
+        )
         println("------> selectQuery = $selectQuery")
         return QueryExecuter.executeQuery<E, S>(
             dao = dao,
@@ -58,20 +67,29 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectAsync(
         dao: IDao,
         where: String = "",
         limit: Int = 0
     ): List<E> {
         return withContext(Dispatchers.IO) { select<E, S>(dao, where, limit) }
-    }
+    }*/
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResult(
         dao: IDao,
         where: String = "",
-        limit: Int = 0
+        limit: Int = 0,
+        offset: Int = 0,
+        orderBy: String = ""
     ): Result<List<E>> {
-        val selectQuery = QueryBuilder.createQuery(dao, QueryBuilder.SELECT_QUERY, where, limit)
+        val selectQuery = QueryBuilder.createQuery(
+            dao = dao,
+            prefix = QueryBuilder.SELECT_QUERY,
+            where = where,
+            limit = limit,
+            offset = offset,
+            orderBy = orderBy
+        )
         return QueryExecuter.executeResultQuery<E, S>(
             dao = dao,
             query = selectQuery,
@@ -95,14 +113,14 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> createTableAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> createTableAsync(
         dao: IDao.IFieldsDao
     ): S {
         return withContext(Dispatchers.IO) {
             dao.initFieldsAsync<E>()
             createTable<E, S>(dao)
         }
-    }
+    }*/
 
     /////---------- DELETE QUERIES
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
@@ -120,13 +138,13 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
         dao: IDao.IFieldsDao,
         where: String = "",
         notifyAll: Boolean = true
     ): S {
         return withContext(Dispatchers.IO) {  delete<E, S>(dao, where, notifyAll) }
-    }
+    }*/
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
@@ -143,13 +161,13 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
         dao: IDao.IFieldsDao,
         item: E,
         notifyAll: Boolean = false
     ): S {
         return withContext(Dispatchers.IO) { delete<E, S>(dao, item, notifyAll) }
-    }
+    }*/
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
@@ -166,13 +184,13 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
         dao: IDao.IFieldsDao,
         items: List<E>,
         notifyAll: Boolean = false
     ): S {
         return withContext(Dispatchers.IO) { delete<E, S>(dao, items, notifyAll) }
-    }
+    }*/
 
     ////--------- INSERT QUERIES
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
@@ -190,13 +208,13 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
+    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
         dao: IDao.IFieldsDao,
         item: E,
         notifyAll: Boolean = false
     ): S {
         return withContext(Dispatchers.IO) { insertOrReplace<E, S>(dao, item, notifyAll) }
-    }
+    }*/
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
         dao: IDao.IFieldsDao,
@@ -213,12 +231,12 @@ object DaoInstance {
         )
     }
 
-    suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
+   /* suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
         dao: IDao.IFieldsDao,
         items: List<E>,
         notifyAll: Boolean = false
     ): S {
         return withContext(Dispatchers.IO) { insertOrReplace<E, S>(dao, items, notifyAll) }
-    }
+    }*/
 
 }

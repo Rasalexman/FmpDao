@@ -11,14 +11,14 @@ inline fun <reified E : Any> IDao.IFieldsDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
 }
 
-suspend inline fun <reified E : Any> IDao.IFieldsDao.initFieldsAsync() {
+/*suspend inline fun <reified E : Any> IDao.IFieldsDao.initFieldsAsync() {
     withContext(Dispatchers.IO) {
         FieldsBuilder.initFields(
             this@initFieldsAsync,
             E::class.java.fields
         )
     }
-}
+}*/
 
 ///----
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.flowable(
@@ -37,12 +37,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
     limit: Int = 0
 ): List<E> = DaoInstance.select<E, S>(this, where, limit)
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectAsync(
     where: String = "",
     limit: Int = 0
 ): List<E> {
     return DaoInstance.selectAsync<E, S>(this, where, limit)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectResult(
     where: String = "",
@@ -56,9 +56,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.c
     return DaoInstance.createTable<E, S>(this)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTableAsync(): S {
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTableAsync(): S {
     return DaoInstance.createTableAsync<E, S>(this)
-}
+}*/
 
 ///------ INSERT DATA
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplace(
@@ -68,12 +68,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.i
     return DaoInstance.insertOrReplace<E, S>(this, item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
     item: E,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.insertOrReplaceAsync<E, S>(this, item, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplace(
     items: List<E>,
@@ -82,12 +82,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.i
     return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.insertOrReplaceAsync<E, S>(this, items, notifyAll)
-}
+}*/
 
 ///---- DELETE
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
@@ -97,12 +97,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.d
     return DaoInstance.delete<E, S>(this, where, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
     where: String = "",
     notifyAll: Boolean = true
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, where, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
     item: E,
@@ -111,12 +111,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.d
     return DaoInstance.delete<E, S>(this, item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
     item: E,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, item, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
     items: List<E>,
@@ -125,9 +125,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.d
     return DaoInstance.delete<E, S>(this, items, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, items, notifyAll)
-}
+}*/

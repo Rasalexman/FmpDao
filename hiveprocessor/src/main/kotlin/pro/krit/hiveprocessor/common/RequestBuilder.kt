@@ -17,7 +17,10 @@ package pro.krit.hiveprocessor.common
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.mobrun.plugin.api.callparams.RequestCallParams
+import com.mobrun.plugin.api.callparams.TableCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
+import com.mobrun.plugin.api.request_assistant.CustomParameter
+import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import pro.krit.hiveprocessor.base.IRequest
 
 object RequestBuilder {
@@ -53,6 +56,18 @@ object RequestBuilder {
                 }
             }
         }
+    }
+
+    fun createTableParams(requestData: List<CustomParameter>? = null): TableCallParams {
+        val requestBuilder =
+            com.mobrun.plugin.api.request_assistant.RequestBuilder<CustomParameter, ScalarParameter<Any>>()
+        requestBuilder.addTableItems(requestData)
+
+        val queryParams = requestBuilder.buildTextRequest()
+
+        val tableCallParams = TableCallParams()
+        tableCallParams.data = queryParams
+        return tableCallParams
     }
 
     private fun Any?.tryParseParams(): String? {

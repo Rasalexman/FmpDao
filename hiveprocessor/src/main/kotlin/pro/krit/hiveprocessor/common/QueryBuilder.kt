@@ -31,6 +31,8 @@ object QueryBuilder {
 
     private const val WHERE = "WHERE"
     private const val LIMIT = "LIMIT"
+    private const val OFFSET = "OFFSET"
+    private const val ORDER = "ORDER BY"
 
     private const val CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS "
     private const val TEXT_PRIMARY_KEY = " TEXT PRIMARY KEY NOT NULL"
@@ -46,14 +48,18 @@ object QueryBuilder {
         dao: IDao,
         prefix: String = SELECT_QUERY,
         where: String = "",
-        limit: Int = 0
+        limit: Int = 0,
+        offset: Int = 0,
+        orderBy: String = ""
     ): String {
         val tableName = dao.fullTableName
         val limitQuery = limit.takeIf { it > 0 }?.run { " $LIMIT $limit" }.orEmpty()
+        val offsetQuery = offset.takeIf { it > 0 }?.run { " $OFFSET $offset" }.orEmpty()
+        val orderByQuery = orderBy.takeIf { it.isNotEmpty() }?.run { " $ORDER $orderBy" }.orEmpty()
         return if (where.isNotEmpty()) {
-            "$prefix $tableName $WHERE $where$limitQuery"
+            "$prefix $tableName $WHERE $where$limitQuery$offsetQuery$orderByQuery"
         } else {
-            "$prefix $tableName$limitQuery"
+            "$prefix $tableName$limitQuery$offsetQuery$orderByQuery"
         }
     }
 

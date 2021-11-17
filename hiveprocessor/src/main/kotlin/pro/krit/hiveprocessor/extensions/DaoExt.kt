@@ -60,12 +60,12 @@ fun IDao.flowableCount(
         if(emitDelay > 0) {
             delay(emitDelay)
         }
-        val result = countAsync(where)
+        val result = count(where)
         emit(result)
     }
 }.onStart {
     if (withStart) {
-        val result = countAsync(where)
+        val result = count(where)
         emit(result)
     }
 }.apply {
@@ -89,11 +89,11 @@ fun IDao.count(
     return result.toIntOrNull() ?: 0
 }
 
-suspend fun IDao.countAsync(
+/*suspend fun IDao.countAsync(
     where: String = ""
 ): Int {
     return withContext(Dispatchers.IO) { count(where) }
-}
+}*/
 
 ////------ TRIGGERS
 fun IDao.triggerFlow() {
@@ -115,11 +115,11 @@ fun IDao.request(
     return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
 
-suspend fun IDao.requestAsync(
+/*suspend fun IDao.requestAsync(
     params: ScalarMap? = null
 ): BaseStatus {
     return withContext(Dispatchers.IO) { request(params) }
-}
+}*/
 
 fun IDao.requestBuilder(
     params: ScalarMap? = null

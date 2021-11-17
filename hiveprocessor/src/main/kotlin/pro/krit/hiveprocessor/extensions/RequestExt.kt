@@ -14,6 +14,7 @@
 
 package pro.krit.hiveprocessor.extensions
 
+import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusRawDataListTable
 import kotlinx.coroutines.Dispatchers
@@ -27,10 +28,15 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     requestData: Any? = null
 ): S? {
     val params = RequestBuilder.createParams(this, requestData)
+    println("------> Start request '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeStatus<S, T>(this, params)
-    return resultStatus?.result?.raw
+    val resultRaw = resultStatus?.result?.raw
+    val resultError = resultStatus?.errors
+    println("------> Finish request '${this.resourceName}' with result: $resultRaw and errors: $resultError")
+    return resultRaw
 }
 
+/*
 suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestAsync(
     requestData: Any? = null
 ): S? {
@@ -45,15 +51,19 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestA
         RequestExecuter.executeStatus<S, T>(currentRequest, params)?.result?.raw
     }
 }
+*/
 
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     requestData: Any? = null
 ): BaseStatus {
     val params = RequestBuilder.createParams(this, requestData)
-    return RequestExecuter.executeBaseStatus(this, params, T::class.java)
+    println("------> Start requestStatus '${this.resourceName}' with params: $params")
+    val resultStatus = RequestExecuter.executeBaseStatus(this, params, T::class.java)
+    println("------> Finish requestStatus '${this.resourceName}' with status: $resultStatus")
+    return resultStatus
 }
 
-suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
+/*suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
     requestData: Any? = null
 ): BaseStatus {
     val currentRequest = this
@@ -64,16 +74,19 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestS
         )
         RequestExecuter.executeBaseStatus(currentRequest, params, T::class.java)
     }
-}
+}*/
 
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
     requestData: Any? = null
 ): Result<S> {
     val params = RequestBuilder.createParams(this, requestData)
-    return RequestExecuter.executeResult<S, T>(this, params)
+    println("------> Start requestResult '${this.resourceName}' with params: $params")
+    return RequestExecuter.executeResult<S, T>(this, params).also {
+        println("------> Finish requestResult '${this.resourceName}' with result: ${it.getOrNull()}")
+    }
 }
 
-suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResultAsync(
+/*suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResultAsync(
     requestData: Any? = null
 ): Result<S> {
     val currentRequest = this
@@ -81,13 +94,27 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestR
         val params = RequestBuilder.createParams(currentRequest, requestData)
         RequestExecuter.executeResult<S, T>(currentRequest, params)
     }
-}
+}*/
 
 fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable {
     val params = RequestBuilder.createParams(this, requestData)
+    println("------> Start requestListStatus '${this.resourceName}' with params: $params")
     return RequestExecuter.executeBaseStatus(
         this,
         params,
         StatusRawDataListTable::class.java
-    ) as StatusRawDataListTable
+    ).also {
+        println("------> Finish requestListStatus '${this.resourceName}' with result: ${it.result} and errors: ${it.errors}")
+    }
+}
+
+fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null): StatusRawDataListTable {
+    val params = RequestBuilder.createTableParams(requestData)
+    println("------> Start tableListStatus '${this.resourceName}' with params: $params")
+    return RequestExecuter.executeBaseTableStatus(
+        this,
+        params
+    ).also {
+        println("------> Finish tableListStatus '${this.resourceName}' with result: ${it.result} and errors: ${it.errors}")
+    }
 }
