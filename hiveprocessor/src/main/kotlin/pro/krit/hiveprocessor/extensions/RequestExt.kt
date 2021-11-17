@@ -17,13 +17,18 @@ package pro.krit.hiveprocessor.extensions
 import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusRawDataListTable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.base.RawStatus
 import pro.krit.hiveprocessor.common.RequestBuilder
 import pro.krit.hiveprocessor.common.RequestExecuter
 
+/**
+ * Простой запрос данных для FMP
+ *
+ * @param requestData - данные для запроса
+ *
+ * @return - сгенерированный процессором статус запроса [RawStatus]
+ */
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     requestData: Any? = null
 ): S? {
@@ -53,6 +58,13 @@ suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestA
 }
 */
 
+/**
+ * Простой запрос данных для FMP
+ *
+ * @param requestData - данные для запроса
+ *
+ * @return - статус запроса [BaseStatus]
+ */
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     requestData: Any? = null
 ): BaseStatus {
@@ -76,6 +88,13 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     }
 }*/
 
+/**
+ * Простой запрос данных для FMP
+ *
+ * @param requestData - данные для запроса
+ *
+ * @return - статус запроса обернутый в [Result]
+ */
 inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
     requestData: Any? = null
 ): Result<S> {
@@ -96,6 +115,13 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
     }
 }*/
 
+/**
+ * Простой запрос данных для FMP
+ *
+ * @param requestData - данные для запроса
+ *
+ * @return - статус запроса [StatusRawDataListTable]
+ */
 fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable {
     val params = RequestBuilder.createParams(this, requestData)
     println("------> Start requestListStatus '${this.resourceName}' with params: $params")
@@ -108,6 +134,13 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
     }
 }
 
+/**
+ * Простой запрос данных для FMP
+ *
+ * @param requestData - [List] данные для запроса
+ *
+ * @return - статус запроса [StatusRawDataListTable]
+ */
 fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null): StatusRawDataListTable {
     val params = RequestBuilder.createTableParams(requestData)
     println("------> Start tableListStatus '${this.resourceName}' with params: $params")

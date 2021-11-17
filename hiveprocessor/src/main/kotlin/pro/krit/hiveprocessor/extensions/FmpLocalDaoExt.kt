@@ -18,21 +18,46 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IDao
 
+/**
+ * Создает Flow, который эмитит данные при подписке либо при старте
+ *
+ * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param withStart - начать эмитить данные при создании потока
+ * @param emitDelay - задержка при эмитинге данных
+ * @param withDistinct - использовать эмитинг только уникальных данных
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.flowable(
     where: String = "",
     limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = "",
     withStart: Boolean = true,
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ): Flow<List<E>> {
-    return DaoInstance.flowable<E,S>(this, where, limit, withStart, emitDelay, withDistinct)
+    return DaoInstance.flowable<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
 }
 
 ///---- SELECT QUERIES
+/**
+ * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
+ *
+ * @param where - тело запроса для SELECT
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ *
+ * @return - [List] с данными, либо пустой список
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.select(
     where: String = "",
-    limit: Int = 0
-): List<E> = DaoInstance.select<E, S>(this, where, limit)
+    limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = ""
+): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectAsync(
     where: String = "",
@@ -41,14 +66,29 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.selectAsync<E, S>(this, where, limit)
 }*/
 
+/**
+ * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
+ *
+ * @param where - тело запроса для SELECT
+ * @param limit - лимитированное количество данных
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ *
+ * @return - список результатов запроса обернутый в [Result]
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectResult(
     where: String = "",
-    limit: Int = 0
+    limit: Int = 0,
+    offset: Int = 0,
+    orderBy: String = ""
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit)
+    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
 }
 
 ////------- CREATE TABLES
+/**
+ * Создание таблицы данных
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTable(): S {
     return DaoInstance.createTable<E, S>(this)
 }
@@ -58,9 +98,17 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 }*/
 
 /////---------- DELETE QUERIES
+/**
+ * Удаление данных из таблицы по запросу
+ *
+ * @param where - тело запроса для SELECT
+ * @param notifyAll - тригер на одновление всех значений
+ *
+ * @return - возвращает статус удаленной записи из таблицы
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     where: String = "",
-    notifyAll: Boolean = true
+    notifyAll: Boolean = false
 ): S {
     return DaoInstance.delete<E, S>(this, where, notifyAll)
 }
@@ -72,6 +120,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.deleteAsync<E, S>(this, where, notifyAll)
 }*/
 
+/**
+ * Удаление данных из таблицы по запросу
+ *
+ * @param item - экземпляр данных для удаления
+ * @param notifyAll - тригер на одновление всех значений
+ *
+ * @return - возвращает статус удаленной записи из таблицы
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     item: E,
     notifyAll: Boolean = false
@@ -86,6 +142,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.deleteAsync<E, S>(this, item, notifyAll)
 }*/
 
+/**
+ * Удаление данных из таблицы по запросу
+ *
+ * @param items - список [List] экземпляров данных для удаления
+ * @param notifyAll - тригер на одновление всех значений
+ *
+ * @return - возвращает статус удаленной записи из таблицы
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     items: List<E>,
     notifyAll: Boolean = false
@@ -101,6 +165,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 }*/
 
 ////--------- INSERT QUERIES
+/**
+ * Вставка или замена данных из таблицы по уникальному ключу [PrimaryKey]
+ *
+ * @param item - экземпляров данных
+ * @param notifyAll - тригер на одновление всех значений
+ *
+ * @return - возвращает статус вставленной записи
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
     item: E,
     notifyAll: Boolean = false
@@ -115,6 +187,14 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.insertOrReplaceAsync<E, S>(this, item, notifyAll)
 }*/
 
+/**
+ * Вставка или замена списка данных по уникальному ключу [PrimaryKey]
+ *
+ * @param items - [List] экземпляров данных
+ * @param notifyAll - тригер на одновление всех значений
+ *
+ * @return - возвращает статус вставленной записи
+ */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
