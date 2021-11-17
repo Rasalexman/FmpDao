@@ -14,7 +14,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pro.krit.fmpdaoexample.fmpresources.IZtMp01Request
-import pro.krit.generated.dao.*
+import pro.krit.generated.dao.PmDataFieldsDaoModel
+import pro.krit.generated.dao.PmDataFieldsDaoStatus
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.generated.request.ZfmPmGetSetRequestEtDataModel
 import pro.krit.generated.request.ZfmPmGetSetRequestParams
@@ -24,7 +25,6 @@ import pro.krit.hiveprocessor.extensions.*
 import pro.krit.hiveprocessor.provider.DatabaseConfig
 import java.util.*
 import kotlin.random.Random
-import kotlin.reflect.KClass
 
 @Suppress("UNUSED_PARAMETER", "UNUSED_VARIABLE")
 class MainActivity : AppCompatActivity() {
@@ -134,15 +134,15 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "FAIL REQUEST", Toast.LENGTH_SHORT).show()
             })*/
 
-            val request2 = request.requestStatusAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+            /*val request2 = request.requestStatusAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
                 params
             )
-            println("------> request2 = $request2")
+            println("------> request2 = $request2")*/
 
-            val request3 = request.requestAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
+            /*val request3 = request.requestAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
                 params
             )
-            println("------> request3 = $request3")
+            println("------> request3 = $request3")*/
         }
 
     }
@@ -152,8 +152,8 @@ class MainActivity : AppCompatActivity() {
         scope.launch {
             withContext(Dispatchers.IO) { selectLocalDaoAsync() }
 
-            val resultList = pmLocalDao.selectAsync()
-            println("----> all count = ${resultList.mapNotNull { it.convertTo() }}")
+            /*val resultList = pmLocalDao.select()
+            println("----> all count = ${resultList.mapNotNull { it.convertTo() }}")*/
 
             pmLocalDao.flowable(withDistinct = true).flowOn(Dispatchers.IO).collect {
                 println("----> pmLocalDao count = ${it.size}")
@@ -193,7 +193,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun selectLocalDaoAsync() {
         //pmLocalDao.dele
 
-        val resultList = pmLocalDao.selectAsync<PmEtDataLocalEntity, PmLocalStatus>()
+        val resultList = pmLocalDao.select<PmEtDataLocalEntity, PmLocalStatus>()
         //pmLocalDao.selectResultAsync()
         println("----> all count = ${resultList.mapNotNull { it.convertTo() }}")
     }
@@ -204,8 +204,8 @@ class MainActivity : AppCompatActivity() {
 
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
-            val resultListAsync = pmFieldDao.selectAsync<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()
-            println("----> IPmDataFieldsDao selectAsync all count = ${resultListAsync.size}")
+            val resultListAsync = pmFieldDao.select<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>()
+            println("----> IPmDataFieldsDao selectAsync all count = ${resultList.size}")
 
             pmFieldDao.flowable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>(withDistinct = true).flowOn(Dispatchers.IO).collect {
                 println("----> pmFieldDao CHANGED")
@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun insertSingleAsync(dao: IPmDataLocalDao) {
         val randomvalue = Random.nextInt(1, 10)
         val type = if(randomvalue%2 == 0) PmType.USER else PmType.ADMIN
-        val statusInsert = dao.insertOrReplaceAsync(
+        val statusInsert = dao.insertOrReplace(
             PmEtDataLocalEntity(
                 //id = Random.nextInt(),
                 marker = UUID.randomUUID().toString().take(18),
@@ -266,7 +266,7 @@ class MainActivity : AppCompatActivity() {
                 taskNum = Random.nextInt(10, 10000000)
             ))
         }
-        val insertAllStatus = dao.insertOrReplace(localListToInsert, notifyAll = true)
+        val insertAllStatus = dao.insertOrReplace<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>(localListToInsert, notifyAll = true)
         println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
     }
 

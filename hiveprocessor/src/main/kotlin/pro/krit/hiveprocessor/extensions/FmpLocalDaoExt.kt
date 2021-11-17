@@ -34,12 +34,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     limit: Int = 0
 ): List<E> = DaoInstance.select<E, S>(this, where, limit)
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectAsync(
     where: String = "",
     limit: Int = 0
 ): List<E> {
     return DaoInstance.selectAsync<E, S>(this, where, limit)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectResult(
     where: String = "",
@@ -53,9 +53,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.createTable<E, S>(this)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTableAsync(): S {
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTableAsync(): S {
     return DaoInstance.createTableAsync<E, S>(this)
-}
+}*/
 
 /////---------- DELETE QUERIES
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
@@ -65,12 +65,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.delete<E, S>(this, where, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
     where: String = "",
     notifyAll: Boolean = true
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, where, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     item: E,
@@ -79,12 +79,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.delete<E, S>(this, item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
     item: E,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, item, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     items: List<E>,
@@ -93,12 +93,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.delete<E, S>(this, items, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.deleteAsync<E, S>(this, items, notifyAll)
-}
+}*/
 
 ////--------- INSERT QUERIES
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
@@ -108,12 +108,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.insertOrReplace<E, S>(this, item, notifyAll)
 }
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
     item: E,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.insertOrReplaceAsync<E, S>(this, item, notifyAll)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>,
@@ -122,9 +122,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
 }
 
+/*
 suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.insertOrReplaceAsync<E, S>(this,items, notifyAll)
-}
+}*/

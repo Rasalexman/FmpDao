@@ -18,9 +18,11 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.mobrun.plugin.api.callparams.RequestCallParams
+import com.mobrun.plugin.api.callparams.TableCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.Error
+import com.mobrun.plugin.models.StatusRawDataListTable
 import pro.krit.hiveprocessor.base.IRequest
 import pro.krit.hiveprocessor.base.RawStatus
 import pro.krit.hiveprocessor.errors.RequestException
@@ -49,18 +51,23 @@ object RequestExecuter {
         request: IRequest,
         params: Any? = null,
         clazz: Class<T>
-    ): BaseStatus {
+    ): T {
         val requestApi = request.hyperHive.requestAPI
         val resourceName = request.resourceName
         return when (params) {
             is WebCallParams -> requestApi.web(resourceName, params, clazz).execute()
             is RequestCallParams -> requestApi.request(resourceName, params, clazz).execute()
-            else -> requestApi.web(resourceName).execute().let { respond ->
-                BaseStatus().apply {
-                    raw = respond
-                }
-            }
+            else -> requestApi.web(resourceName, WebCallParams(), clazz).execute()
         }
+    }
+
+    fun executeBaseTableStatus(
+        request: IRequest,
+        params: TableCallParams? = null
+    ): StatusRawDataListTable {
+        val requestApi = request.hyperHive.requestAPI
+        val resourceName = request.resourceName
+        return requestApi.table(resourceName, params, StatusRawDataListTable::class.java).execute()
     }
 
     inline fun <reified S : Any, reified T : RawStatus<S>> executeStatus(

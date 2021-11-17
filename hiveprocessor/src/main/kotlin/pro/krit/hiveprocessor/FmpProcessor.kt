@@ -16,6 +16,7 @@ package pro.krit.hiveprocessor
 
 import com.google.auto.service.AutoService
 import com.mobrun.plugin.api.HyperHive
+import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
@@ -63,11 +64,12 @@ class FmpProcessor : AbstractProcessor() {
 
         private const val REQUEST_STATEMENT = "request"
         private const val REQUEST_NAME = "requestWithParams"
-        private const val REQUEST_ASYNC_STATEMENT = "requestAsync"
-        private const val REQUEST_ASYNC_NAME = "requestWithParamsAsync"
+        //private const val REQUEST_ASYNC_STATEMENT = "requestAsync"
+        //private const val REQUEST_ASYNC_NAME = "requestWithParamsAsync"
 
         private const val FUNC_CREATE_PARAMS_NAME = "createParams"
         private const val FUNC_CREATE_PARAMS_MAP_NAME = "createParamsMap"
+        private const val FUNC_GET_PARAMETER_NAME = "getParameterName"
 
         private const val FMP_DAO_NAME = "FmpDao"
         private const val FMP_LOCAL_DAO_NAME = "FmpLocalDao"
@@ -298,8 +300,6 @@ class FmpProcessor : AbstractProcessor() {
 
                     classTypeSpec.addFunction(funcSpec)
                 }
-
-
             }
         }
     }
@@ -324,11 +324,11 @@ class FmpProcessor : AbstractProcessor() {
 
             if (bindData.parameters.isNotEmpty()) {
                 val localParams = bindData.parameters
-                val requestFunc = createRequestFunction(localParams, REQUEST_NAME, isAsync = false)
-                val requestFuncAsync =
-                    createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)
+                val requestFunc = createRequestFunction(localParams, REQUEST_NAME)
+                /*val requestFuncAsync =
+                    createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)*/
                 classTypeSpec.addFunction(requestFunc.build())
-                classTypeSpec.addFunction(requestFuncAsync.build())
+                //classTypeSpec.addFunction(requestFuncAsync.build())
             }
 
             if (bindData.fields.isNotEmpty()) {
@@ -464,7 +464,6 @@ class FmpProcessor : AbstractProcessor() {
     private fun createRequestFunction(
         parameters: List<String>,
         funName: String,
-        isAsync: Boolean
     ): FunSpec.Builder {
         val funcSpec = FunSpec.builder(funName)
         var mapOfParams = TAG_MEMBER_HALF
@@ -482,20 +481,16 @@ class FmpProcessor : AbstractProcessor() {
         val replacedParams = FIELD_PARAMS_REPLACE.format(mapOfParams)
         val statement = "$RETURN_STATEMENT $FUNC_MEMBER_PARAMS_STATEMENT$replacedParams"
         val returnType = ClassName(MOBRUN_MODEL_PATH, MOBRUN_BASE_NAME)
-        val updateFuncName = if (isAsync) {
-            REQUEST_ASYNC_STATEMENT
-        } else {
-            REQUEST_STATEMENT
-        }
+        val updateFuncName = REQUEST_STATEMENT
         return funcSpec.addStatement(
             statement,
             MemberName(EXTENSIONS_PATH, updateFuncName),
             MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
-        ).returns(returnType).apply {
+        ).returns(returnType)/*.apply {
             if (isAsync) {
                 addModifiers(KModifier.SUSPEND)
             }
-        }
+        }*/
     }
 
     private fun createProperties(): List<PropertySpec> {
@@ -871,6 +866,8 @@ class FmpProcessor : AbstractProcessor() {
                 val tableAnnotation = inter.getAnnotation(FmpTable::class.java)
                 val paramAnnotation = inter.getAnnotation(FmpParam::class.java)
 
+                val annotationName = tableAnnotation?.name ?: paramAnnotation?.name.orEmpty()
+
                 if (inter.kind != ElementKind.INTERFACE) {
                     throw IllegalStateException("You can use \'@FmpTable\' or \'@FmpParam\' annotation only with interfaces")
                 }
@@ -924,7 +921,22 @@ class FmpProcessor : AbstractProcessor() {
                        /* val (numPackName, numClassName) = NumeratedFields::class.java.toString().getPackAndClass()
                         val numerateClassName = ClassName(numPackName, numClassName)*/
                         addAnnotation(createCountFieldsAnnotation(propClassFields.size))
-                        addSuperinterface(NumeratedFields::class.java)
+                        if(isTableAnnotation) {
+                            addSuperinterface(NumeratedFields::class.java)
+                        } else {
+                            addSuperinterface(CustomParameter::class.java)
+                            val returnMapStatement = buildString {
+                                append("$RETURN_STATEMENT \"$annotationName\"")
+                            }
+                            val stringTypeName = String::class.asTypeName()
+                            val getParamsMapFunSpec = FunSpec.builder(FUNC_GET_PARAMETER_NAME)
+                                .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
+                                .addStatement(returnMapStatement)
+                                .returns(stringTypeName)
+                                .build()
+
+                            addFunction(getParamsMapFunSpec)
+                        }
                     }
                 }
                 elementsFiles.add(propClassSpec)

@@ -29,12 +29,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     limit: Int = 0
 ): List<E> = DaoInstance.select<E, S>(this, where, limit)
 
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
+/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
     where: String = "",
     limit: Int = 0
 ): List<E> {
     return DaoInstance.selectAsync<E, S>(this, where, limit)
-}
+}*/
 
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResult(
     where: String = "",

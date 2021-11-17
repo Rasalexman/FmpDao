@@ -18,7 +18,7 @@ interface IZfmPmGetSetRequest : IRequest.IBaseRequest {
     @FmpParam(
         name = Parameters.IV_MATNR,
         fields = [
-            "ET_AUTH_GR", "ET_ERROR", "ET_AUTH_USER"
+            "ET_AUTH_GR_Int", "ET_ERROR", "ET_AUTH_USER"
         ],
         isNumeric = true
     )
