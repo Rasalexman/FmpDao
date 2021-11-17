@@ -3,7 +3,7 @@ package config
 object Versions {
 
     const val gradle = "4.2.2"
-    const val kotlin = "1.5.31"
+    const val kotlin = "1.6.0"
 
     const val appCoreX = "1.6.0"
     const val coroutines = "1.5.2"

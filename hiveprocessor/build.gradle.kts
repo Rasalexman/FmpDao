@@ -16,6 +16,11 @@ sourceSets {
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
     targetCompatibility = JavaVersion.VERSION_1_8
+    sourceSets {
+        getByName("main") {
+            java.setSrcDirs(Builds.codeDirs)
+        }
+    }
 
     withJavadocJar()
     withSourcesJar()
@@ -37,7 +42,6 @@ dependencies {
 kapt {
     useBuildCache = true
     generateStubs = false
-    includeCompileClasspath = false
 }
 
 group = "pro.krit.hiveprocessor"
