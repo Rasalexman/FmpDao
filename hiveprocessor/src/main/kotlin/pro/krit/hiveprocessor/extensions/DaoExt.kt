@@ -48,6 +48,8 @@ const val ERROR_CODE_COUNT_WHERE = 10003
 const val ERROR_CODE_CREATE = 10004
 const val ERROR_CODE_INSERT = 10005
 const val ERROR_CODE_DELETE = 10006
+const val ERROR_CODE_QUERY = 10007
+const val ERROR_CODE_UPDATE = 10008
 
 fun IDao.flowableCount(
     where: String = "",

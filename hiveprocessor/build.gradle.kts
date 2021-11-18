@@ -14,8 +14,8 @@ sourceSets {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     sourceSets {
         getByName("main") {
             java.setSrcDirs(Builds.codeDirs)
@@ -28,9 +28,9 @@ java {
 
 dependencies {
     implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
-    implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
+    //implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
     implementation(config.Libs.Common.gson)
-    implementation(config.Libs.Core.coroutinesCore)
+    compileOnly(config.Libs.Core.coroutinesCore)
 
     //implementation(project(":hhive"))
 
@@ -46,6 +46,10 @@ kapt {
 
 group = "pro.krit.hiveprocessor"
 version = Builds.Processor.VERSION_NAME
+
+tasks.create(name = "sourceJar", type = Jar::class) {
+    archiveClassifier.set("sources")
+}
 
 publishing {
     publications {
@@ -64,7 +68,7 @@ publishing {
     repositories {
         maven {
             name = "hiveprocessor"
-            url = uri("${buildDir}/publishing-repository")
+            setUrl(uri("${buildDir}/publishing-repository"))
         }
     }
 }

@@ -35,7 +35,7 @@ object QueryExecuter {
         return try {
             val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
             status.result.database.records.orEmpty()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
@@ -59,7 +59,7 @@ object QueryExecuter {
                 notifyAll
             )
             status.result.database.records.firstOrNull()?.get(key).orEmpty()
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             ""
         }
@@ -88,7 +88,7 @@ object QueryExecuter {
                 Result.failure(IllegalStateException(message))
             }
 
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             Result.failure(e)
@@ -109,7 +109,7 @@ object QueryExecuter {
             hyperHiveDatabaseApi.query(query, clazz).execute()!!.apply {
                 if (notifyAll) this.triggerFlow(localDao)
             }
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             e.printStackTrace()
             println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             createErrorStatus<E>(
@@ -145,7 +145,7 @@ object QueryExecuter {
     }
 
     inline fun <reified E : Any> createErrorStatus(
-        ex: Exception,
+        ex: Throwable,
         codeType: Int,
         method: String
     ): StatusSelectTable<E> {

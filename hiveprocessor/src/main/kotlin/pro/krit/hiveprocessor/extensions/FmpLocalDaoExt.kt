@@ -17,6 +17,7 @@ package pro.krit.hiveprocessor.extensions
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.QueryExecuter
 
 /**
  * Создает Flow, который эмитит данные при подписке либо при старте
@@ -39,6 +40,27 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     withDistinct: Boolean = false
 ): Flow<List<E>> {
     return DaoInstance.flowable<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
+}
+
+/**
+ * Простой запрос в таблицу базы данных
+ *
+ * @param body - тело запроса
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.query(
+    body: String = ""
+): List<E> {
+    return try {
+        QueryExecuter.executeQuery<E, S>(
+            dao = this,
+            query = body,
+            errorCode = ERROR_CODE_QUERY,
+            methodName = "query"
+        )
+    } catch (e: Throwable) {
+        e.printStackTrace()
+        emptyList<E>()
+    }
 }
 
 ///---- SELECT QUERIES
@@ -85,12 +107,29 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
 }
 
+/**
+ * Создает SQL-запрос на обновление данных в таблице справочника, и возвращает [StatusSelectTable]
+ *
+ * @param setQuery - тело запроса для SET
+ * @param from - тело запроса если данные обновляются из другой таблицы
+ * @param where - тело запроса поиска элементов обновления
+ *
+ * @return - [StatusSelectTable] статус обновления таблицы
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.update(
+    setQuery: String,
+    from: String = "",
+    where: String = ""
+): S = DaoInstance.update(this, setQuery, from, where)
+
+
+
 ////------- CREATE TABLES
 /**
  * Создание таблицы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTable(): S {
-    return DaoInstance.createTable<E, S>(this)
+    return DaoInstance.createTable(this)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTableAsync(): S {
@@ -110,7 +149,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     where: String = "",
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.delete<E, S>(this, where, notifyAll)
+    return DaoInstance.delete(this, where, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
@@ -132,7 +171,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     item: E,
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.delete<E, S>(this, item, notifyAll)
+    return DaoInstance.delete(this, item, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
@@ -154,7 +193,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.delete<E, S>(this, items, notifyAll)
+    return DaoInstance.delete(this, items, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
@@ -177,7 +216,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     item: E,
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.insertOrReplace<E, S>(this, item, notifyAll)
+    return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
