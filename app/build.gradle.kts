@@ -33,8 +33,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     packagingOptions {
@@ -69,13 +69,12 @@ android {
     kotlinOptions {
         languageVersion = "1.6"
         apiVersion = "1.6"
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     kapt {
         useBuildCache = true
         generateStubs = false
-        includeCompileClasspath = false
     }
 }
 

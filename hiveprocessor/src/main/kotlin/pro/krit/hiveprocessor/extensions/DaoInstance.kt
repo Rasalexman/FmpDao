@@ -105,7 +105,7 @@ object DaoInstance {
     ): S {
         dao.initFields<E>()
         val query = QueryBuilder.createTableQuery(dao)
-        return QueryExecuter.executeStatus<E, S>(
+        return QueryExecuter.executeStatus(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_CREATE,
@@ -126,10 +126,10 @@ object DaoInstance {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
         where: String = "",
-        notifyAll: Boolean = true
+        notifyAll: Boolean = false
     ): S {
         val deleteQuery = QueryBuilder.createQuery(dao, QueryBuilder.DELETE_QUERY, where)
-        return QueryExecuter.executeStatus<E, S>(
+        return QueryExecuter.executeStatus(
             dao = dao,
             query = deleteQuery,
             errorCode = ERROR_CODE_REMOVE_WHERE,
@@ -152,7 +152,7 @@ object DaoInstance {
         notifyAll: Boolean = false
     ): S {
         val query = QueryBuilder.createDeleteQuery(dao, item)
-        return QueryExecuter.executeStatus<E, S>(
+        return QueryExecuter.executeStatus(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_DELETE,
@@ -175,7 +175,7 @@ object DaoInstance {
         notifyAll: Boolean = false
     ): S {
         val query = QueryBuilder.createDeleteQuery(dao, items)
-        return QueryExecuter.executeTransactionStatus<E, S>(
+        return QueryExecuter.executeTransactionStatus(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_DELETE,
@@ -192,6 +192,24 @@ object DaoInstance {
         return withContext(Dispatchers.IO) { delete<E, S>(dao, items, notifyAll) }
     }*/
 
+    ////--------- UPDATE QUERIES
+    inline fun <reified E : Any, reified S : StatusSelectTable<E>> update(
+        dao: IDao.IFieldsDao,
+        setQuery: String,
+        from: String = "",
+        where: String = "",
+        notifyAll: Boolean = false
+    ): S {
+        val updateQuery = QueryBuilder.createUpdateQuery(dao, setQuery, from, where)
+        return QueryExecuter.executeStatus(
+            dao = dao,
+            query = updateQuery,
+            errorCode = ERROR_CODE_UPDATE,
+            methodName = "update",
+            notifyAll = notifyAll
+        )
+    }
+
     ////--------- INSERT QUERIES
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
         dao: IDao.IFieldsDao,
@@ -199,7 +217,7 @@ object DaoInstance {
         notifyAll: Boolean = false
     ): S {
         val query = QueryBuilder.createInsertOrReplaceQuery(dao, item)
-        return QueryExecuter.executeStatus<E, S>(
+        return QueryExecuter.executeStatus(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_INSERT,
