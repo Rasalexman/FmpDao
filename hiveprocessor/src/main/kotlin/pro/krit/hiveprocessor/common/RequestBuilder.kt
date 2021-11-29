@@ -22,6 +22,7 @@ import com.mobrun.plugin.api.callparams.WebCallParams
 import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import pro.krit.hiveprocessor.base.IRequest
+import pro.krit.hiveprocessor.extensions.ScalarMap
 
 object RequestBuilder {
 
@@ -58,10 +59,13 @@ object RequestBuilder {
         }
     }
 
-    fun createTableParams(requestData: List<CustomParameter>? = null): TableCallParams {
+    fun createTableParams(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): TableCallParams {
         val requestBuilder =
             com.mobrun.plugin.api.request_assistant.RequestBuilder<CustomParameter, ScalarParameter<Any>>()
         requestBuilder.addTableItems(requestData)
+        if(scalarParameters != null) {
+            requestBuilder.addScalars(scalarParameters)
+        }
 
         val queryParams = requestBuilder.buildTextRequest()
 
