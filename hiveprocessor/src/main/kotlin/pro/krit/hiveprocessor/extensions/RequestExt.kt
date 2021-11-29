@@ -137,11 +137,12 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
  * Простой запрос данных для FMP
  *
  * @param requestData - [List] данные для запроса
+ * @param scalarParameters - [List] скалярные параметры для запроса
  *
  * @return - статус запроса [StatusRawDataListTable]
  */
-fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null): StatusRawDataListTable {
-    val params = RequestBuilder.createTableParams(requestData)
+fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): StatusRawDataListTable {
+    val params = RequestBuilder.createTableParams(requestData, scalarParameters)
     println("------> Start tableListStatus '${this.resourceName}' with params: ${params.data}")
     return RequestExecuter.executeBaseTableStatus(
         this,
