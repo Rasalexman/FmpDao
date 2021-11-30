@@ -62,8 +62,12 @@ object RequestBuilder {
     fun createTableParams(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): TableCallParams {
         val requestBuilder =
             com.mobrun.plugin.api.request_assistant.RequestBuilder<CustomParameter, ScalarParameter<Any>>()
-        requestBuilder.addTableItems(requestData)
-        if(scalarParameters != null) {
+
+        if(!requestData.isNullOrEmpty()) {
+            requestBuilder.addTableItems(requestData)
+        }
+
+        if (!scalarParameters.isNullOrEmpty()) {
             requestBuilder.addScalars(scalarParameters)
         }
 
