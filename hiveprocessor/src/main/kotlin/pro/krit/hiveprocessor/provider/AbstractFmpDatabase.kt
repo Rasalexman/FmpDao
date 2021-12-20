@@ -15,8 +15,10 @@
 package pro.krit.hiveprocessor.provider
 
 import com.google.gson.GsonBuilder
-import com.mobrun.plugin.api.*
-import com.mobrun.plugin.models.StatusSelectTable
+import com.mobrun.plugin.api.DatabaseAPI
+import com.mobrun.plugin.api.HyperHive
+import com.mobrun.plugin.api.HyperHiveState
+import com.mobrun.plugin.api.VersionAPI
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,15 +57,21 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun provideHyperHiveState(): HyperHiveState {
-        return hyperHiveState ?: throw NullPointerException("HyperHiveState instance is not initialized")
+        return hyperHiveState
+            ?: throw NullPointerException("HyperHiveState instance is not initialized")
     }
 
     override fun getTrigger(dao: IDao): Flow<String> {
-        return triggers.getOrPut(dao.fullTableName) { MutableSharedFlow(1, 1, BufferOverflow.DROP_OLDEST) }
+        return triggers.getOrPut(dao.fullTableName) {
+            MutableSharedFlow(
+                extraBufferCapacity = 1,
+                onBufferOverflow = BufferOverflow.DROP_OLDEST
+            )
+        }
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun<T : AbstractFmpDatabase> initialize(hState: HyperHiveState, config: DatabaseConfig): T {
+    fun <T : AbstractFmpDatabase> initialize(hState: HyperHiveState, config: DatabaseConfig): T {
         savedFmpDbKey = config.dbKey
 
         hyperHiveState = hState
@@ -75,7 +83,8 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .setVersionProject(config.projectVersion)
             .setDefaultRetryCount(config.retryCount)
             .setDefaultRetryIntervalSec(config.retryInterval)
-            .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()).apply {
+            .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create())
+            .apply {
                 hyperHive = buildHyperHive().setupLogs(config.logLevel)
             }
         return this as T
@@ -92,7 +101,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {
         var isClosed = false
         var isOpened = tryToOpenDatabase(dbKey, pathBase)
-        if(!isOpened) {
+        if (!isOpened) {
             isClosed = tryToCloseDatabase(pathBase)
             isOpened = tryToOpenDatabase(dbKey, pathBase)
         }
@@ -105,7 +114,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun closeAndClearProviders(pathBase: String) {
-        if(tryToCloseDatabase(pathBase)) {
+        if (tryToCloseDatabase(pathBase)) {
             clearProviders()
         }
     }
@@ -114,7 +123,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         val currentKey = fmpKey.takeIf { it.isNotEmpty() } ?: savedFmpDbKey
         val key = generateKey(currentKey)
         val hyperHiveDatabaseApi = databaseApi
-        return if(pathBase.isNotEmpty()) {
+        return if (pathBase.isNotEmpty()) {
             hyperHiveDatabaseApi.openBase(pathBase, key)
         } else {
             hyperHiveDatabaseApi.openDefaultBase(key)
@@ -123,7 +132,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
     private fun tryToCloseDatabase(pathBase: String = ""): Boolean {
         val hyperHiveDatabaseApi = databaseApi
-        return if(pathBase.isNotEmpty()) {
+        return if (pathBase.isNotEmpty()) {
             hyperHiveDatabaseApi.closeBase(pathBase)
         } else {
             hyperHiveDatabaseApi.closeDefaultBase()
