@@ -25,7 +25,7 @@ object QueryBuilder {
     const val SELECT_QUERY = "SELECT * FROM"
     const val COUNT_QUERY = "SELECT count(*) FROM"
     const val DELETE_QUERY = "DELETE FROM"
-    const val UPDATE_QUERY = "UPDATE %s SET "
+    private const val UPDATE_QUERY = "UPDATE %s SET "
 
     const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;"
     const val END_TRANSACTION_QUERY = "END TRANSACTION;"
@@ -113,7 +113,7 @@ object QueryBuilder {
                 append(from)
             }
             if(where.isNotEmpty()) {
-                append(" ")
+                append(" $WHERE ")
                 append(where)
             }
         }
