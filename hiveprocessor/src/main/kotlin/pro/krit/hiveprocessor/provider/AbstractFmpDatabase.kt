@@ -64,6 +64,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     override fun getTrigger(dao: IDao): Flow<String> {
         return triggers.getOrPut(dao.fullTableName) {
             MutableSharedFlow(
+                replay = 1,
                 extraBufferCapacity = 1,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
