@@ -2,10 +2,7 @@ package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.*
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -22,7 +19,7 @@ object DaoInstance {
         emitDelay: Long = 0L,
         withDistinct: Boolean = false
     ) = flow {
-        dao.fmpDatabase.getTrigger(dao).collect {
+        dao.getTrigger().collect {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }
@@ -30,7 +27,8 @@ object DaoInstance {
             emit(result)
         }
     }.onStart {
-        if (withStart) {
+        val isTriggerEmpty = dao.isTriggerEmpty()
+        if (withStart && isTriggerEmpty) {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }

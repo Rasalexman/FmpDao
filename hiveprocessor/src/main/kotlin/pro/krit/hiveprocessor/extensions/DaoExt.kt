@@ -19,10 +19,8 @@ import com.mobrun.plugin.api.request_assistant.RequestBuilder
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.withContext
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.base.IDao.*
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
@@ -51,14 +49,21 @@ const val ERROR_CODE_DELETE = 10006
 const val ERROR_CODE_QUERY = 10007
 const val ERROR_CODE_UPDATE = 10008
 
+fun IDao.getTrigger(): Flow<String> {
+    return this.fmpDatabase.getTrigger(this)
+}
+
+suspend fun IDao.isTriggerEmpty(): Boolean {
+    return getTrigger().firstOrNull().isNullOrEmpty()
+}
+
 fun IDao.flowableCount(
     where: String = "",
     withStart: Boolean = true,
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ) = flow {
-    val trigger = this@flowableCount
-    this@flowableCount.fmpDatabase.getTrigger(trigger).collect {
+    this@flowableCount.getTrigger().collect {
         if(emitDelay > 0) {
             delay(emitDelay)
         }
@@ -66,7 +71,8 @@ fun IDao.flowableCount(
         emit(result)
     }
 }.onStart {
-    if (withStart) {
+    val trigger = this@flowableCount
+    if (withStart && trigger.isTriggerEmpty()) {
         val result = count(where)
         emit(result)
     }
@@ -99,11 +105,12 @@ fun IDao.count(
 
 ////------ TRIGGERS
 fun IDao.triggerFlow() {
-    (fmpDatabase.getTrigger(this) as MutableSharedFlow<String>).tryEmit(fullTableName)
+    (this.getTrigger() as MutableSharedFlow<String>).tryEmit(fullTableName)
 }
 
 fun <E : Any> StatusSelectTable<E>.triggerFlow(dao: IDao) {
-    if (this.status.name == "OK") {
+    val statusName = this.status.name.uppercase()
+    if (statusName == "OK") {
         dao.triggerFlow()
     }
 }

@@ -1,6 +1,5 @@
 package pro.krit.fmpdaoexample.fmpresources
 
-import pro.krit.hiveprocessor.annotations.FmpParam
 import pro.krit.hiveprocessor.annotations.FmpRestRequest
 import pro.krit.hiveprocessor.annotations.FmpTable
 import pro.krit.hiveprocessor.base.IRequest
@@ -9,28 +8,47 @@ import pro.krit.hiveprocessor.base.IRequest
 @FmpRestRequest(
     resourceName = "ZFM_PM_GET_SET",
     parameters = [
-        Parameters.IV_USER,  // Login
-        Parameters.IV_MATNR
+        Parameters.IV_USER
     ]
 )
 interface IZfmPmGetSetRequest : IRequest.IBaseRequest {
 
-    @FmpParam(
-        name = Parameters.IV_MATNR,
+    @FmpTable(
+        name = "ET_AUTH_GR",
         fields = [
-            "ET_AUTH_GR_Int", "ET_ERROR", "ET_AUTH_USER"
+            "BEGRU"
         ],
         isNumeric = true
     )
-    private interface IvMatnr
+    private interface EtAuthGr
 
     @FmpTable(
-        name = "ET_DATA",
+        name = "ET_ERROR",
         fields = [
-            "ET_AUTH_GR", "ET_ERROR", "ET_AUTH_USER"
+            "RETCODE",
+            "ERROR_TEXT"
         ],
         isNumeric = true
     )
-    private interface EtData
+    private interface EtError
+
+    @FmpTable(
+        name = "ET_AUTH_USER",
+        fields = [
+            "PERNR", "FIO", "WERKS", "PLANS_TEXT"
+        ],
+        isNumeric = true
+    )
+    private interface EtAuthUser
+
+    @FmpTable(
+        name = "ET_PARAM",
+        fields = [
+            "PARAM_NAME", "PARAM_VALUE"
+        ],
+        isList = true,
+        isNumeric = true
+    )
+    private interface EtParams
 
 }

@@ -7,6 +7,9 @@ plugins {
     kotlin("kapt")
 }
 
+group = "pro.krit.hiveprocessor"
+version = Builds.Processor.VERSION_NAME
+
 sourceSets {
     getByName("main") {
         java.setSrcDirs(Builds.codeDirs)
@@ -16,14 +19,22 @@ sourceSets {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
-    sourceSets {
+    /*sourceSets {
         getByName("main") {
             java.setSrcDirs(Builds.codeDirs)
         }
-    }
+    }*/
 
-    withJavadocJar()
     withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+    kotlinOptions {
+        apiVersion = "1.6"
+        languageVersion = "1.6"
+        jvmTarget = "11"
+    }
 }
 
 dependencies {
@@ -32,26 +43,16 @@ dependencies {
     implementation(config.Libs.Common.gson)
     compileOnly(config.Libs.Core.coroutinesCore)
 
-    //implementation(project(":hhive"))
-
     implementation(config.Libs.Processor.kotlinPoet)
     implementation(config.Libs.Processor.autoService)
     kapt(config.Libs.Processor.autoService)
 }
 
-kapt {
-    useBuildCache = true
-    generateStubs = false
-}
-
-group = "pro.krit.hiveprocessor"
-version = Builds.Processor.VERSION_NAME
-
-tasks.create(name = "sourceJar", type = Jar::class) {
+/*tasks.create(name = "sourceJar", type = Jar::class) {
     archiveClassifier.set("sources")
-}
+}*/
 
-publishing {
+/*publishing {
     publications {
         create<MavenPublication>("hiveprocessor") {
             from(components["kotlin"])
@@ -71,4 +72,4 @@ publishing {
             setUrl(uri("${buildDir}/publishing-repository"))
         }
     }
-}
+}*/

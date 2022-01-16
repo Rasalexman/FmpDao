@@ -46,5 +46,6 @@ package pro.krit.hiveprocessor.annotations
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.SOURCE)
 annotation class FmpDatabase(
-    val asDaoProvider: Boolean = false
+    val asDaoProvider: Boolean = false,
+    val asSingleton: Boolean = true
 )
