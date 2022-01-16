@@ -99,7 +99,7 @@ object DaoInstance {
 
     ///// Create tables
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> createTable(
-        dao: IDao.IFieldsDao
+        dao: IDao
     ): S {
         dao.initFields<E>()
         val query = QueryBuilder.createTableQuery(dao)

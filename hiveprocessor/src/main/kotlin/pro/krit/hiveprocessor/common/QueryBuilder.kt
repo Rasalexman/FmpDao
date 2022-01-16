@@ -64,7 +64,7 @@ object QueryBuilder {
         }
     }
 
-    fun createTableQuery(dao: IFieldsDao): String {
+    fun createTableQuery(dao: IDao): String {
         val localDaoFields = dao.fieldsData
         val fieldsNames = localDaoFields?.fieldsNamesWithTypes
         if (fieldsNames.isNullOrEmpty()) {
