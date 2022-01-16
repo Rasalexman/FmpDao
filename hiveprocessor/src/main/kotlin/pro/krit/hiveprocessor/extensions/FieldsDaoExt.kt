@@ -89,7 +89,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
  * Создание таблицы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTable(): S {
-    return DaoInstance.createTable<E, S>(this)
+    return DaoInstance.createTable(this)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTableAsync(): S {
@@ -109,7 +109,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.i
     item: E,
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.insertOrReplace<E, S>(this, item, notifyAll)
+    return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
@@ -123,7 +123,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.i
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
-    return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
+    return DaoInstance.insertOrReplace(this, items, notifyAll)
 }
 
 /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(

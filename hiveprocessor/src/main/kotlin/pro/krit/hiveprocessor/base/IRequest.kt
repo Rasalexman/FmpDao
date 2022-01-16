@@ -15,7 +15,6 @@
 package pro.krit.hiveprocessor.base
 
 import com.mobrun.plugin.api.HyperHive
-import pro.krit.hiveprocessor.request.BaseFmpRawModel
 import pro.krit.hiveprocessor.request.ObjectRawStatus
 
 typealias RawStatus<S> = ObjectRawStatus<S>

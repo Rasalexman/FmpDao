@@ -38,9 +38,9 @@ android {
     }
 
     packagingOptions {
-        exclude("META-INF/notice.txt")
-        exclude("META-INF/plugin_release.kotlin_module")
-        exclude("META-INF/fmp_release.kotlin_module")
+        this.resources.excludes.add("META-INF/notice.txt")
+        this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
+        this.resources.excludes.add("META-INF/fmp_release.kotlin_module")
     }
 
     // Declare the task that will monitor all configurations.
@@ -70,11 +70,6 @@ android {
         languageVersion = "1.6"
         apiVersion = "1.6"
         jvmTarget = "11"
-    }
-
-    kapt {
-        useBuildCache = true
-        generateStubs = false
     }
 }
 

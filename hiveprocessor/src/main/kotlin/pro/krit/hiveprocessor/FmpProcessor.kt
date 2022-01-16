@@ -47,6 +47,7 @@ class FmpProcessor : AbstractProcessor() {
 
     companion object {
 
+        private const val FMP_DATABASE_NAME = "FmpDatabase"
 
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
@@ -78,6 +79,8 @@ class FmpProcessor : AbstractProcessor() {
         private const val TAG_MEMBER_HALF = "%M("
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
+        private const val FUNC_MEMBER_STATEMENT_GENERIC = "this.%M<"
+        private const val FUNC_MEMBER_STATEMENT_GENERIC_CLOSE = ">()"
 
         private const val FIELD_PROVIDER = "fmpDatabase"
         private const val FIELD_HYPER_HIVE = "hyperHive"
@@ -98,6 +101,7 @@ class FmpProcessor : AbstractProcessor() {
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
         private const val TAG_CLASS_NAME = "%T"
+        private const val DELIMETER = ","
 
         private const val QUERY_VALUE = "val query: String = "
         private const val QUERY_RETURN = "return %T.executeQuery(this, query)"
@@ -136,7 +140,7 @@ class FmpProcessor : AbstractProcessor() {
         annotations: MutableSet<out TypeElement>,
         roundEnv: RoundEnvironment
     ): Boolean {
-        if(annotations.isNotEmpty()) {
+        if (annotations.isNotEmpty()) {
             val startTime = System.currentTimeMillis()
             //println("FmpProcessor started with annotations: $annotations")
             val bindingDataList = mutableListOf<BindData>()
@@ -176,18 +180,23 @@ class FmpProcessor : AbstractProcessor() {
     }
 
     private fun processDatabase(databaseElement: Element, daoList: List<BindData>) {
-        checkElementForRestrictions("FmpDatabase", databaseElement)
+        checkElementForRestrictions(FMP_DATABASE_NAME, databaseElement)
 
         val annotation = databaseElement.getAnnotation(FmpDatabase::class.java)
         val annotationType = databaseElement.asType()
         val databaseData = ClassName.bestGuess(annotationType.toString())
 
+        val isSingleInstance = annotation.asSingleton
         val className = databaseData.simpleName
         val packName = databaseData.packageName
         val fileName = className.createFileName()
 
         val superClassName = ClassName(packName, className)
-        val classTypeSpec = TypeSpec.objectBuilder(fileName)
+        val classTypeSpec = if (isSingleInstance) {
+            TypeSpec.objectBuilder(fileName)
+        } else {
+            TypeSpec.classBuilder(fileName)
+        }
         classTypeSpec.superclass(superClassName)
 
         // Extended classes only for Interfaces
@@ -324,7 +333,7 @@ class FmpProcessor : AbstractProcessor() {
 
             if (bindData.parameters.isNotEmpty()) {
                 val localParams = bindData.parameters
-                val requestFunc = createRequestFunction(localParams, REQUEST_NAME)
+                val requestFunc = createRequestFunction(localParams)
                 /*val requestFuncAsync =
                     createRequestFunction(localParams, REQUEST_ASYNC_NAME, isAsync = true)*/
                 classTypeSpec.addFunction(requestFunc.build())
@@ -461,11 +470,8 @@ class FmpProcessor : AbstractProcessor() {
     }
 
 
-    private fun createRequestFunction(
-        parameters: List<String>,
-        funName: String,
-    ): FunSpec.Builder {
-        val funcSpec = FunSpec.builder(funName)
+    private fun createRequestFunction(parameters: List<String>): FunSpec.Builder {
+        val funcSpec = FunSpec.builder(REQUEST_NAME)
         var mapOfParams = TAG_MEMBER_HALF
         val paramsSize = parameters.size - 1
         val propertyClass = Any::class.asClassName()
@@ -530,11 +536,11 @@ class FmpProcessor : AbstractProcessor() {
             isLocalProp
         )
 
-    /*if (bindData.isLocal || bindData.fields.isNotEmpty()) {
+        /*if (bindData.isLocal || bindData.fields.isNotEmpty()) {
 
-        } else {
-            listOf(hyperHiveProviderProp, resourceNameProp, parameterNameProp, isCachedProp)
-        }*/
+            } else {
+                listOf(hyperHiveProviderProp, resourceNameProp, parameterNameProp, isCachedProp)
+            }*/
     }
 
     // создаем иницилизируешие поля для конструктора а так жу функцию init {  }
@@ -577,16 +583,16 @@ class FmpProcessor : AbstractProcessor() {
                     val members = mutableListOf<Any>()
                     members.add(MemberName(EXTENSIONS_PATH, INIT_CREATE_TABLE))
                     val initStatement = buildString {
-                        if(superTypeGenerics.isNotEmpty()) {
-                            append("this.%M<")
+                        if (superTypeGenerics.isNotEmpty()) {
+                            append(FUNC_MEMBER_STATEMENT_GENERIC)
                             val genSize = superTypeGenerics.size - 1
                             superTypeGenerics.forEachIndexed { index, className ->
                                 append(className)
-                                if(index < genSize) {
-                                    append(",")
+                                if (index < genSize) {
+                                    append(DELIMETER)
                                 }
                             }
-                            append(">()")
+                            append(FUNC_MEMBER_STATEMENT_GENERIC_CLOSE)
                         } else {
                             append(FUNC_MEMBER_STATEMENT)
                         }
@@ -886,7 +892,7 @@ class FmpProcessor : AbstractProcessor() {
                 }
 
                 // название таблицы
-                val postFixName = if(isTableAnnotation) MODEL_POSTFIX else PARAMS_POSTFIX
+                val postFixName = if (isTableAnnotation) MODEL_POSTFIX else PARAMS_POSTFIX
                 val propName = mainClassName + inter.simpleName.toString().capitalizeFirst()
                 val propModelData = annotationInnerName.asModelFieldData()
                 val propTypeClassName = propName.createFileName(postFixName).capitalizeFirst()
@@ -895,7 +901,7 @@ class FmpProcessor : AbstractProcessor() {
                     .addModifiers(KModifier.DATA)
 
                 // добавляем в маппу для параметров запроса
-                if(isParamAnnotation) {
+                if (isParamAnnotation) {
                     val isList = paramAnnotation.isList
                     // выбираем правильный тип данных
                     val typeName = createListTypeName(propClassName, isList)
@@ -904,8 +910,9 @@ class FmpProcessor : AbstractProcessor() {
 
                 // table constructor properties
                 val constructorPropSpec = FunSpec.constructorBuilder()
-                // does table have enumeric parameter in annotaion
-                val isNumericModel = tableAnnotation?.isNumeric ?: paramAnnotation?.isNumeric ?: false
+                // does table have enumeric parameter in annotation
+                val isNumericModel =
+                    tableAnnotation?.isNumeric ?: paramAnnotation?.isNumeric ?: false
                 propClassFields.forEachIndexed { index, name ->
                     addTableModelProperty(
                         name,
@@ -917,11 +924,11 @@ class FmpProcessor : AbstractProcessor() {
                     )
                 }
                 propClassSpec.primaryConstructor(constructorPropSpec.build()).apply {
-                    if(isNumericModel) {
-                       /* val (numPackName, numClassName) = NumeratedFields::class.java.toString().getPackAndClass()
-                        val numerateClassName = ClassName(numPackName, numClassName)*/
+                    if (isNumericModel) {
+                        /* val (numPackName, numClassName) = NumeratedFields::class.java.toString().getPackAndClass()
+                         val numerateClassName = ClassName(numPackName, numClassName)*/
                         addAnnotation(createCountFieldsAnnotation(propClassFields.size))
-                        if(isTableAnnotation) {
+                        if (isTableAnnotation) {
                             addSuperinterface(NumeratedFields::class.java)
                         } else {
                             addSuperinterface(CustomParameter::class.java)
@@ -941,7 +948,7 @@ class FmpProcessor : AbstractProcessor() {
                 }
                 elementsFiles.add(propClassSpec)
 
-                if(isTableAnnotation) {
+                if (isTableAnnotation) {
                     // result model property
                     createResultModelProperty(
                         propModelData.name,
@@ -956,7 +963,8 @@ class FmpProcessor : AbstractProcessor() {
 
             //------ Request Params Class
             if (parameters.isNotEmpty()) {
-                val paramsClass = createRequestParams(mainClassName, parameters, paramsAnnotationClasses)
+                val paramsClass =
+                    createRequestParams(mainClassName, parameters, paramsAnnotationClasses)
                 elementsFiles.add(1, paramsClass)
             }
 
@@ -977,7 +985,8 @@ class FmpProcessor : AbstractProcessor() {
                 REQUEST_PACKAGE_NAME,
                 mainClassName.createFileName(RESPOND_STATUS_POSTFIX)
             )
-            val rawStatusTypeSpec = createRawStatusClass(respondStatusClassName, resultModelClassName)
+            val rawStatusTypeSpec =
+                createRawStatusClass(respondStatusClassName, resultModelClassName)
             elementsFiles.add(rawStatusTypeSpec)
 
             val parametrizedInterface =
@@ -989,7 +998,6 @@ class FmpProcessor : AbstractProcessor() {
                 java.lang.String.format(" Please set private inner interfaces with annotation \'@FmpTable\' for request \'$element\'. ")
             messager.printMessage(Diagnostic.Kind.WARNING, message)
         }*/
-
 
 
         // save all classes in one file
@@ -1057,7 +1065,10 @@ class FmpProcessor : AbstractProcessor() {
         classTypeSpec.addProperty(propBuilder)
     }
 
-    private fun createListTypeName(originalClassName: ClassName, fieldReturnList: Boolean): TypeName {
+    private fun createListTypeName(
+        originalClassName: ClassName,
+        fieldReturnList: Boolean
+    ): TypeName {
         return if (fieldReturnList) {
             val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
             list.parameterizedBy(originalClassName).copy(nullable = true)
@@ -1085,7 +1096,7 @@ class FmpProcessor : AbstractProcessor() {
                 .initializer(propName)
                 .mutable(true)
                 .addAnnotation(annotationSerialize).apply {
-                    if(isNumericModel && numIndex >= 0) {
+                    if (isNumericModel && numIndex >= 0) {
                         addAnnotation(createJavaFieldAnnotation())
                         addAnnotation(createParameterFieldAnnotation(numIndex))
                     }
@@ -1109,9 +1120,10 @@ class FmpProcessor : AbstractProcessor() {
     ) {
         val classType = HyperHive::class.asTypeName()
         val hyperHivePropName = FIELD_HYPER_HIVE
-        val propHyperSpec = PropertySpec.builder(hyperHivePropName, classType, KModifier.PUBLIC, KModifier.OVERRIDE)
-            .initializer(hyperHivePropName)
-            .build()
+        val propHyperSpec =
+            PropertySpec.builder(hyperHivePropName, classType, KModifier.PUBLIC, KModifier.OVERRIDE)
+                .initializer(hyperHivePropName)
+                .build()
         val paramHyperSpec = ParameterSpec.builder(hyperHivePropName, classType)
             .build()
 
@@ -1119,7 +1131,12 @@ class FmpProcessor : AbstractProcessor() {
         val stringTypeName = String::class.asTypeName()
         val mapTypeName = Map::class.asTypeName().parameterizedBy(stringTypeName, stringTypeName)
         val nullableMapType = mapTypeName.copy(nullable = true)
-        val propHeadersSpec = PropertySpec.builder(FIELD_DEFAULT_HEADERS, nullableMapType, KModifier.PUBLIC, KModifier.OVERRIDE)
+        val propHeadersSpec = PropertySpec.builder(
+            FIELD_DEFAULT_HEADERS,
+            nullableMapType,
+            KModifier.PUBLIC,
+            KModifier.OVERRIDE
+        )
             .mutable()
             .initializer(FIELD_DEFAULT_HEADERS)
             .build()
@@ -1130,7 +1147,12 @@ class FmpProcessor : AbstractProcessor() {
             .defaultValue(NULL_INITIALIZER)
             .build()
 
-        val propResourceSpec = PropertySpec.builder(FIELD_RESOURCE_NAME, stringTypeName, KModifier.PUBLIC, KModifier.OVERRIDE)
+        val propResourceSpec = PropertySpec.builder(
+            FIELD_RESOURCE_NAME,
+            stringTypeName,
+            KModifier.PUBLIC,
+            KModifier.OVERRIDE
+        )
             .initializer(FIELD_RESOURCE_NAME)
             .build()
 
@@ -1297,8 +1319,8 @@ class FmpProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedOptions(): Set<String?>? {
-        return Collections.singleton("org.gradle.annotation.processing.aggregating")
-        //return Collections.singleton("org.gradle.annotation.processing.isolating")
+        //return Collections.singleton("org.gradle.annotation.processing.aggregating")
+        return Collections.singleton("org.gradle.annotation.processing.isolating")
     }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()

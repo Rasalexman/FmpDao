@@ -39,7 +39,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     override val databasePath: String
         get() = hyperHiveState?.dbPathDefault.orEmpty()
 
-    private var savedFmpDbKey: String = ""
+    private var savedFmpDbKey: String = DEFAULT_FMP_KEY
 
     private val triggers: HashMap<String, Flow<String>> = hashMapOf()
 
@@ -63,17 +63,21 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
     override fun getTrigger(dao: IDao): Flow<String> {
         return triggers.getOrPut(dao.fullTableName) {
-            MutableSharedFlow(
+            val trigger = MutableSharedFlow<String>(
                 replay = 1,
                 extraBufferCapacity = 1,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
+            trigger.tryEmit(dao.fullTableName)
+            trigger
         }
     }
 
     @Suppress("UNCHECKED_CAST")
     fun <T : AbstractFmpDatabase> initialize(hState: HyperHiveState, config: DatabaseConfig): T {
-        savedFmpDbKey = config.dbKey
+        if(config.dbKey.isNotEmpty()) {
+            savedFmpDbKey = config.dbKey
+        }
 
         hyperHiveState = hState
             .setHostWithSchema(config.serverAddress)
@@ -146,14 +150,18 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
     private fun clearProviders() {
         triggers.clear()
-        savedFmpDbKey = ""
+        savedFmpDbKey = DEFAULT_FMP_KEY
         hyperHive = null
         hyperHiveState = null
     }
 
     private fun HyperHive.setupLogs(logLevel: Int): HyperHive {
-        this.loggingAPI.setLogEnabled(logLevel > 0)
+        this.loggingAPI.setLogEnabled(logLevel >= 0)
         this.loggingAPI.setLogLevel(logLevel)
         return this
+    }
+
+    companion object {
+        private const val DEFAULT_FMP_KEY = "default"
     }
 }
