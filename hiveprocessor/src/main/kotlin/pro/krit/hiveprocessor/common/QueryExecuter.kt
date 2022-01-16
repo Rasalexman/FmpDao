@@ -14,6 +14,7 @@
 
 package pro.krit.hiveprocessor.common
 
+import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
@@ -23,12 +24,12 @@ import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
 
-    const val DEFAULT_ERRORCODE = 1001
+    const val DEFAULT_ERROR_CODE = 1001
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeQuery(
         dao: IDao,
         query: String,
-        errorCode: Int = DEFAULT_ERRORCODE,
+        errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "",
         notifyAll: Boolean = false
     ): List<E> {
@@ -46,7 +47,7 @@ object QueryExecuter {
         dao: IDao,
         key: String,
         query: String,
-        errorCode: Int = DEFAULT_ERRORCODE,
+        errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "",
         notifyAll: Boolean = false
     ): String {
@@ -69,7 +70,7 @@ object QueryExecuter {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeResultQuery(
         dao: IDao,
         query: String,
-        errorCode: Int = DEFAULT_ERRORCODE,
+        errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "",
         notifyAll: Boolean = false
     ): Result<List<E>> {
@@ -77,7 +78,6 @@ object QueryExecuter {
             val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
             if (status.isNotBad()) {
                 val result = status.result.database.records.orEmpty()
-                println("[SUCCESS]: ${dao.fullTableName} result = $result")
                 Result.success(result)
             } else {
                 val firstError = status.errors.firstOrNull()
@@ -98,7 +98,7 @@ object QueryExecuter {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeStatus(
         dao: IDao,
         query: String,
-        errorCode: Int = DEFAULT_ERRORCODE,
+        errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "executeStatus",
         notifyAll: Boolean = false
     ): S {
@@ -106,8 +106,15 @@ object QueryExecuter {
             val localDao: IDao = dao
             val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
             val clazz = S::class.java
-            hyperHiveDatabaseApi.query(query, clazz).execute()!!.apply {
-                if (notifyAll) this.triggerFlow(localDao)
+            val status = hyperHiveDatabaseApi.query(query, clazz).execute()!!
+            // check for table creation
+            val isOkStatus = status.checkTableStatus(localDao, hyperHiveDatabaseApi)
+            if(isOkStatus) {
+                status
+            } else {
+                hyperHiveDatabaseApi.query(query, clazz).execute()!!
+            }.apply {
+                if(notifyAll) this.triggerFlow(localDao)
             }
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -134,7 +141,7 @@ object QueryExecuter {
         val endStatus = executeStatus<E, S>(
             dao,
             QueryBuilder.END_TRANSACTION_QUERY,
-            DEFAULT_ERRORCODE,
+            DEFAULT_ERROR_CODE,
             methodName,
             notifyAll
         )
@@ -142,6 +149,25 @@ object QueryExecuter {
             status = endStatus
         }
         return status
+    }
+
+    inline fun <reified E : Any, reified S : StatusSelectTable<E>> S.checkTableStatus(
+        dao: IDao,
+        databaseApi: DatabaseAPI
+    ): Boolean {
+        return if(!this.isOk) {
+            val isTableError = this.errors.firstOrNull()?.code == 1
+            if(isTableError) {
+                val clazz = S::class.java
+                val createTableQuery = QueryBuilder.createTableQuery(dao)
+                val createTableStatus = databaseApi.query(createTableQuery, clazz).execute()!!
+                createTableStatus.isOk
+            } else {
+                true
+            }
+        } else {
+            true
+        }
     }
 
     inline fun <reified E : Any> createErrorStatus(

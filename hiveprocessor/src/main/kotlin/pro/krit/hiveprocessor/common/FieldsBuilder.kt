@@ -17,6 +17,7 @@ package pro.krit.hiveprocessor.common
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
+import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import java.lang.reflect.Field
 import java.security.MessageDigest
@@ -28,7 +29,7 @@ object FieldsBuilder {
     private const val PRIMARY_KEY_JAVA_TYPE = "String"
     private const val VALUE_NULL = "NULL"
 
-    fun initFields(dao: IFieldsDao, fields: Array<Field>) {
+    fun initFields(dao: IDao, fields: Array<Field>) {
         if(dao.fieldsData != null) return
 
         var localPrimaryKey: Field? = null

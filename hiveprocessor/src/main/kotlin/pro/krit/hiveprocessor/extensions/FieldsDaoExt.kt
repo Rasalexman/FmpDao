@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.FieldsBuilder
 
-inline fun <reified E : Any> IDao.IFieldsDao.initFields() {
+inline fun <reified E : Any> IDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
 }
 

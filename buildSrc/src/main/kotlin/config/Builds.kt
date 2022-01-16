@@ -1,10 +1,10 @@
 package config
 
 object Builds {
-    const val MIN_VERSION = 21
-    const val COMPILE_VERSION = 30
-    const val TARGET_VERSION = 30
-    const val BUILD_TOOLS = "30.0.3"
+    const val MIN_VERSION = 19
+    const val COMPILE_VERSION = 31
+    const val TARGET_VERSION = 31
+    const val BUILD_TOOLS = "31.0.0"
     const val APP_ID = "pro.krit.fmpdaoexample"
 
     val codeDirs = arrayListOf(
@@ -22,7 +22,7 @@ object Builds {
     }
 
     object Processor {
-        const val VERSION_CODE = 103028
-        const val VERSION_NAME = "1.3.28"
+        const val VERSION_CODE = 103035
+        const val VERSION_NAME = "1.3.35"
     }
 }
