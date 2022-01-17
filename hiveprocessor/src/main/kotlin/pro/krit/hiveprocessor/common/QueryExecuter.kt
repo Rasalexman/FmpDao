@@ -155,7 +155,7 @@ object QueryExecuter {
         dao: IDao,
         databaseApi: DatabaseAPI
     ): Boolean {
-        return if(!this.isOk) {
+        return if(!this.isOk && dao.fieldsData != null) {
             val isTableError = this.errors.firstOrNull()?.code == 1
             if(isTableError) {
                 val clazz = S::class.java

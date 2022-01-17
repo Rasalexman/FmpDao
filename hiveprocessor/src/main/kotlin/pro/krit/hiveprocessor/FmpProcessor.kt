@@ -142,7 +142,7 @@ class FmpProcessor : AbstractProcessor() {
     ): Boolean {
         if (annotations.isNotEmpty()) {
             val startTime = System.currentTimeMillis()
-            //println("FmpProcessor started with annotations: $annotations")
+            println("FmpProcessor started with annotations: $annotations")
             val bindingDataList = mutableListOf<BindData>()
             // Create files for FmpDao annotation
             val fmpResult = collectAnnotationData(
@@ -1319,8 +1319,8 @@ class FmpProcessor : AbstractProcessor() {
     }
 
     override fun getSupportedOptions(): Set<String?>? {
-        //return Collections.singleton("org.gradle.annotation.processing.aggregating")
-        return Collections.singleton("org.gradle.annotation.processing.isolating")
+        return Collections.singleton("org.gradle.annotation.processing.aggregating")
+        //return Collections.singleton("org.gradle.annotation.processing.isolating")
     }
 
     override fun getSupportedSourceVersion(): SourceVersion = SourceVersion.latestSupported()
