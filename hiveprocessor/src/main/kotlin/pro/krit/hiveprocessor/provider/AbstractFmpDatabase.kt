@@ -80,7 +80,6 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         }
 
         hyperHiveState = hState
-            .setHostWithSchema(config.serverAddress)
             .setApiVersion(VersionAPI.V_1)
             .setEnvironmentSlug(config.environment)
             .setProjectSlug(config.project)
@@ -89,6 +88,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .setDefaultRetryCount(config.retryCount)
             .setDefaultRetryIntervalSec(config.retryInterval)
             .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create())
+            .setHostWithSchema(config.serverAddress)
             .apply {
                 hyperHive = buildHyperHive().setupLogs(config.logLevel)
             }
