@@ -21,6 +21,7 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
+import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.data.BindData
 import pro.krit.hiveprocessor.data.FieldData
 import java.util.*
@@ -39,7 +40,7 @@ const val PREFIX_UPPER = 'I'
 const val PREFIX_LOWER = 'i'
 
 const val MODEL_FIELD_TYPE_INT = "int"
-const val MODEL_FIELD_TYPE_LIST = "list"
+//const val MODEL_FIELD_TYPE_LIST = "list"
 const val MODEL_FIELD_PRIMARY_KEY = "primary"
 private const val TAG_STRING_FULL_TYPE = "%S"
 
@@ -52,9 +53,14 @@ const val KOTLIN_STRING_TYPE_NAME = "String"
 const val KOTLIN_PATH = "kotlin"
 const val KOTLIN_COLLECTION_PATH = "kotlin.collections"
 const val KOTLIN_MAP_OF_NAME = "mapOf"
+private const val FIELD_NAME_INT = "_Int"
 
 fun String.capitalizeFirst(): String {
     return replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
+}
+
+fun String.withoutInt(): String {
+    return this.replace(FIELD_NAME_INT, "", true)
 }
 
 internal fun String.createFileName(postFix: String = CLASS_POSTFIX): String {

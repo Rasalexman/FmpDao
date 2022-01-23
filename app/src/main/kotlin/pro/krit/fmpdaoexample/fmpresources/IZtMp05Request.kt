@@ -3,7 +3,6 @@ package pro.krit.fmpdaoexample.fmpresources
 import pro.krit.hiveprocessor.annotations.FmpRestRequest
 import pro.krit.hiveprocessor.annotations.FmpTable
 import pro.krit.hiveprocessor.base.IRequest
-import pro.krit.models.remote.common.Fields
 
 // Фиксация прибытия
 @FmpRestRequest(

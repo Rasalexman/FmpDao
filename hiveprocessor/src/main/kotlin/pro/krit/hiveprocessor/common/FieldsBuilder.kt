@@ -19,6 +19,7 @@ import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.base.IDao.IFieldsDao
+import pro.krit.hiveprocessor.extensions.withoutInt
 import java.lang.reflect.Field
 import java.security.MessageDigest
 import java.util.*
@@ -28,6 +29,7 @@ object FieldsBuilder {
     private val md by lazy { MessageDigest.getInstance("SHA-256") }
     private const val PRIMARY_KEY_JAVA_TYPE = "String"
     private const val VALUE_NULL = "NULL"
+    const val FIELD_TYPE_INTEGER = "Integer"
 
     fun initFields(dao: IDao, fields: Array<Field>) {
         if(dao.fieldsData != null) return
@@ -108,11 +110,16 @@ object FieldsBuilder {
                 val value = field[item]
                 stringBuilderRes.append(prefix)
                 if (value == null) {
-                    stringBuilderRes.append("NULL")
+                    stringBuilderRes.append(VALUE_NULL)
                 } else {
-                    stringBuilderRes.append("'")
-                        .append(value)
-                        .append("'")
+                    val fieldType = field.type.simpleName
+                    if(fieldType != FIELD_TYPE_INTEGER) {
+                        stringBuilderRes.append("'")
+                            .append(value)
+                            .append("'")
+                    } else {
+                        stringBuilderRes.append(value)
+                    }
                 }
                 prefix = ", "
             } catch (e: IllegalAccessException) {
@@ -142,7 +149,7 @@ object FieldsBuilder {
         }
 
         for (fieldName in fieldsNames) {
-            res += prefix + fieldName
+            res += prefix + fieldName.withoutInt()
             prefix = ", "
         }
         res += ")"

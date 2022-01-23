@@ -35,7 +35,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     withStart: Boolean = true,
     emitDelay: Long = 0L,
     withDistinct: Boolean = false
-) = DaoInstance.flowable<E, S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
+) = DaoInstance.flowableTriggered<E, S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает список результатов
@@ -52,13 +52,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     orderBy: String = ""
 ): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectAsync(
-    where: String = "",
-    limit: Int = 0
-): List<E> {
-    return DaoInstance.selectAsync<E, S>(this, where, limit)
-}*/
-
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
  *
@@ -74,4 +67,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     orderBy: String = ""
 ): Result<List<E>> {
     return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
+}
+
+///------- CREATE TABLE
+/**
+ * Создание таблицы данных
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.createTable(): S {
+    return DaoInstance.createTable(this)
 }

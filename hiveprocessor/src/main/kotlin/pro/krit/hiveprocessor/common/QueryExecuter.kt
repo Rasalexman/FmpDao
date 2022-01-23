@@ -19,7 +19,6 @@ import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.RequestExecuter.isNotBad
-import pro.krit.hiveprocessor.extensions.fullTableName
 import pro.krit.hiveprocessor.extensions.triggerFlow
 
 object QueryExecuter {
@@ -38,7 +37,7 @@ object QueryExecuter {
             status.result.database.records.orEmpty()
         } catch (e: Throwable) {
             e.printStackTrace()
-            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
         }
     }
@@ -84,13 +83,13 @@ object QueryExecuter {
                 val message = firstError?.run {
                     description ?: descriptions.firstOrNull()
                 }.orEmpty()
-                println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+                //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
                 Result.failure(IllegalStateException(message))
             }
 
         } catch (e: Throwable) {
             e.printStackTrace()
-            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             Result.failure(e)
         }
     }
@@ -118,7 +117,7 @@ object QueryExecuter {
             }
         } catch (e: Throwable) {
             e.printStackTrace()
-            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
+            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             createErrorStatus<E>(
                 ex = e,
                 codeType = errorCode,

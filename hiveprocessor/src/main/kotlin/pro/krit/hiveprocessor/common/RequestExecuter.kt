@@ -90,19 +90,19 @@ object RequestExecuter {
         resourceName: String
     ): Result<S> {
         val result = try {
-            println("status: $this")
+            //println("[RequestExecuter] request status: $this")
             val typeToken = object : TypeToken<T>() {}.type
             val status: T = gson.fromJson<T>(this, typeToken)
             if (status.isNotBad()) {
                 val result = status.result
                 if (result != null) {
-                    println("result: $result")
+                    //println("result: $result")
                     val raw = result.raw
                     raw?.let { currentResult ->
                         Result.success(currentResult)
                     } ?: Result.failure(RequestException.ResultRawNullError)
                 } else {
-                    println("status result is null | resourceName = '$resourceName'")
+                    //println("status result is null | resourceName = '$resourceName'")
                     Result.failure(RequestException.StatusResultNullError)
                 }
             } else {
@@ -122,13 +122,13 @@ object RequestExecuter {
             e.printStackTrace()
             Result.failure(RequestException.WebCallError)
         }
-        println("final result = $result")
+        //println("final result = $result")
         return result
     }
 
     inline fun <reified S : Any, reified T : RawStatus<S>> String.tryParseRawStatus(): T? {
         return try {
-            println("status: $this")
+            //println("status: $this")
             val status: T = gson.fromJson<T>(this, T::class.java)
             status
         } catch (ex: Exception) {
