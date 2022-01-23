@@ -1,11 +1,14 @@
 package pro.krit.fmpdaoexample
 
 import android.os.Bundle
-import android.widget.Button
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.MutableLiveData
 import com.rasalexman.sresult.common.extensions.applyIfSuccessSuspend
 import com.rasalexman.sresult.common.extensions.doAsync
 import com.rasalexman.sresult.common.extensions.logg
+import com.rasalexman.sresult.common.extensions.orZero
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collect
@@ -13,13 +16,18 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pro.krit.fmpdaoexample.database.CreateDataBaseUseCase
+import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
 import pro.krit.fmpdaoexample.database.parseTable
-import pro.krit.fmpdaoexample.fmpresources.IZtMp01Request
+import pro.krit.fmpdaoexample.databinding.ActivityMainBinding
+import pro.krit.fmpdaoexample.fmpresources.Fields
 import pro.krit.generated.dao.PmDataFieldsDaoModel
 import pro.krit.generated.dao.PmDataFieldsDaoStatus
+import pro.krit.generated.dao.ZfmToroSymptomListModel
+import pro.krit.generated.dao.ZfmToroSymptomListStatus
 import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthGrModel
 import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthUserModel
 import pro.krit.generated.request.ZfmPmGetSetRequestParams
+import pro.krit.hiveprocessor.common.RequestExecuter.isNotBad
 import pro.krit.hiveprocessor.extensions.*
 import java.util.*
 import kotlin.random.Random
@@ -36,37 +44,67 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     lateinit var mainDb: IMainDatabase
     lateinit var pmFieldDao: IPmDataFieldsDao
-    lateinit var pmLocalDao: IPmDataLocalDao
+
+    private val pmLocalDao: IPmDataLocalDao by lazy {
+        mainDb.providePmLocalDao()
+    }
+    private val zfmToroSymptomList: IZfmToroSymptomList by lazy {
+        mainDb.provideIZfmToroSymptomList()
+    }
     lateinit var pmRemoteDao: IPmDataDao
+
+    val showLoading: MutableLiveData<Int> = MutableLiveData(View.GONE)
+    val status: MutableLiveData<String> = MutableLiveData("DB NOT OPEN")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        this.findViewById<Button>(R.id.request01Button)?.setOnClickListener {
-            makeRequest01Map()
-        }
-        this.findViewById<Button>(R.id.request02Button)?.setOnClickListener {
+        val binding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding.main = this
+        binding.lifecycleOwner = this
+
+        binding.request02Button.setOnClickListener {
             insertFieldsList(pmFieldDao)
         }
 
-        this.findViewById<Button>(R.id.request03Button)?.setOnClickListener {
-            insertLocalList(pmLocalDao)
-        }
+        openDataBase()
+    }
 
-        this.findViewById<Button>(R.id.authOnlineDB)?.setOnClickListener {
-            authOnline()
-        }
-
-        this.findViewById<Button>(R.id.authOfflineDB)?.setOnClickListener {
-            authOffline()
+    private fun openDataBase() {
+        val appContext = this.applicationContext
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            val state =
+                doAsync { dataBaseHolder.createAndOpenDatabase(DEBUG_LOGIN, "omk", appContext) }
+            if (state.isOpened) {
+                mainDb = dataBaseHolder.mainDb
+                status.value = "DB OPENED"
+            } else {
+                status.value = "DB NOT OPENED"
+            }
         }
     }
 
-    private fun loadGetSetUserData() {
-        pmLocalDao = mainDb.providePmLocalDao()
+    fun authOnline() {
+        processLoading(true)
+        val scope = CoroutineScope(Dispatchers.Main)
+        scope.launch {
+            val result = doAsync { dataBaseHolder.authUser(DEBUG_LOGIN, DEBUG_PASSWORD) }
+            result.applyIfSuccessSuspend {
+                logg { "AUTH SUCCESS with token: $it" }
+                loadGetSetUserData()
+            }.applyIfSuccessSuspend {
+                loadSymptoms()
+            }
+            processLoading(false)
+        }
+    }
+
+    private suspend fun loadGetSetUserData() = doAsync {
         val zmpGetSet = mainDb.provideZmGetSet()
         val param = ZfmPmGetSetRequestParams(
-            ivUser = "bolonin_dn@vsw.ru"
+            ivUser = DEBUG_LOGIN
         )
         val status = zmpGetSet.requestListStatus(param)
         println("-----> ZfmPmGetSetRequestParams result = $status")
@@ -75,60 +113,31 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             status.parseTable<ZfmPmGetSetRequestEtAuthGrModel>("ET_AUTH_GR")
         val userData = status.parseTable<ZfmPmGetSetRequestEtAuthUserModel>("ET_AUTH_USER")
             .firstOrNull()
+
+        println("-----> loadGetSetUserData $userCredentials")
     }
 
-    private fun authOnline() {
-        val state =
-            dataBaseHolder.createAndOpenDatabase(DEBUG_LOGIN, "omk", this.applicationContext)
-        if (state.isOpened) {
-            mainDb = dataBaseHolder.mainDb
-            val scope = CoroutineScope(Dispatchers.Main)
-            scope.launch {
-                val result = doAsync { dataBaseHolder.authUser(DEBUG_LOGIN, DEBUG_PASSWORD) }
-                result.applyIfSuccessSuspend {
-                    logg { "AUTH SUCCESS with token: $it" }
-
-                    loadGetSetUserData()
-                }
-            }
-        }
+    private suspend fun loadSymptoms() = doAsync {
+        val request = zfmToroSymptomList.requestBuilder()
+        val status = request.streamCallAuto().execute()
+        println("-----> loadSymptoms ${status.isNotBad()}")
     }
 
-    private fun authOffline() {
-
-    }
-
-    private fun makeRequest01Map() {
-        val request: IZtMp01Request = mainDb.provideIZtMp01Request()
-        val paramsMap = request.createParamsMap("0001", "0001")
-        val params = request.createParams("0001", "0001")
-        makeRequest01(params)
-    }
-
-    private fun makeRequest01(params: Any?) {
+    fun getSymptoms() {
+        processLoading(true)
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
-            val request: IZtMp01Request = mainDb.provideIZtMp01Request()
-            /*val result1 = request.requestResultAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
-                params
-            )
-            result1.fold(onSuccess = {
-                Toast.makeText(this@MainActivity, "SUCCESS", Toast.LENGTH_SHORT).show()
-            }, onFailure = {
-                it.printStackTrace()
-                Toast.makeText(this@MainActivity, "FAIL REQUEST", Toast.LENGTH_SHORT).show()
-            })*/
-
-            /*val request2 = request.requestStatusAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
-                params
-            )
-            println("------> request2 = $request2")*/
-
-            /*val request3 = request.requestAsync<ZtMp01RequestResultModel, ZtMp01RequestRespondStatus>(
-                params
-            )
-            println("------> request3 = $request3")*/
+            val allData: List<ZfmToroSymptomListModel> = doAsync {
+                zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus>(
+                    where = "${Fields.RBNR_Int} = 100"
+                )
+            }
+            println("-----> getSymptoms ${allData.size}")
+            processLoading(false)
         }
+    }
+
+    fun authOffline() {
 
     }
 
@@ -148,42 +157,50 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         scope.launch {
             pmLocalDao.flowable("TYPE = \'${PmType.USER}\' ORDER BY QWERTY ASC")
                 .flowOn(Dispatchers.IO).collect {
-                println("----> pmLocalDao PmType.USER count = ${it.size}")
+                    println("----> pmLocalDao PmType.USER count = ${it.size}")
+                }
+        }
+    }
+
+    fun insertLocalList() {
+        val scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            val selectedSize = selectLocalDaoAsync()
+            if(selectedSize == 0) {
+                val localListToInsert = mutableListOf<PmEtDataLocalEntity>()
+                val randomCount = Random.nextInt(21, 50)
+                repeat(randomCount) {
+                    val isLocal = it % 2 == 0
+                    val type = if (isLocal) PmType.USER else PmType.ADMIN
+
+                    localListToInsert.add(
+                        PmEtDataLocalEntity(
+                            id = UUID.randomUUID().toString(),
+                            marker = UUID.randomUUID().toString().take(18),
+                            auart = UUID.randomUUID().toString().take(12),
+                            taskNum = Random.nextInt(10, 10000000),
+                            type = type,
+                            isLocal = isLocal
+                        )
+                    )
+                }
+                val insertAllStatus = pmLocalDao.insertOrReplace(localListToInsert, notifyAll = true)
+                println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
             }
         }
     }
 
-    private fun insertLocalList(dao: IPmDataLocalDao) {
-        val scope = CoroutineScope(Dispatchers.IO)
-        scope.launch {
-            selectLocalDaoAsync()
-        }
+    private suspend fun selectLocalDaoAsync(): Int = doAsync {
+        val allData = pmLocalDao.select()
+        val convertedSize = if(allData.isNotEmpty()) {
+            val first = allData.first()
+            val resultList = pmLocalDao.select(where = "${Fields.IS_LOCAL} = 'false'")
+            val converted = resultList.mapNotNull { it.convertTo() }
+            converted.size
+        } else 0
 
-        val localListToInsert = mutableListOf<PmEtDataLocalEntity>()
-        val randomCount = Random.nextInt(21, 50)
-        repeat(randomCount) {
-            val type = if (it % 2 == 0) PmType.USER else PmType.ADMIN
-
-            localListToInsert.add(
-                PmEtDataLocalEntity(
-                    //id = Random.nextInt(),
-                    marker = UUID.randomUUID().toString().take(18),
-                    auart = UUID.randomUUID().toString().take(12),
-                    index = Random.nextInt(10, 10000000),
-                    type = type,
-                )
-            )
-        }
-        val insertAllStatus = dao.insertOrReplace(localListToInsert, notifyAll = true)
-        println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
-    }
-
-    private suspend fun selectLocalDaoAsync() {
-        //pmLocalDao.dele
-
-        val resultList = pmLocalDao.select<PmEtDataLocalEntity, PmLocalStatus>()
-        //pmLocalDao.selectResultAsync()
-        println("----> all count = ${resultList.mapNotNull { it.convertTo() }}")
+        println("----> all count = $convertedSize")
+        convertedSize
     }
 
     private fun exampleWithFieldsDao(pmFieldDao: IPmDataFieldsDao) {
@@ -197,8 +214,8 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
             pmFieldDao.flowable<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>(withDistinct = true)
                 .flowOn(Dispatchers.IO).collect {
-                println("----> pmFieldDao CHANGED")
-            }
+                    println("----> pmFieldDao CHANGED")
+                }
         }
 
         scope.launch {
@@ -223,7 +240,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             PmEtDataLocalEntity(
                 marker = UUID.randomUUID().toString().take(18),
                 auart = UUID.randomUUID().toString().take(12),
-                index = Random.nextInt(10, 10000000),
+                taskNum = Random.nextInt(10, 10000000),
                 type = PmType.USER
             ), notifyAll = true
         )
@@ -238,7 +255,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 //id = Random.nextInt(),
                 marker = UUID.randomUUID().toString().take(18),
                 auart = UUID.randomUUID().toString().take(12),
-                index = Random.nextInt(10, 10000000),
+                taskNum = Random.nextInt(10, 10000000),
                 type = type
             )
         )
@@ -262,6 +279,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             notifyAll = true
         )
         println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
+    }
+
+    private fun processLoading(isLoading: Boolean) {
+        showLoading.postValue(
+            if(isLoading) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        )
     }
 
     /*val insertScope = CoroutineScope(Dispatchers.Main)

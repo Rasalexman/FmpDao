@@ -14,26 +14,26 @@
 
 package pro.krit.hiveprocessor.common
 
-import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import pro.krit.hiveprocessor.extensions.fullTableName
+import pro.krit.hiveprocessor.extensions.withoutInt
 
 object QueryBuilder {
 
     const val COUNT_KEY = "count(*)"
-    const val SELECT_QUERY = "SELECT * FROM"
-    const val COUNT_QUERY = "SELECT count(*) FROM"
-    const val DELETE_QUERY = "DELETE FROM"
+    const val SELECT_QUERY = "SELECT * FROM "
+    const val COUNT_QUERY = "SELECT count(*) FROM "
+    const val DELETE_QUERY = "DELETE FROM "
     private const val UPDATE_QUERY = "UPDATE %s SET "
 
     const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;"
     const val END_TRANSACTION_QUERY = "END TRANSACTION;"
 
-    private const val WHERE = "WHERE"
-    private const val LIMIT = "LIMIT"
-    private const val OFFSET = "OFFSET"
-    private const val ORDER = "ORDER BY"
+    private const val WHERE = " WHERE "
+    private const val LIMIT = " LIMIT "
+    private const val OFFSET = " OFFSET "
+    private const val ORDER = " ORDER BY "
 
     private const val CREATE_TABLE_QUERY = "CREATE TABLE IF NOT EXISTS "
     private const val TEXT_PRIMARY_KEY = " TEXT PRIMARY KEY NOT NULL"
@@ -42,8 +42,6 @@ object QueryBuilder {
 
     private const val INSERT_OR_REPLACE = "INSERT OR REPLACE INTO "
     private const val VALUES = " VALUES "
-
-    private const val FIELD_TYPE_INTEGER = "Integer"
 
     fun createQuery(
         dao: IDao,
@@ -54,13 +52,21 @@ object QueryBuilder {
         orderBy: String = ""
     ): String {
         val tableName = dao.fullTableName
-        val limitQuery = limit.takeIf { it > 0 }?.run { " $LIMIT $limit" }.orEmpty()
-        val offsetQuery = offset.takeIf { it > 0 }?.run { " $OFFSET $offset" }.orEmpty()
-        val orderByQuery = orderBy.takeIf { it.isNotEmpty() }?.run { " $ORDER $orderBy" }.orEmpty()
-        return if (where.isNotEmpty()) {
-            "$prefix $tableName $WHERE $where$limitQuery$offsetQuery$orderByQuery"
-        } else {
-            "$prefix $tableName$limitQuery$offsetQuery$orderByQuery"
+        val limitQuery = limit.takeIf { it > 0 }?.run { "$LIMIT$limit" }.orEmpty()
+        val offsetQuery = offset.takeIf { it > 0 }?.run { "$OFFSET$offset" }.orEmpty()
+        val orderByQuery =
+            orderBy.takeIf { it.isNotEmpty() }?.run { "$ORDER${orderBy.withoutInt()}" }.orEmpty()
+
+        return buildString {
+            append(prefix)
+            append(tableName)
+            if(where.isNotEmpty()) {
+                append(WHERE)
+                append(where.withoutInt())
+            }
+            append(limitQuery)
+            append(offsetQuery)
+            append(orderByQuery)
         }
     }
 
@@ -74,6 +80,7 @@ object QueryBuilder {
 
         var prefix = ""
         val localFieldNames = fieldsNames.orEmpty()
+        val localFieldsSize = localFieldNames.size
         return buildString {
             append(CREATE_TABLE_QUERY)
             append(dao.fullTableName)
@@ -85,14 +92,20 @@ object QueryBuilder {
                 prefix = ", "
             }
 
+            var counter = 0
             for (entry in localFieldNames) {
+                counter++
                 val fieldName = entry.key
                 val fieldType = entry.value
 
                 append(prefix)
-                append(fieldName)
+                append(fieldName.withoutInt())
                 append(getFieldType(fieldType))
-                prefix = ", "
+                prefix = if(counter < localFieldsSize) {
+                    ", "
+                } else {
+                    ""
+                }
             }
             append(")")
         }
@@ -108,13 +121,13 @@ object QueryBuilder {
         return buildString {
             append(updateTableQuery)
             append(setQuery)
-            if(from.isNotEmpty()) {
+            if (from.isNotEmpty()) {
                 append(" ")
-                append(from)
+                append(from.withoutInt())
             }
-            if(where.isNotEmpty()) {
-                append(" $WHERE ")
-                append(where)
+            if (where.isNotEmpty()) {
+                append(WHERE)
+                append(where.withoutInt())
             }
         }
     }
@@ -123,29 +136,36 @@ object QueryBuilder {
         dao: IFieldsDao,
         item: E
     ): String {
+
         val fieldsForQuery = dao.fieldsData?.fieldsForQuery
             ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
 
         val fieldsValues = FieldsBuilder.getValues(dao, item)
-        return "$INSERT_OR_REPLACE ${dao.fullTableName} $fieldsForQuery$VALUES$fieldsValues"
+        return buildString {
+            append(INSERT_OR_REPLACE)
+            append(dao.fullTableName)
+            append(" ")
+            append("$fieldsForQuery$VALUES$fieldsValues")
+        }
     }
 
-    fun <E : Any, S : StatusSelectTable<E>> createInsertOrReplaceQuery(
+    fun <E : Any> createInsertOrReplaceQuery(
         dao: IFieldsDao,
         items: List<E>
     ): String {
-        val stringBuilder = StringBuilder()
-        for (item in items) {
-            stringBuilder.append(createInsertOrReplaceQuery(dao, item))
-                .append("; ")
+        return buildString {
+            for (item in items) {
+                append(createInsertOrReplaceQuery(dao, item))
+                append("; ")
+            }
         }
-        return stringBuilder.toString()
     }
 
     fun <E : Any> createDeleteQuery(
         dao: IFieldsDao,
         item: E
     ): String {
+        val tableName = dao.fullTableName
         val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val primaryKeyName = localDaoFields?.primaryKeyName
@@ -158,19 +178,24 @@ object QueryBuilder {
             e.printStackTrace()
             throw UnsupportedOperationException(e.message)
         }
-        return "$DELETE_QUERY ${dao.fullTableName} $WHERE $primaryKeyName = '$keyValue'"
+        return buildString {
+            append(DELETE_QUERY)
+            append(tableName)
+            append(WHERE)
+            append("$primaryKeyName = '$keyValue'")
+        }
     }
 
     fun <E : Any> createDeleteQuery(dao: IFieldsDao, items: List<E>): String {
-        val stringBuilder = StringBuilder()
-        for (item in items) {
-            stringBuilder.append(createDeleteQuery(dao, item))
-                .append("; ")
+        return buildString {
+            for (item in items) {
+                append(createDeleteQuery(dao, item))
+                append("; ")
+            }
         }
-        return stringBuilder.toString()
     }
 
     private fun getFieldType(fieldType: String): String {
-        return if (fieldType == FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
+        return if (fieldType == FieldsBuilder.FIELD_TYPE_INTEGER) INTEGER_FIELD_TYPE else TEXT_FIELD_TYPE
     }
 }

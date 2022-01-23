@@ -1,10 +1,12 @@
-package pro.krit.models.remote.common
+package pro.krit.fmpdaoexample.fmpresources
 
 object Fields {
     // Идентификатор справочника
     const val LOCAL_ID = "ID"
     // Текст кода статуса задания
     const val STAT_TEXT = "STAT_TEXT"
+    const val MARKER = "MARKER"
+    const val AUART = "AUART"
     // Код следующего статуса
     const val TASK_STAT_NEXT = "TASK_STAT_NEXT"
     // Код следующего статуса Int
@@ -63,6 +65,16 @@ object Fields {
     const val PLAN_QNT = "PLAN_QNT"
     // ЕИЗ
     const val MEINS = "MEINS"
+    const val INDEX = "INDEX"
+    const val TYPE = "TYPE"
+    const val IS_LOCAL = "IS_LOCAL"
+    // Код причины дефекта
+    const val SYMPTOM_CODE = "SYMPTOM_CODE"
+    // Код группы симптома
+    const val SYMPT_GRP_CODE = "SYMPT_GRP_CODE"
+    // Наименование причины дефекта
+    const val SYMPTOM_TEXT = "SYMPTOM_TEXT"
+    const val RBNR_Int = "RBNR_Int"
     // Складское место
     const val STOR_SPACE = "STOR_SPACE"
     // Номер ЕО

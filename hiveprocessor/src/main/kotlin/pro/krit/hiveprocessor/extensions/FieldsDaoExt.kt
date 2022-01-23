@@ -5,18 +5,12 @@ import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.FieldsBuilder
 
+/**
+ * Инициализация полей таблицы из модели данных
+ */
 inline fun <reified E : Any> IDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
 }
-
-/*suspend inline fun <reified E : Any> IDao.IFieldsDao.initFieldsAsync() {
-    withContext(Dispatchers.IO) {
-        FieldsBuilder.initFields(
-            this@initFieldsAsync,
-            E::class.java.fields
-        )
-    }
-}*/
 
 /**
  * Создает Flow, который эмитит данные при подписке либо при старте
@@ -38,7 +32,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.f
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ): Flow<List<E>> {
-    return DaoInstance.flowable<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
+    return DaoInstance.flowableTriggered<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
 }
 
 /**
@@ -57,13 +51,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
     offset: Int = 0,
     orderBy: String = ""
 ): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.selectAsync(
-    where: String = "",
-    limit: Int = 0
-): List<E> {
-    return DaoInstance.selectAsync<E, S>(this, where, limit)
-}*/
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -84,18 +71,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
     return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
 }
 
-///------- CREATE TABLE
-/**
- * Создание таблицы данных
- */
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTable(): S {
-    return DaoInstance.createTable(this)
-}
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.createTableAsync(): S {
-    return DaoInstance.createTableAsync<E, S>(this)
-}*/
-
 ///------ INSERT DATA
 /**
  * Удаление данных из таблицы по запросу
@@ -112,26 +87,12 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.i
     return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
-    item: E,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.insertOrReplaceAsync<E, S>(this, item, notifyAll)
-}*/
-
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.insertOrReplace(this, items, notifyAll)
 }
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplaceAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.insertOrReplaceAsync<E, S>(this, items, notifyAll)
-}*/
 
 ///---- DELETE
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
@@ -141,13 +102,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.d
     return DaoInstance.delete<E, S>(this, where, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
-    where: String = "",
-    notifyAll: Boolean = true
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, where, notifyAll)
-}*/
-
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
     item: E,
     notifyAll: Boolean = false
@@ -155,23 +109,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.d
     return DaoInstance.delete<E, S>(this, item, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
-    item: E,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, item, notifyAll)
-}*/
-
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
     items: List<E>,
     notifyAll: Boolean = false
 ): S {
     return DaoInstance.delete<E, S>(this, items, notifyAll)
 }
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.deleteAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, items, notifyAll)
-}*/

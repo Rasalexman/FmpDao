@@ -2,7 +2,9 @@ package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -10,6 +12,26 @@ import pro.krit.hiveprocessor.common.QueryExecuter
 object DaoInstance {
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowable(
+        dao: IDao,
+        where: String = "",
+        limit: Int = 0,
+        offset: Int = 0,
+        orderBy: String = "",
+        emitDelay: Long = 0L,
+        withDistinct: Boolean = false
+    ) = flow {
+        if(emitDelay > 0) {
+            delay(emitDelay)
+        }
+        val result = select<E, S>(dao, where, limit, offset, orderBy)
+        emit(result)
+    }.apply {
+        if (withDistinct) {
+            distinctUntilChanged()
+        }
+    }
+
+    inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowableTriggered(
         dao: IDao,
         where: String = "",
         limit: Int = 0,
@@ -56,7 +78,7 @@ object DaoInstance {
             offset = offset,
             orderBy = orderBy
         )
-        println("------> selectQuery = $selectQuery")
+        //println("------> selectQuery = $selectQuery")
         return QueryExecuter.executeQuery<E, S>(
             dao = dao,
             query = selectQuery,
@@ -64,14 +86,6 @@ object DaoInstance {
             methodName = "selectWhere"
         )
     }
-
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectAsync(
-        dao: IDao,
-        where: String = "",
-        limit: Int = 0
-    ): List<E> {
-        return withContext(Dispatchers.IO) { select<E, S>(dao, where, limit) }
-    }*/
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> selectResult(
         dao: IDao,
@@ -111,15 +125,6 @@ object DaoInstance {
         )
     }
 
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> createTableAsync(
-        dao: IDao.IFieldsDao
-    ): S {
-        return withContext(Dispatchers.IO) {
-            dao.initFieldsAsync<E>()
-            createTable<E, S>(dao)
-        }
-    }*/
-
     /////---------- DELETE QUERIES
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
@@ -136,14 +141,6 @@ object DaoInstance {
         )
     }
 
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
-        dao: IDao.IFieldsDao,
-        where: String = "",
-        notifyAll: Boolean = true
-    ): S {
-        return withContext(Dispatchers.IO) {  delete<E, S>(dao, where, notifyAll) }
-    }*/
-
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
         item: E,
@@ -159,14 +156,6 @@ object DaoInstance {
         )
     }
 
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
-        dao: IDao.IFieldsDao,
-        item: E,
-        notifyAll: Boolean = false
-    ): S {
-        return withContext(Dispatchers.IO) { delete<E, S>(dao, item, notifyAll) }
-    }*/
-
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
         dao: IDao.IFieldsDao,
         items: List<E>,
@@ -181,14 +170,6 @@ object DaoInstance {
             notifyAll = notifyAll
         )
     }
-
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> deleteAsync(
-        dao: IDao.IFieldsDao,
-        items: List<E>,
-        notifyAll: Boolean = false
-    ): S {
-        return withContext(Dispatchers.IO) { delete<E, S>(dao, items, notifyAll) }
-    }*/
 
     ////--------- UPDATE QUERIES
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> update(

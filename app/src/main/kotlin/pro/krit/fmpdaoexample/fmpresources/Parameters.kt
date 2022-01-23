@@ -1,7 +1,5 @@
 package pro.krit.fmpdaoexample.fmpresources
 
-import pro.krit.models.remote.common.Fields
-
 object Parameters {
     private const val IV = "IV_"
 

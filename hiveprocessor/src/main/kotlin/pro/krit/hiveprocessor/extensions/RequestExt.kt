@@ -33,10 +33,10 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     requestData: Any? = null
 ): S? {
     val params = RequestBuilder.createParams(this, requestData)
-    println("------> Start request '${this.resourceName}' with params: $params")
+    //println("------> Start request '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeStatus<S, T>(this, params)
     val resultError = resultStatus?.errors
-    println("------> Finish request '${this.resourceName}' with result: ${resultStatus?.raw} and errors: $resultError")
+    //println("------> Finish request '${this.resourceName}' with result: ${resultStatus?.raw} and errors: $resultError")
     return resultStatus?.result?.raw
 }
 
@@ -68,9 +68,9 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     requestData: Any? = null
 ): BaseStatus {
     val params = RequestBuilder.createParams(this, requestData)
-    println("------> Start requestStatus '${this.resourceName}' with params: $params")
+    //println("------> Start requestStatus '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeBaseStatus(this, params, T::class.java)
-    println("------> Finish requestStatus '${this.resourceName}' with status: ${resultStatus.raw}")
+    //println("------> Finish requestStatus '${this.resourceName}' with status: ${resultStatus.raw}")
     return resultStatus
 }
 
@@ -98,10 +98,10 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
     requestData: Any? = null
 ): Result<S> {
     val params = RequestBuilder.createParams(this, requestData)
-    println("------> Start requestResult '${this.resourceName}' with params: $params")
-    return RequestExecuter.executeResult<S, T>(this, params).also {
+    //println("------> Start requestResult '${this.resourceName}' with params: $params")
+    return RequestExecuter.executeResult<S, T>(this, params)/*.also {
         println("------> Finish requestResult '${this.resourceName}' with result: ${it.getOrNull()}")
-    }
+    }*/
 }
 
 /*suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResultAsync(
@@ -123,14 +123,14 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestResult(
  */
 fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable {
     val params = RequestBuilder.createParams(this, requestData)
-    println("------> Start requestListStatus '${this.resourceName}' with params: $params")
+    //println("------> Start requestListStatus '${this.resourceName}' with params: $params")
     return RequestExecuter.executeBaseStatus(
         this,
         params,
         StatusRawDataListTable::class.java
-    ).also {
+    )/*.also {
         println("------> Finish requestListStatus '${this.resourceName}' with result: ${it.raw} and errors: ${it.errors}")
-    }
+    }*/
 }
 
 /**
@@ -143,11 +143,11 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
  */
 fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): StatusRawDataListTable {
     val params = RequestBuilder.createTableParams(requestData, scalarParameters)
-    println("------> Start tableListStatus '${this.resourceName}' with params: ${params.data}")
+    //println("------> Start tableListStatus '${this.resourceName}' with params: ${params.data}")
     return RequestExecuter.executeBaseTableStatus(
         this,
         params
-    ).also {
+    )/*.also {
         println("------> Finish tableListStatus '${this.resourceName}' with result: ${it.raw} and errors: ${it.errors}")
-    }
+    }*/
 }

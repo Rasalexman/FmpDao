@@ -39,7 +39,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     emitDelay: Long = 100L,
     withDistinct: Boolean = false
 ): Flow<List<E>> {
-    return DaoInstance.flowable<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
+    return DaoInstance.flowableTriggered<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
 }
 
 /**
@@ -59,7 +59,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
         )
     } catch (e: Throwable) {
         e.printStackTrace()
-        emptyList<E>()
+        emptyList()
     }
 }
 
@@ -80,13 +80,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     offset: Int = 0,
     orderBy: String = ""
 ): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectAsync(
-    where: String = "",
-    limit: Int = 0
-): List<E> {
-    return DaoInstance.selectAsync<E, S>(this, where, limit)
-}*/
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -122,20 +115,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     where: String = ""
 ): S = DaoInstance.update(this, setQuery, from, where)
 
-
-
-////------- CREATE TABLES
-/**
- * Создание таблицы данных
- */
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTable(): S {
-    return DaoInstance.createTable(this)
-}
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.createTableAsync(): S {
-    return DaoInstance.createTableAsync<E, S>(this)
-}*/
-
 /////---------- DELETE QUERIES
 /**
  * Удаление данных из таблицы по запросу
@@ -152,13 +131,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.delete(this, where, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
-    where: String = "",
-    notifyAll: Boolean = true
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, where, notifyAll)
-}*/
-
 /**
  * Удаление данных из таблицы по запросу
  *
@@ -174,13 +146,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.delete(this, item, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
-    item: E,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, item, notifyAll)
-}*/
-
 /**
  * Удаление данных из таблицы по запросу
  *
@@ -195,13 +160,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 ): S {
     return DaoInstance.delete(this, items, notifyAll)
 }
-
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.deleteAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.deleteAsync<E, S>(this, items, notifyAll)
-}*/
 
 ////--------- INSERT QUERIES
 /**
@@ -219,13 +177,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
-/*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
-    item: E,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.insertOrReplaceAsync<E, S>(this, item, notifyAll)
-}*/
-
 /**
  * Вставка или замена списка данных по уникальному ключу [PrimaryKey]
  *
@@ -240,11 +191,3 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 ): S {
     return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
 }
-
-/*
-suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplaceAsync(
-    items: List<E>,
-    notifyAll: Boolean = false
-): S {
-    return DaoInstance.insertOrReplaceAsync<E, S>(this,items, notifyAll)
-}*/
