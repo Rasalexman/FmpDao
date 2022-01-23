@@ -78,8 +78,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
-): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
+    orderBy: String = "",
+    fields: List<String>? = null
+): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy, fields)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -95,9 +96,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
+    orderBy: String = "",
+    fields: List<String>? = null
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
+    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy, fields)
 }
 
 /**
@@ -113,7 +115,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     setQuery: String,
     from: String = "",
     where: String = ""
-): S = DaoInstance.update(this, setQuery, from, where)
+): StatusSelectTable<E> = DaoInstance.update(this, setQuery, from, where)
 
 /////---------- DELETE QUERIES
 /**
@@ -127,7 +129,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     where: String = "",
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.delete(this, where, notifyAll)
 }
 
@@ -142,7 +144,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     item: E,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.delete(this, item, notifyAll)
 }
 
@@ -157,7 +159,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.delete(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.delete(this, items, notifyAll)
 }
 
@@ -173,7 +175,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
     item: E,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
@@ -188,6 +190,6 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
 }

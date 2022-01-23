@@ -49,8 +49,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
-): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
+    orderBy: String = "",
+    fields: List<String>? = null
+): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy, fields)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -64,15 +65,16 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
+    orderBy: String = "",
+    fields: List<String>? = null
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
+    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy, fields)
 }
 
 ///------- CREATE TABLE
 /**
  * Создание таблицы данных
  */
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.createTable(): S {
+inline fun <reified E : Any> IDao.createTable(): StatusSelectTable<E> {
     return DaoInstance.createTable(this)
 }

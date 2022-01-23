@@ -21,10 +21,11 @@ import pro.krit.hiveprocessor.extensions.withoutInt
 
 object QueryBuilder {
 
-    const val COUNT_KEY = "count(*)"
-    const val SELECT_QUERY = "SELECT * FROM "
-    const val COUNT_QUERY = "SELECT count(*) FROM "
+    const val COUNT_KEY = "count(%s)"
+    const val SELECT_QUERY = "SELECT %s FROM "
+    const val COUNT_QUERY = "SELECT count(%s) FROM "
     const val DELETE_QUERY = "DELETE FROM "
+    private const val SELECT_ALL_MAKER = "*"
     private const val UPDATE_QUERY = "UPDATE %s SET "
 
     const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;"
@@ -49,18 +50,20 @@ object QueryBuilder {
         where: String = "",
         limit: Int = 0,
         offset: Int = 0,
-        orderBy: String = ""
+        orderBy: String = "",
+        fields: List<String>? = null
     ): String {
         val tableName = dao.fullTableName
         val limitQuery = limit.takeIf { it > 0 }?.run { "$LIMIT$limit" }.orEmpty()
         val offsetQuery = offset.takeIf { it > 0 }?.run { "$OFFSET$offset" }.orEmpty()
         val orderByQuery =
             orderBy.takeIf { it.isNotEmpty() }?.run { "$ORDER${orderBy.withoutInt()}" }.orEmpty()
+        val prefixQuery = createWithFields(prefix, fields)
 
-        return buildString {
-            append(prefix)
+        val query = buildString {
+            append(prefixQuery)
             append(tableName)
-            if(where.isNotEmpty()) {
+            if (where.isNotEmpty()) {
                 append(WHERE)
                 append(where.withoutInt())
             }
@@ -68,6 +71,7 @@ object QueryBuilder {
             append(offsetQuery)
             append(orderByQuery)
         }
+        return query
     }
 
     fun createTableQuery(dao: IDao): String {
@@ -101,7 +105,7 @@ object QueryBuilder {
                 append(prefix)
                 append(fieldName.withoutInt())
                 append(getFieldType(fieldType))
-                prefix = if(counter < localFieldsSize) {
+                prefix = if (counter < localFieldsSize) {
                     ", "
                 } else {
                     ""
@@ -192,6 +196,19 @@ object QueryBuilder {
                 append(createDeleteQuery(dao, item))
                 append("; ")
             }
+        }
+    }
+
+    fun createWithFields(prefix: String, fields: List<String>? = null): String {
+        val prefixQuery = fields.takeIf { !it.isNullOrEmpty() }?.let {
+            val fieldsStatement = it.joinToString(", ")
+            fieldsStatement.withoutInt()
+        } ?: SELECT_ALL_MAKER
+        return try {
+            prefix.format(prefixQuery)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            prefix
         }
     }
 

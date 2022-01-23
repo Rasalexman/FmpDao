@@ -48,9 +48,11 @@ object QueryExecuter {
         query: String,
         errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "",
-        notifyAll: Boolean = false
+        notifyAll: Boolean = false,
+        fields: List<String>? = null
     ): String {
         return try {
+            val queryKey = QueryBuilder.createWithFields(key, fields)
             val status = executeStatus<Map<String, String>, StatusSelectTable<Map<String, String>>>(
                 dao,
                 query,
@@ -58,7 +60,7 @@ object QueryExecuter {
                 methodName,
                 notifyAll
             )
-            status.result.database.records.firstOrNull()?.get(key).orEmpty()
+            status.result.database.records.firstOrNull()?.get(queryKey).orEmpty()
         } catch (e: Throwable) {
             e.printStackTrace()
             ""
@@ -100,7 +102,7 @@ object QueryExecuter {
         errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "executeStatus",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         return try {
             val localDao: IDao = dao
             val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
@@ -118,11 +120,11 @@ object QueryExecuter {
         } catch (e: Throwable) {
             e.printStackTrace()
             //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
-            createErrorStatus<E>(
+            createErrorStatus(
                 ex = e,
                 codeType = errorCode,
                 method = methodName
-            ) as S
+            )
         }
     }
 
@@ -132,7 +134,7 @@ object QueryExecuter {
         errorCode: Int = 1001,
         methodName: String = "",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         var status = executeStatus<E, S>(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
         if (status.isOk) {
             status = executeStatus<E, S>(dao, query, errorCode, methodName)

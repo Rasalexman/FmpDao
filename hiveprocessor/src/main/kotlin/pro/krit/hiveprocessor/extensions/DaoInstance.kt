@@ -18,12 +18,13 @@ object DaoInstance {
         offset: Int = 0,
         orderBy: String = "",
         emitDelay: Long = 0L,
-        withDistinct: Boolean = false
+        withDistinct: Boolean = false,
+        fields: List<String>? = null
     ) = flow {
         if(emitDelay > 0) {
             delay(emitDelay)
         }
-        val result = select<E, S>(dao, where, limit, offset, orderBy)
+        val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
         emit(result)
     }.apply {
         if (withDistinct) {
@@ -39,13 +40,14 @@ object DaoInstance {
         orderBy: String = "",
         withStart: Boolean = true,
         emitDelay: Long = 0L,
-        withDistinct: Boolean = false
+        withDistinct: Boolean = false,
+        fields: List<String>? = null
     ) = flow {
         dao.getTrigger().collect {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }
-            val result = select<E, S>(dao, where, limit, offset, orderBy)
+            val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
             emit(result)
         }
     }.onStart {
@@ -54,7 +56,7 @@ object DaoInstance {
             if(emitDelay > 0) {
                 delay(emitDelay)
             }
-            val startResult = select<E, S>(dao, where, limit, offset, orderBy)
+            val startResult = select<E, S>(dao, where, limit, offset, orderBy, fields)
             emit(startResult)
         }
     }.apply {
@@ -68,7 +70,8 @@ object DaoInstance {
         where: String = "",
         limit: Int = 0,
         offset: Int = 0,
-        orderBy: String = ""
+        orderBy: String = "",
+        fields: List<String>? = null,
     ): List<E> {
         val selectQuery = QueryBuilder.createQuery(
             dao = dao,
@@ -76,9 +79,10 @@ object DaoInstance {
             where = where,
             limit = limit,
             offset = offset,
-            orderBy = orderBy
+            orderBy = orderBy,
+            fields = fields
         )
-        //println("------> selectQuery = $selectQuery")
+        println("------> selectQuery = $selectQuery")
         return QueryExecuter.executeQuery<E, S>(
             dao = dao,
             query = selectQuery,
@@ -92,15 +96,16 @@ object DaoInstance {
         where: String = "",
         limit: Int = 0,
         offset: Int = 0,
-        orderBy: String = ""
+        orderBy: String = "",
+        fields: List<String>? = null
     ): Result<List<E>> {
         val selectQuery = QueryBuilder.createQuery(
             dao = dao,
-            prefix = QueryBuilder.SELECT_QUERY,
             where = where,
             limit = limit,
             offset = offset,
-            orderBy = orderBy
+            orderBy = orderBy,
+            fields = fields
         )
         return QueryExecuter.executeResultQuery<E, S>(
             dao = dao,
@@ -112,9 +117,9 @@ object DaoInstance {
 
 
     ///// Create tables
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> createTable(
+    inline fun <reified E : Any> createTable(
         dao: IDao
-    ): S {
+    ): StatusSelectTable<E> {
         dao.initFields<E>()
         val query = QueryBuilder.createTableQuery(dao)
         return QueryExecuter.executeStatus(
@@ -126,11 +131,11 @@ object DaoInstance {
     }
 
     /////---------- DELETE QUERIES
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
+    inline fun <reified E : Any> delete(
         dao: IDao.IFieldsDao,
         where: String = "",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val deleteQuery = QueryBuilder.createQuery(dao, QueryBuilder.DELETE_QUERY, where)
         return QueryExecuter.executeStatus(
             dao = dao,
@@ -141,11 +146,11 @@ object DaoInstance {
         )
     }
 
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
+    inline fun <reified E : Any> delete(
         dao: IDao.IFieldsDao,
         item: E,
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val query = QueryBuilder.createDeleteQuery(dao, item)
         return QueryExecuter.executeStatus(
             dao = dao,
@@ -156,11 +161,11 @@ object DaoInstance {
         )
     }
 
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> delete(
+    inline fun <reified E : Any> delete(
         dao: IDao.IFieldsDao,
         items: List<E>,
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val query = QueryBuilder.createDeleteQuery(dao, items)
         return QueryExecuter.executeTransactionStatus(
             dao = dao,
@@ -172,13 +177,13 @@ object DaoInstance {
     }
 
     ////--------- UPDATE QUERIES
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> update(
+    inline fun <reified E : Any> update(
         dao: IDao.IFieldsDao,
         setQuery: String,
         from: String = "",
         where: String = "",
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val updateQuery = QueryBuilder.createUpdateQuery(dao, setQuery, from, where)
         return QueryExecuter.executeStatus(
             dao = dao,
@@ -190,11 +195,11 @@ object DaoInstance {
     }
 
     ////--------- INSERT QUERIES
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
+    inline fun <reified E : Any> insertOrReplace(
         dao: IDao.IFieldsDao,
         item: E,
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val query = QueryBuilder.createInsertOrReplaceQuery(dao, item)
         return QueryExecuter.executeStatus(
             dao = dao,
@@ -205,19 +210,11 @@ object DaoInstance {
         )
     }
 
-    /*suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
-        dao: IDao.IFieldsDao,
-        item: E,
-        notifyAll: Boolean = false
-    ): S {
-        return withContext(Dispatchers.IO) { insertOrReplace<E, S>(dao, item, notifyAll) }
-    }*/
-
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
         dao: IDao.IFieldsDao,
         items: List<E>,
         notifyAll: Boolean = false
-    ): S {
+    ): StatusSelectTable<E> {
         val query = QueryBuilder.createInsertOrReplaceQuery(dao, items)
         return QueryExecuter.executeTransactionStatus<E, S>(
             dao = dao,
@@ -227,13 +224,4 @@ object DaoInstance {
             notifyAll = notifyAll
         )
     }
-
-   /* suspend inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplaceAsync(
-        dao: IDao.IFieldsDao,
-        items: List<E>,
-        notifyAll: Boolean = false
-    ): S {
-        return withContext(Dispatchers.IO) { insertOrReplace<E, S>(dao, items, notifyAll) }
-    }*/
-
 }

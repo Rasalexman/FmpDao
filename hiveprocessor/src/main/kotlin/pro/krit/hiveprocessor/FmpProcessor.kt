@@ -585,13 +585,15 @@ class FmpProcessor : AbstractProcessor() {
                     val initStatement = buildString {
                         if (superTypeGenerics.isNotEmpty()) {
                             append(FUNC_MEMBER_STATEMENT_GENERIC)
-                            val genSize = superTypeGenerics.size - 1
-                            superTypeGenerics.forEachIndexed { index, className ->
+                            //val genSize = superTypeGenerics.size - 1
+                            val className = superTypeGenerics.firstOrNull().orEmpty()
+                            append(className)
+                            /*superTypeGenerics.forEachIndexed { index, className ->
                                 append(className)
                                 if (index < genSize) {
                                     append(DELIMETER)
                                 }
-                            }
+                            }*/
                             append(FUNC_MEMBER_STATEMENT_GENERIC_CLOSE)
                         } else {
                             append(FUNC_MEMBER_STATEMENT)
