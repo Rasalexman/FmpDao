@@ -8,13 +8,9 @@ import androidx.lifecycle.MutableLiveData
 import com.rasalexman.sresult.common.extensions.applyIfSuccessSuspend
 import com.rasalexman.sresult.common.extensions.doAsync
 import com.rasalexman.sresult.common.extensions.logg
-import com.rasalexman.sresult.common.extensions.orZero
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import pro.krit.fmpdaoexample.database.CreateDataBaseUseCase
 import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
 import pro.krit.fmpdaoexample.database.parseTable
@@ -72,9 +68,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private fun openDataBase() {
+        processLoading(true)
         val appContext = this.applicationContext
         val scope = CoroutineScope(Dispatchers.Main)
         scope.launch {
+            delay(1000L)
             val state =
                 doAsync { dataBaseHolder.createAndOpenDatabase(DEBUG_LOGIN, "omk", appContext) }
             if (state.isOpened) {
@@ -83,6 +81,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             } else {
                 status.value = "DB NOT OPENED"
             }
+            processLoading(false)
         }
     }
 
@@ -126,10 +125,11 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     fun getSymptoms() {
         processLoading(true)
         val scope = CoroutineScope(Dispatchers.Main)
+        val localRbnr = 100
         scope.launch {
             val allData: List<ZfmToroSymptomListModel> = doAsync {
                 zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus>(
-                    where = "${Fields.RBNR_Int} = 100"
+                    where = "${Fields.RBNR_Int} = $localRbnr"
                 )
             }
             println("-----> getSymptoms ${allData.size}")
@@ -191,15 +191,24 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     }
 
     private suspend fun selectLocalDaoAsync(): Int = doAsync {
+        val fields = listOf(Fields.MARKER, Fields.TASK_NUM, Fields.LOCAL_ID)
         val allData = pmLocalDao.select()
+        val allCount = pmLocalDao.count(byField = Fields.MARKER)
+        println("----> all count = $allCount")
         val convertedSize = if(allData.isNotEmpty()) {
             val first = allData.first()
-            val resultList = pmLocalDao.select(where = "${Fields.IS_LOCAL} = 'false'")
+            val resultList = pmLocalDao.select(
+                where = "${Fields.IS_LOCAL} = 'false'",
+                fields = fields
+            )
             val converted = resultList.mapNotNull { it.convertTo() }
             converted.size
         } else 0
 
-        println("----> all count = $convertedSize")
+        val deleteStatus = pmLocalDao.delete(where = "${Fields.IS_LOCAL} = 'false'")
+
+        println("----> delete status = ${deleteStatus.isNotBad()}")
+        println("----> converted count = $convertedSize")
         convertedSize
     }
 
@@ -274,7 +283,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 )
             )
         }
-        val insertAllStatus = dao.insertOrReplace<PmDataFieldsDaoModel, PmDataFieldsDaoStatus>(
+        val insertAllStatus = dao.insertOrReplace(
             localListToInsert,
             notifyAll = true
         )

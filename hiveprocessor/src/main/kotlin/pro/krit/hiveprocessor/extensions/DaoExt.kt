@@ -33,10 +33,12 @@ typealias ScalarMap = Map<Parameter, Value>
 
 val IDao.fullTableName: String
     get() {
-        return if(tableName.isNotEmpty()) {
-            "\'${resourceName}_${tableName}\'"
-        } else {
-            "\'${resourceName}\'"
+        return buildString {
+            append(resourceName)
+            if(tableName.isNotEmpty()) {
+                append("_")
+                append(tableName)
+            }
         }
     }
 
@@ -61,19 +63,20 @@ fun IDao.flowableCount(
     where: String = "",
     withStart: Boolean = true,
     emitDelay: Long = 100L,
-    withDistinct: Boolean = false
+    withDistinct: Boolean = false,
+    byField: String? = null
 ) = flow {
     this@flowableCount.getTrigger().collect {
         if(emitDelay > 0) {
             delay(emitDelay)
         }
-        val result = count(where)
+        val result = count(where, byField)
         emit(result)
     }
 }.onStart {
     val trigger = this@flowableCount
     if (withStart && trigger.isTriggerEmpty()) {
-        val result = count(where)
+        val result = count(where, byField)
         emit(result)
     }
 }.apply {
@@ -84,24 +87,26 @@ fun IDao.flowableCount(
 
 /// Counts Queries
 fun IDao.count(
-    where: String = ""
+    where: String = "",
+    byField: String? = null
 ): Int {
-    val selectQuery = QueryBuilder.createQuery(this, QueryBuilder.COUNT_QUERY, where)
+    val localFields = byField?.let { listOf(it) }
+    val selectQuery = QueryBuilder.createQuery(
+        dao = this,
+        prefix = QueryBuilder.COUNT_QUERY,
+        where = where,
+        fields = localFields
+    )
     val result = QueryExecuter.executeKeyQuery(
         dao = this,
         key = QueryBuilder.COUNT_KEY,
         query = selectQuery,
         errorCode = ERROR_CODE_COUNT_WHERE,
-        methodName = "countWhere"
+        methodName = "countWhere",
+        fields = localFields
     )
     return result.toIntOrNull() ?: 0
 }
-
-/*suspend fun IDao.countAsync(
-    where: String = ""
-): Int {
-    return withContext(Dispatchers.IO) { count(where) }
-}*/
 
 ////------ TRIGGERS
 fun IDao.triggerFlow() {
@@ -123,12 +128,6 @@ fun IDao.request(
     val request = requestBuilder(params)
     return request.streamCallAuto()?.execute() ?: BaseStatus()
 }
-
-/*suspend fun IDao.requestAsync(
-    params: ScalarMap? = null
-): BaseStatus {
-    return withContext(Dispatchers.IO) { request(params) }
-}*/
 
 fun IDao.requestBuilder(
     params: ScalarMap? = null

@@ -49,8 +49,9 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
-): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy)
+    orderBy: String = "",
+    fields: List<String>? = null
+): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy, fields)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -66,9 +67,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
     where: String = "",
     limit: Int = 0,
     offset: Int = 0,
-    orderBy: String = ""
+    orderBy: String = "",
+    fields: List<String>? = null
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy)
+    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy, fields)
 }
 
 ///------ INSERT DATA
@@ -80,38 +82,38 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.s
  *
  * @return - возвращает статус удаленной записи из таблицы
  */
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplace(
+inline fun <reified E : Any> IDao.IFieldsDao.insertOrReplace(
     item: E,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.insertOrReplace(this, item, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.insertOrReplace(
+inline fun <reified E : Any> IDao.IFieldsDao.insertOrReplace(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
+): StatusSelectTable<E> {
     return DaoInstance.insertOrReplace(this, items, notifyAll)
 }
 
 ///---- DELETE
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
+inline fun <reified E : Any> IDao.IFieldsDao.delete(
     where: String = "",
     notifyAll: Boolean = false
-): S {
-    return DaoInstance.delete<E, S>(this, where, notifyAll)
+): StatusSelectTable<E> {
+    return DaoInstance.delete(this, where, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
+inline fun <reified E : Any> IDao.IFieldsDao.delete(
     item: E,
     notifyAll: Boolean = false
-): S {
-    return DaoInstance.delete<E, S>(this, item, notifyAll)
+): StatusSelectTable<E> {
+    return DaoInstance.delete(this, item, notifyAll)
 }
 
-inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.delete(
+inline fun <reified E : Any> IDao.IFieldsDao.delete(
     items: List<E>,
     notifyAll: Boolean = false
-): S {
-    return DaoInstance.delete<E, S>(this, items, notifyAll)
+): StatusSelectTable<E> {
+    return DaoInstance.delete(this, items, notifyAll)
 }
