@@ -23,13 +23,13 @@ object DaoInstance {
         fields: List<String>? = null
     ): Flow<List<E>> {
         val trigger = dao.getStartedTrigger(withStart)
-        println("------> onCreate trigger flow")
+        //println("------> onCreate trigger flow")
         return flow {
             trigger.collect {
                 if (emitDelay > 0) {
                     delay(emitDelay)
                 }
-                println("------> onCollect trigger value: $it")
+                //println("------> onCollect trigger value: $it")
                 val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
                 emit(result)
                 if(withStart) {
