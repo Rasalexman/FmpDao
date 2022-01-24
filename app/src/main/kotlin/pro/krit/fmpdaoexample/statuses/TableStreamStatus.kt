@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.statuses
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName

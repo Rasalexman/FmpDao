@@ -1,6 +1,5 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.models
 
-import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.rasalexman.sresult.common.extensions.orZero

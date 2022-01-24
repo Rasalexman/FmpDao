@@ -1,7 +1,6 @@
 package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
-import kotlinx.coroutines.flow.Flow
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.FieldsBuilder
 
@@ -13,7 +12,7 @@ inline fun <reified E : Any> IDao.initFields() {
 }
 
 /**
- * Создает Flow, который эмитит данные при подписке либо при старте
+ * Создает Flow, который эмитит данные при подписке
  *
  * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
  * @param limit - лимитированное количество данных
@@ -22,6 +21,9 @@ inline fun <reified E : Any> IDao.initFields() {
  * @param withStart - начать эмитить данные при создании потока
  * @param emitDelay - задержка при эмитинге данных
  * @param withDistinct - использовать эмитинг только уникальных данных
+ * @param fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
+ *
+ * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.flowable(
     where: String = "",
@@ -29,11 +31,20 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.f
     offset: Int = 0,
     orderBy: String = "",
     withStart: Boolean = true,
-    emitDelay: Long = 100L,
-    withDistinct: Boolean = false
-): Flow<List<E>> {
-    return DaoInstance.flowableTriggered<E,S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
-}
+    emitDelay: Long = 0L,
+    withDistinct: Boolean = false,
+    fields: List<String>? = null
+) = DaoInstance.flowable<E, S>(
+    dao = this,
+    where = where,
+    limit = limit,
+    offset = offset,
+    orderBy = orderBy,
+    withStart = withStart,
+    emitDelay = emitDelay,
+    withDistinct = withDistinct,
+    fields = fields
+)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]

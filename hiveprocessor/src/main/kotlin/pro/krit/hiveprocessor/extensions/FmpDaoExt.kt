@@ -17,7 +17,7 @@ import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 
 /**
- * Создает Flow, который эмитит данные при подписке либо при старте
+ * Создает Flow, который эмитит данные при подписке
  *
  * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
  * @param limit - лимитированное количество данных
@@ -26,6 +26,9 @@ import pro.krit.hiveprocessor.base.IDao
  * @param withStart - начать эмитить данные при создании потока
  * @param emitDelay - задержка при эмитинге данных
  * @param withDistinct - использовать эмитинг только уникальных данных
+ * @param fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
+ *
+ * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.flowable(
     where: String = "",
@@ -34,8 +37,19 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
     orderBy: String = "",
     withStart: Boolean = true,
     emitDelay: Long = 0L,
-    withDistinct: Boolean = false
-) = DaoInstance.flowableTriggered<E, S>(this, where, limit, offset, orderBy, withStart, emitDelay, withDistinct)
+    withDistinct: Boolean = false,
+    fields: List<String>? = null
+) = DaoInstance.flowable<E, S>(
+    dao = this,
+    where = where,
+    limit = limit,
+    offset = offset,
+    orderBy = orderBy,
+    withStart = withStart,
+    emitDelay = emitDelay,
+    withDistinct = withDistinct,
+    fields = fields
+)
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает список результатов

@@ -1,5 +1,6 @@
 package pro.krit.fmpdaoexample
 
+import pro.krit.fmpdaoexample.daos.*
 import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
 import pro.krit.fmpdaoexample.fmpresources.*
 import pro.krit.hiveprocessor.annotations.FmpDatabase
@@ -19,6 +20,7 @@ interface IMainDatabase : IMainLocalDatabase, IMainRemoteDatabase, IMainRequest,
 
 interface IMainLocalDatabase {
     fun providePmLocalDao(): IPmDataLocalDao
+    fun provideUsersLocalDao(): IUsersLocalDao
 }
 
 interface IMainRemoteDatabase {

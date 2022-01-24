@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.models
 
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable

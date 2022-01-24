@@ -1,93 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    <data>
-        <variable
-            name="main"
-            type="pro.krit.fmpdaoexample.MainActivity" />
-    </data>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/mainHostFragment"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/navigation_main" />
 
-        <TextView
-            android:id="@+id/statusTV"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@{main.status}"
-            android:layout_marginTop="@dimen/size_100dp"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <Button
-            android:id="@+id/request01Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Get Symptoms"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="@dimen/size_24dp"
-            onViewClick="@{() -> main.getSymptoms()}"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/statusTV" />
-
-        <Button
-            android:id="@+id/request02Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Items"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="@dimen/size_24dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/request01Button" />
-
-        <Button
-            android:id="@+id/request03Button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Add Local Items"
-            onViewClick="@{() -> main.insertLocalList()}"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="@dimen/size_24dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/request02Button" />
-
-        <Button
-            android:id="@+id/authOnlineDB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Auth online"
-            onViewClick="@{() -> main.authOnline()}"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="@dimen/size_24dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/request03Button" />
-
-        <Button
-            android:id="@+id/authOfflineDB"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Auth offline"
-            onViewClick="@{() -> main.authOffline()}"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginTop="@dimen/size_24dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/authOnlineDB" />
-
-        <com.google.android.material.progressindicator.CircularProgressIndicator
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:visibility="@{main.showLoading}"
-            app:layout_constraintLeft_toLeftOf="parent"
-            android:layout_marginBottom="@dimen/size_24dp"
-            android:layout_marginTop="@dimen/size_24dp"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/statusTV" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-</layout>
+</FrameLayout>

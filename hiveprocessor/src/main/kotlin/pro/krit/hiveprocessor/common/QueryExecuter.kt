@@ -19,7 +19,8 @@ import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.RequestExecuter.isNotBad
-import pro.krit.hiveprocessor.extensions.triggerFlow
+import pro.krit.hiveprocessor.extensions.getErrorMessage
+import pro.krit.hiveprocessor.extensions.triggerDaoIfOk
 
 object QueryExecuter {
 
@@ -67,7 +68,6 @@ object QueryExecuter {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeResultQuery(
         dao: IDao,
         query: String,
@@ -81,10 +81,7 @@ object QueryExecuter {
                 val result = status.result.database.records.orEmpty()
                 Result.success(result)
             } else {
-                val firstError = status.errors.firstOrNull()
-                val message = firstError?.run {
-                    description ?: descriptions.firstOrNull()
-                }.orEmpty()
+                val message = status.getErrorMessage()
                 //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
                 Result.failure(IllegalStateException(message))
             }
@@ -115,7 +112,7 @@ object QueryExecuter {
             } else {
                 hyperHiveDatabaseApi.query(query, clazz).execute()!!
             }.apply {
-                if(notifyAll) this.triggerFlow(localDao)
+                if(notifyAll) this.triggerDaoIfOk(localDao)
             }
         } catch (e: Throwable) {
             e.printStackTrace()

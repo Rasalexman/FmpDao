@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="item"
+            type="pro.krit.fmpdaoexample.models.SymptomItemUI" />
+    </data>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingStart="@dimen/size_8dp"
+        android:background="?attr/selectableItemBackground"
+        android:paddingEnd="@dimen/size_16dp"
+        android:paddingVertical="@dimen/size_8dp">
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:focusable="false"
+            android:checked="@={item.isSelected}"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_16sp"
+                android:text="@{item.symptomText}"
+                android:textColor="@color/black"
+                tools:text="USER ALEXANDER" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/text_size_12sp"
+                android:text="@{item.symptomCode}"
+                android:textColor="@color/gray"
+                tools:text="350696" />
+
+        </LinearLayout>
+
+
+
+    </LinearLayout>
+</layout>

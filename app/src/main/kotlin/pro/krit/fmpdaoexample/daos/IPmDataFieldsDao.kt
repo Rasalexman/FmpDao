@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.daos
 
 import pro.krit.hiveprocessor.annotations.FmpLocalDao
 import pro.krit.hiveprocessor.base.IDao

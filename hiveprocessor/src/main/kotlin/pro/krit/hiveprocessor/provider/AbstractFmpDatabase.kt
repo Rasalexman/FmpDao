@@ -22,6 +22,7 @@ import com.mobrun.plugin.api.VersionAPI
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.extensions.fullTableName
 import java.io.File
@@ -42,6 +43,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     private var savedFmpDbKey: String = DEFAULT_FMP_KEY
 
     private val triggers: HashMap<String, Flow<String>> = hashMapOf()
+    private var isSharedTriggers: Boolean = true
 
     override val isDbCreated: Boolean
         get() {
@@ -62,14 +64,23 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun getTrigger(dao: IDao): Flow<String> {
-        return triggers.getOrPut(dao.fullTableName) {
+        val daoTableName = dao.fullTableName
+        return triggers.getOrPut(daoTableName) {
+            createTrigger(daoTableName)
+        }
+    }
+
+    private fun createTrigger(tableName: String): Flow<String> {
+        return if(isSharedTriggers) {
             val trigger = MutableSharedFlow<String>(
                 replay = 1,
                 extraBufferCapacity = 1,
                 onBufferOverflow = BufferOverflow.DROP_OLDEST
             )
-            trigger.tryEmit(dao.fullTableName)
+            trigger.tryEmit(tableName)
             trigger
+        } else {
+            MutableStateFlow(tableName)
         }
     }
 
@@ -78,6 +89,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         if(config.dbKey.isNotEmpty()) {
             savedFmpDbKey = config.dbKey
         }
+        isSharedTriggers = config.isSharedTrigger
 
         hyperHiveState = hState
             .setApiVersion(VersionAPI.V_1)

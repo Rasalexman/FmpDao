@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.fmpresources
 
 import pro.krit.hiveprocessor.annotations.FmpParam
 import pro.krit.hiveprocessor.annotations.FmpRestRequest
