@@ -22,7 +22,7 @@ import pro.krit.hiveprocessor.provider.DatabaseState
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 
-class CreateDataBaseUseCase : CoroutineScope {
+object DataBaseHolder : CoroutineScope {
 
     private val supervisorJob = SupervisorJob()
     override val coroutineContext: CoroutineContext = Dispatchers.Main + supervisorJob
@@ -30,6 +30,8 @@ class CreateDataBaseUseCase : CoroutineScope {
     private val gson: Gson = GsonBuilder().create()
 
     lateinit var mainDb: IMainDatabase
+
+    var isDbOpened: Boolean = false
 
     fun createAndOpenDatabase(login: String, dbKey: String, context: Context): DatabaseState {
         val serverAddress = "http://10.100.205.123"
@@ -54,7 +56,8 @@ class CreateDataBaseUseCase : CoroutineScope {
             project = project,
             retryCount = 6,
             retryInterval = 10,
-            logLevel = 0
+            logLevel = 0,
+            isSharedTrigger = false
         )
 
         mainDb = MainDatabaseImpl.initialize(
@@ -62,7 +65,9 @@ class CreateDataBaseUseCase : CoroutineScope {
             config = hyperHiveConfig
         )
         val dbState = mainDb.openDatabase(login)
-        return dbState
+        return dbState.also {
+            isDbOpened = it.isOpened
+        }
     }
 
 
@@ -124,8 +129,6 @@ class CreateDataBaseUseCase : CoroutineScope {
         val request: Request,
     )
 
-    companion object {
-        private const val KEY_OK = "OK"
-    }
+    private const val KEY_OK = "OK"
 
 }

@@ -1,5 +1,7 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.daos
 
+import pro.krit.fmpdaoexample.models.PmEtDataLocalEntity
+import pro.krit.fmpdaoexample.statuses.PmLocalStatus
 import pro.krit.hiveprocessor.annotations.FmpLocalDao
 import pro.krit.hiveprocessor.base.IDao
 

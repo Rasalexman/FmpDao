@@ -35,7 +35,7 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     val params = RequestBuilder.createParams(this, requestData)
     //println("------> Start request '${this.resourceName}' with params: $params")
     val resultStatus = RequestExecuter.executeStatus<S, T>(this, params)
-    val resultError = resultStatus?.errors
+    //val resultError = resultStatus?.errors
     //println("------> Finish request '${this.resourceName}' with result: ${resultStatus?.raw} and errors: $resultError")
     return resultStatus?.result?.raw
 }

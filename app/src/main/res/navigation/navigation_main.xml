@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation_main"
+    app:startDestination="@id/startFragment">
+
+    <fragment
+        android:id="@+id/startFragment"
+        android:name="pro.krit.fmpdaoexample.fragments.start.StartFragment"
+        android:label="StartFragment">
+        <action
+            android:id="@+id/action_startFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="pro.krit.fmpdaoexample.fragments.MainFragment"
+        android:label="MainFragment">
+        <action
+            android:id="@+id/action_mainFragment_to_usersFragment"
+            app:destination="@id/usersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/usersFragment"
+        android:name="pro.krit.fmpdaoexample.fragments.users.UsersFragment"
+        android:label="UsersFragment">
+        <action
+            android:id="@+id/action_usersFragment_to_symptomsFragment"
+            app:destination="@id/symptomsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/symptomsFragment"
+        android:name="pro.krit.fmpdaoexample.fragments.symptoms.SymptomsFragment"
+        android:label="SymptomsFragment" >
+
+        <argument
+            android:name="user"
+            app:argType="pro.krit.fmpdaoexample.models.UserItemUI"
+            app:nullable="false"/>
+    </fragment>
+
+</navigation>

@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package pro.krit.fmpdaoexample.models
 
 data class PmDataUI(
     var id: String,

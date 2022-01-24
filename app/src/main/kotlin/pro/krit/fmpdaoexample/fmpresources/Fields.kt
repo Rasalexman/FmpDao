@@ -75,6 +75,7 @@ object Fields {
     // Наименование причины дефекта
     const val SYMPTOM_TEXT = "SYMPTOM_TEXT"
     const val RBNR_Int = "RBNR_Int"
+    const val RBNR = "RBNR"
     // Складское место
     const val STOR_SPACE = "STOR_SPACE"
     // Номер ЕО
@@ -103,4 +104,5 @@ object Fields {
     const val SORDER = "SORDER"
     // Краткое описание
     const val TEXT = "TEXT"
+    const val TAB_NUM = "TAB_NUM"
 }

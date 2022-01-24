@@ -22,10 +22,10 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.base.IDao.*
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
+import java.util.*
 
 typealias Parameter = String
 typealias Value = Any
@@ -55,33 +55,42 @@ fun IDao.getTrigger(): Flow<String> {
     return this.fmpDatabase.getTrigger(this)
 }
 
-suspend fun IDao.isTriggerEmpty(): Boolean {
-    return getTrigger().firstOrNull().isNullOrEmpty()
+fun IDao.getNotEmptyTrigger(): Flow<String> {
+    return this.fmpDatabase.getTrigger(this).filter { it.isNotEmpty() }
+}
+
+fun IDao.getStartedTrigger(withStart: Boolean): Flow<String> {
+    return if (withStart) {
+        triggerFlow()
+        getNotEmptyTrigger()
+    } else {
+        getTrigger()
+    }
 }
 
 fun IDao.flowableCount(
     where: String = "",
     withStart: Boolean = true,
-    emitDelay: Long = 100L,
+    emitDelay: Long = 0L,
     withDistinct: Boolean = false,
     byField: String? = null
-) = flow {
-    this@flowableCount.getTrigger().collect {
-        if(emitDelay > 0) {
-            delay(emitDelay)
+): Flow<Int> {
+    val trigger = this.getStartedTrigger(withStart)
+    return flow {
+        trigger.collect {
+            if(emitDelay > 0) {
+                delay(emitDelay)
+            }
+            val result = count(where, byField)
+            emit(result)
+            if(withStart) {
+                dropTrigger()
+            }
         }
-        val result = count(where, byField)
-        emit(result)
-    }
-}.onStart {
-    val trigger = this@flowableCount
-    if (withStart && trigger.isTriggerEmpty()) {
-        val result = count(where, byField)
-        emit(result)
-    }
-}.apply {
-    if (withDistinct) {
-        distinctUntilChanged()
+    }.apply {
+        if (withDistinct) {
+            distinctUntilChanged()
+        }
     }
 }
 
@@ -110,10 +119,22 @@ fun IDao.count(
 
 ////------ TRIGGERS
 fun IDao.triggerFlow() {
-    (this.getTrigger() as MutableSharedFlow<String>).tryEmit(fullTableName)
+    val trigger = this.getTrigger()
+    val triggerValue = UUID.randomUUID().toString()
+    when(trigger) {
+        is MutableSharedFlow -> trigger.tryEmit(triggerValue)
+        is MutableStateFlow -> trigger.tryEmit(triggerValue)
+    }
 }
 
-fun <E : Any> StatusSelectTable<E>.triggerFlow(dao: IDao) {
+fun IDao.dropTrigger() {
+    when(val trigger = this.getTrigger()) {
+        is MutableSharedFlow -> trigger.tryEmit("")
+        is MutableStateFlow -> trigger.tryEmit("")
+    }
+}
+
+fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
     val statusName = this.status.name.uppercase()
     if (statusName == "OK") {
         dao.triggerFlow()

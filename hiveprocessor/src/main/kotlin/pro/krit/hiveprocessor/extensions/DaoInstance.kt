@@ -2,9 +2,9 @@ package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -17,51 +17,29 @@ object DaoInstance {
         limit: Int = 0,
         offset: Int = 0,
         orderBy: String = "",
-        emitDelay: Long = 0L,
-        withDistinct: Boolean = false,
-        fields: List<String>? = null
-    ) = flow {
-        if(emitDelay > 0) {
-            delay(emitDelay)
-        }
-        val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
-        emit(result)
-    }.apply {
-        if (withDistinct) {
-            distinctUntilChanged()
-        }
-    }
-
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowableTriggered(
-        dao: IDao,
-        where: String = "",
-        limit: Int = 0,
-        offset: Int = 0,
-        orderBy: String = "",
         withStart: Boolean = true,
         emitDelay: Long = 0L,
         withDistinct: Boolean = false,
         fields: List<String>? = null
-    ) = flow {
-        dao.getTrigger().collect {
-            if(emitDelay > 0) {
-                delay(emitDelay)
+    ): Flow<List<E>> {
+        val trigger = dao.getStartedTrigger(withStart)
+        println("------> onCreate trigger flow")
+        return flow {
+            trigger.collect {
+                if (emitDelay > 0) {
+                    delay(emitDelay)
+                }
+                println("------> onCollect trigger value: $it")
+                val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
+                emit(result)
+                if(withStart) {
+                    dao.dropTrigger()
+                }
             }
-            val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
-            emit(result)
-        }
-    }.onStart {
-        val isTriggerEmpty = dao.isTriggerEmpty()
-        if (withStart && isTriggerEmpty) {
-            if(emitDelay > 0) {
-                delay(emitDelay)
+        }.apply {
+            if (withDistinct) {
+                distinctUntilChanged()
             }
-            val startResult = select<E, S>(dao, where, limit, offset, orderBy, fields)
-            emit(startResult)
-        }
-    }.apply {
-        if (withDistinct) {
-            distinctUntilChanged()
         }
     }
 
@@ -82,7 +60,7 @@ object DaoInstance {
             orderBy = orderBy,
             fields = fields
         )
-        println("------> selectQuery = $selectQuery")
+        //println("------> selectQuery = $selectQuery")
         return QueryExecuter.executeQuery<E, S>(
             dao = dao,
             query = selectQuery,

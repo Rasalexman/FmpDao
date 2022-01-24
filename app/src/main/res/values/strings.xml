@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">FmpDao</string>
+    <string name="get_symptoms">Get Symptoms</string>
+    <string name="add_items">Add Items</string>
+    <string name="add_local_items">Add Local Items</string>
+    <string name="auth_online">Auth online</string>
+    <string name="auth_offline">Auth offline</string>
+    <string name="show_users">Show Users</string>
+</resources>

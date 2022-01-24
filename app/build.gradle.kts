@@ -4,6 +4,8 @@ import config.Libs
 plugins {
     id("com.android.application")
     kotlin("android")
+    id("kotlin-parcelize")
+    id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
 }
 
@@ -78,6 +80,8 @@ dependencies {
     //implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
     
     implementation(Libs.Core.coreKtx)
+    implementation(Libs.Core.coroutinesCore)
+    //implementation("androidx.navigation:navigation-ui-ktx:2.4.0-rc01")
     implementation(Libs.Common.sresultpresentation)
     implementation(Libs.Common.gson)
 
