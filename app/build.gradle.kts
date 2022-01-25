@@ -43,6 +43,7 @@ android {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/fmp_release.kotlin_module")
+        this.resources.excludes.add("com.mobrun.plugin.BuildConfige")
     }
 
     // Declare the task that will monitor all configurations.
@@ -81,13 +82,14 @@ dependencies {
     
     implementation(Libs.Core.coreKtx)
     implementation(Libs.Core.coroutinesCore)
-    //implementation("androidx.navigation:navigation-ui-ktx:2.4.0-rc01")
     implementation(Libs.Common.sresultpresentation)
     implementation(Libs.Common.gson)
 
     implementation(project(":hhive"))
 
-    implementation(project(":hiveprocessor"))
+    implementation(project(":hiveprocessor")) {
+        exclude(group = "com.mobrun", module = "plugin")
+    }
     kapt(project(":hiveprocessor"))
 
     testImplementation(Libs.Tests.junit)

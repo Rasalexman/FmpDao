@@ -2,9 +2,7 @@ package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -22,7 +20,7 @@ object DaoInstance {
         withDistinct: Boolean = false,
         fields: List<String>? = null
     ): Flow<List<E>> {
-        val trigger = dao.getStartedTrigger(withStart)
+        val trigger = dao.getTrigger()
         //println("------> onCreate trigger flow")
         return flow {
             trigger.collect {
@@ -32,10 +30,17 @@ object DaoInstance {
                 //println("------> onCollect trigger value: $it")
                 val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
                 emit(result)
-                if(withStart) {
+                /*if(withStart) {
                     dao.dropTrigger()
-                }
+                }*/
             }
+        }.onStart {
+            if(withStart && dao.isTriggerEmpty()) {
+                dao.triggerFlow()
+            }
+        }.catch {
+            println("[ERROR]: database table '${dao.fullTableName}' error $it")
+            emit(emptyList())
         }.apply {
             if (withDistinct) {
                 distinctUntilChanged()

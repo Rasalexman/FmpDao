@@ -35,4 +35,5 @@ interface IFmpDatabase {
 
     fun setDefaultHeaders(headers: Map<String, String>?)
     fun getDefaultHeaders(): Map<String, String>?
+    fun clearProviders()
 }

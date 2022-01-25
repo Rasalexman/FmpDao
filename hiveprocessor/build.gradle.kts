@@ -13,8 +13,18 @@ version = Builds.Processor.VERSION_NAME
 sourceSets {
     getByName("main") {
         java.setSrcDirs(Builds.codeDirs)
+        //java.exclude("com.mobrun.plugin.BuildConfig")
     }
 }
+
+/*
+configurations {
+    all {
+        exclude(group = "com.mobrun.plugin", module = "helpers")
+        exclude(group = "com.mobrun.plugin", module = "kernel")
+    }
+}
+*/
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
@@ -29,17 +39,10 @@ java {
     withJavadocJar()
 }
 
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-    kotlinOptions {
-        apiVersion = "1.6"
-        languageVersion = "1.6"
-        jvmTarget = "11"
-    }
-}
-
 dependencies {
-    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
-    //implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
+    //libsTree.exclude(listOf("*BuildConfig*"))
+
+    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to listOf("com/mobrun/plugin/BuildConfig.java"))))
     implementation(config.Libs.Common.gson)
     compileOnly(config.Libs.Core.coroutinesCore)
 

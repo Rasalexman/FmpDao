@@ -55,6 +55,7 @@ fun IDao.getTrigger(): Flow<String> {
     return this.fmpDatabase.getTrigger(this)
 }
 
+/*
 fun IDao.getNotEmptyTrigger(): Flow<String> {
     return this.fmpDatabase.getTrigger(this).filter { it.isNotEmpty() }
 }
@@ -66,6 +67,10 @@ fun IDao.getStartedTrigger(withStart: Boolean): Flow<String> {
     } else {
         getTrigger()
     }
+}*/
+
+suspend fun IDao.isTriggerEmpty(): Boolean {
+    return getTrigger().firstOrNull().isNullOrEmpty()
 }
 
 fun IDao.flowableCount(
@@ -75,7 +80,7 @@ fun IDao.flowableCount(
     withDistinct: Boolean = false,
     byField: String? = null
 ): Flow<Int> {
-    val trigger = this.getStartedTrigger(withStart)
+    val trigger = this.getTrigger()
     return flow {
         trigger.collect {
             if(emitDelay > 0) {
@@ -83,9 +88,13 @@ fun IDao.flowableCount(
             }
             val result = count(where, byField)
             emit(result)
-            if(withStart) {
+            /*if(withStart) {
                 dropTrigger()
-            }
+            }*/
+        }
+    }.onStart {
+        if(withStart && this@flowableCount.isTriggerEmpty()) {
+            this@flowableCount.triggerFlow()
         }
     }.apply {
         if (withDistinct) {
@@ -127,12 +136,12 @@ fun IDao.triggerFlow() {
     }
 }
 
-fun IDao.dropTrigger() {
+/*fun IDao.dropTrigger() {
     when(val trigger = this.getTrigger()) {
         is MutableSharedFlow -> trigger.tryEmit("")
         is MutableStateFlow -> trigger.tryEmit("")
     }
-}
+}*/
 
 fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
     val statusName = this.status.name.uppercase()

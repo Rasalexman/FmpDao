@@ -160,7 +160,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return login.takeIf { it.isNotEmpty() }?.let { "${login}bjasbjasbjasew" }.orEmpty()
     }
 
-    private fun clearProviders() {
+    override fun clearProviders() {
         triggers.clear()
         savedFmpDbKey = DEFAULT_FMP_KEY
         hyperHive = null

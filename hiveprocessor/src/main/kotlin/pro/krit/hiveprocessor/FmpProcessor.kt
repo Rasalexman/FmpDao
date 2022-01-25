@@ -74,6 +74,7 @@ class FmpProcessor : AbstractProcessor() {
 
         private const val FMP_DAO_NAME = "FmpDao"
         private const val FMP_LOCAL_DAO_NAME = "FmpLocalDao"
+        private const val FMP_BASE_NAME = "IFmpDatabase"
 
         private const val TAG_MEMBER_FULL = "%M()"
         private const val TAG_MEMBER_HALF = "%M("
@@ -101,7 +102,6 @@ class FmpProcessor : AbstractProcessor() {
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
         private const val TAG_CLASS_NAME = "%T"
-        private const val DELIMETER = ","
 
         private const val QUERY_VALUE = "val query: String = "
         private const val QUERY_RETURN = "return %T.executeQuery(this, query)"
@@ -127,6 +127,9 @@ class FmpProcessor : AbstractProcessor() {
 
     /* message helper */
     private var messager: Messager by Delegates.notNull()
+
+    // names of all props
+    private val allProperties = mutableListOf<String>()
 
     override fun init(processingEnv: ProcessingEnvironment) {
         super.init(processingEnv)
@@ -172,6 +175,7 @@ class FmpProcessor : AbstractProcessor() {
                 databases?.forEach { currentDatabase ->
                     processDatabase(currentDatabase, bindingDataList)
                 }
+                allProperties.clear()
             }
 
             println("FmpProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
@@ -206,8 +210,13 @@ class FmpProcessor : AbstractProcessor() {
             daoList,
             annotation.asDaoProvider
         )
+
         // than create function for database
-        createFunctions(classTypeSpec, databaseElement, daoList, annotation.asDaoProvider)
+        allProperties.addAll(
+            createFunctions(classTypeSpec, databaseElement, daoList, annotation.asDaoProvider)
+        )
+        // create clearing function
+        createClearProviders(classTypeSpec, allProperties)
 
         saveFiles(DATABASE_PACKAGE_NAME, fileName, listOf(classTypeSpec))
     }
@@ -221,14 +230,15 @@ class FmpProcessor : AbstractProcessor() {
         val extendedTypeMirrors = TYPE_UTILS.directSupertypes(element.asType())
         if (extendedTypeMirrors != null && extendedTypeMirrors.isNotEmpty()) {
 
-            val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter {
-                !it.simpleName.toString().contains("IFmpDatabase")
+            val extendedElements = extendedTypeMirrors.mapToInterfaceElements().filter { extElement ->
+                !extElement.simpleName.toString().contains(FMP_BASE_NAME)
             }
             //println("----------------> createDatabaseExtendedFunction")
             //println("checkExtendedInterface $element - extendedElements ")
-            extendedElements.forEach {
-                createFunctions(classTypeSpec, it, daoList, asProvider)
-                createDatabaseExtendedFunction(classTypeSpec, it, daoList, asProvider)
+            extendedElements.forEach { extendedElement ->
+                val funcPropNames = createFunctions(classTypeSpec, extendedElement, daoList, asProvider)
+                allProperties.addAll(funcPropNames)
+                createDatabaseExtendedFunction(classTypeSpec, extendedElement, daoList, asProvider)
             }
         }
     }
@@ -238,8 +248,9 @@ class FmpProcessor : AbstractProcessor() {
         element: Element,
         daoList: List<BindData>,
         asProvide: Boolean = false
-    ) {
+    ): List<String> {
         val methods = element.enclosedElements.orEmpty()
+        val allPropNames = mutableListOf<String>()
         //println("----------------> createFunctions")
         //println("------> element = $element | enclosedElements = $methods")
 
@@ -284,6 +295,7 @@ class FmpProcessor : AbstractProcessor() {
                             } else {
 
                                 val propName = funcName.createFileName()
+                                allPropNames.add(propName)
                                 val prop =
                                     PropertySpec.builder(
                                         propName,
@@ -310,6 +322,29 @@ class FmpProcessor : AbstractProcessor() {
                     classTypeSpec.addFunction(funcSpec)
                 }
             }
+        }
+
+
+        return allPropNames
+    }
+
+    private fun createClearProviders(classTypeSpec: TypeSpec.Builder, allPropNames: List<String>) {
+        if (allPropNames.isNotEmpty()) {
+
+            val clearStatement = buildString {
+                allPropNames.forEach { propName ->
+                    append("$propName = $NULL_INITIALIZER")
+                    appendLine()
+                }
+                append("super.clearProviders()")
+            }
+
+            val clearFuncSpec = FunSpec.builder("clearProviders")
+                .addModifiers(KModifier.OVERRIDE)
+                .addStatement(clearStatement)
+                .build()
+
+            classTypeSpec.addFunction(clearFuncSpec)
         }
     }
 
