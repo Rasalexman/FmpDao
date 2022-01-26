@@ -133,7 +133,7 @@ object FieldsBuilder {
         val key = UUID.randomUUID().toString()
         val bytes = key.toByteArray()
         val digest = md.digest(bytes)
-        return digest.fold("", { str, it -> str + "%02x".format(it) })
+        return digest.fold("") { str, it -> str + "%02x".format(it) }
     }
 
     private fun getFields(
