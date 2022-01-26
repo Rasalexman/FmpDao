@@ -82,6 +82,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
  * @param limit - лимитированное количество данных
  * @param offset - отступ в получении данных
  * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
  *
  * @return - [List] с данными, либо пустой список
  */
@@ -100,6 +101,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
  * @param limit - лимитированное количество данных
  * @param offset - отступ в получении данных
  * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
  *
  * @return - список результатов запроса обернутый в [Result]
  */

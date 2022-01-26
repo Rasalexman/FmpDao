@@ -13,5 +13,5 @@ import pro.krit.hiveprocessor.base.IDao
 interface IPmDataDao : IDao.IFmpDao<PmEtDataEntity, PmStatus> {
 
     @FmpQuery("SELECT * FROM :PmEtDataEntity WHERE MARKER = :id AND AUFPL = :count LIMIT :limit")
-    suspend fun selectOnlyAvailable(id: String, count: Int, limit: Long): List<PmEtDataEntity>
+    suspend fun selectOnlyAvailable(id: String, count: String, limit: Long): List<PmEtDataEntity>
 }

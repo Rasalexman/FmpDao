@@ -18,7 +18,6 @@ import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import pro.krit.hiveprocessor.extensions.withoutInt
 import java.lang.reflect.Field
 import java.security.MessageDigest
@@ -80,7 +79,7 @@ object FieldsBuilder {
         )
     }
 
-    fun <E : Any> getValues(dao: IFieldsDao, item: E): String {
+    fun <E : Any> getValues(dao: IDao, item: E): String {
         val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val fields = localDaoFields?.fields

@@ -17,23 +17,19 @@ sourceSets {
     }
 }
 
-/*
-configurations {
-    all {
-        exclude(group = "com.mobrun.plugin", module = "helpers")
-        exclude(group = "com.mobrun.plugin", module = "kernel")
-    }
+tasks.register<Jar>(name = "sourceJar") {
+    from(sourceSets["main"].java.srcDirs)
+    archiveClassifier.set("sources")
 }
-*/
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-    /*sourceSets {
+    this.sourceSets {
         getByName("main") {
             java.setSrcDirs(Builds.codeDirs)
         }
-    }*/
+    }
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
     withSourcesJar()
     withJavadocJar()
@@ -42,8 +38,8 @@ java {
 dependencies {
     //libsTree.exclude(listOf("*BuildConfig*"))
 
-    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to listOf("com/mobrun/plugin/BuildConfig.java"))))
-    implementation(config.Libs.Common.gson)
+    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to Builds.excludes)))
+    compileOnly(config.Libs.Common.gson)
     compileOnly(config.Libs.Core.coroutinesCore)
 
     implementation(config.Libs.Processor.kotlinPoet)
@@ -55,7 +51,7 @@ dependencies {
     archiveClassifier.set("sources")
 }*/
 
-/*publishing {
+publishing {
     publications {
         create<MavenPublication>("hiveprocessor") {
             from(components["kotlin"])
@@ -69,10 +65,10 @@ dependencies {
         }
     }
 
-    repositories {
+    /*repositories {
         maven {
             name = "hiveprocessor"
             setUrl(uri("${buildDir}/publishing-repository"))
         }
-    }
-}*/
+    }*/
+}

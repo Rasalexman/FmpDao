@@ -18,6 +18,7 @@ import pro.krit.fmpdaoexample.fmpresources.Fields
 import pro.krit.fmpdaoexample.models.PmType
 import pro.krit.fmpdaoexample.models.UserEntity
 import pro.krit.fmpdaoexample.models.UserItemUI
+import pro.krit.hiveprocessor.extensions.count
 import pro.krit.hiveprocessor.extensions.flowable
 import pro.krit.hiveprocessor.extensions.insertOrReplace
 import java.util.*
@@ -38,10 +39,10 @@ class UsersViewModel : BaseViewModel() {
     }
 
     private val usersFlowable: Flow<List<UserEntity>>
-        get() = usersDao.flowable(withStart = true, orderBy = "${Fields.TAB_NUM} ASC").flowOn(Dispatchers.IO)
+        get() = usersDao.flowable(orderBy = "${Fields.TAB_NUM} ASC").flowOn(Dispatchers.IO)
 
     override val resultLiveData: LiveData<ResultList<UserItemUI>> by unsafeLazy {
-        usersFlowable.asLiveData(timeoutInMs = 0L, context = Dispatchers.IO).switchMap { usersList ->
+        usersFlowable.asLiveData(timeoutInMs = 0L).switchMap { usersList ->
             asyncLiveData {
                 emit(loadingResult())
                 val currentUsers = if (usersList.size < 200) {
@@ -72,8 +73,14 @@ class UsersViewModel : BaseViewModel() {
                 )
             )
         }
-        val usersStatus = usersDao.insertOrReplace(freshUsers)
-        logg { "usersStatus is OK - ${usersStatus.isOk}" }
+        /*
+        val deleteStatus = usersDao.delete(existUsers)
+        println("deleteStatus is OK - ${deleteStatus.isOk}")
+        */
+        val usersAll = usersDao.count()
+        println("all users count - $usersAll")
+        val insertStatus = usersDao.insertOrReplace(freshUsers)
+        println("insertStatus is OK - ${insertStatus.isOk}")
         freshUsers
     }
 
@@ -100,7 +107,5 @@ class UsersViewModel : BaseViewModel() {
                 append(userSurn[randSurn])
             }
         }
-
-
     }
 }

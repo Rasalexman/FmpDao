@@ -11,6 +11,12 @@ object Builds {
         "src/main/kotlin"
     )
 
+    val excludes = listOf(
+        "com/mobrun/plugin/BuildConfig.java",
+        "META-INF",
+        "ru/fsight/fmp/*"
+    )
+
     object App {
         const val VERSION_CODE = 10002
         const val VERSION_NAME = "1.0.2"
@@ -22,7 +28,7 @@ object Builds {
     }
 
     object Processor {
-        const val VERSION_CODE = 103041
-        const val VERSION_NAME = "1.3.41"
+        const val VERSION_CODE = 103042
+        const val VERSION_NAME = "1.3.42"
     }
 }

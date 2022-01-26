@@ -5,13 +5,6 @@ import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.FieldsBuilder
 
 /**
- * Инициализация полей таблицы из модели данных
- */
-inline fun <reified E : Any> IDao.initFields() {
-    FieldsBuilder.initFields(this, E::class.java.fields)
-}
-
-/**
  * Создает Flow, который эмитит данные при подписке
  *
  * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
