@@ -16,6 +16,7 @@ package pro.krit.hiveprocessor.common
 
 import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.models.Error
+import com.mobrun.plugin.models.StatusRequest
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
 import pro.krit.hiveprocessor.common.RequestExecuter.isNotBad
@@ -30,7 +31,7 @@ object QueryExecuter {
         dao: IDao,
         query: String,
         errorCode: Int = DEFAULT_ERROR_CODE,
-        methodName: String = "",
+        methodName: String = "executeQuery",
         notifyAll: Boolean = false
     ): List<E> {
         return try {
@@ -48,7 +49,7 @@ object QueryExecuter {
         key: String,
         query: String,
         errorCode: Int = DEFAULT_ERROR_CODE,
-        methodName: String = "",
+        methodName: String = "executeKeyQuery",
         notifyAll: Boolean = false,
         fields: List<String>? = null
     ): String {
@@ -72,7 +73,7 @@ object QueryExecuter {
         dao: IDao,
         query: String,
         errorCode: Int = DEFAULT_ERROR_CODE,
-        methodName: String = "",
+        methodName: String = "executeResultQuery",
         notifyAll: Boolean = false
     ): Result<List<E>> {
         return try {
@@ -128,10 +129,19 @@ object QueryExecuter {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeTransactionStatus(
         dao: IDao,
         query: String,
-        errorCode: Int = 1001,
+        errorCode: Int = DEFAULT_ERROR_CODE,
         methodName: String = "",
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
+
+        if(query.isEmpty()) {
+            val okStatus = StatusSelectTable<E>()
+            okStatus.status = StatusRequest.OK
+            return okStatus.apply {
+                if(notifyAll) this.triggerDaoIfOk(dao)
+            }
+        }
+
         var status = executeStatus<E, S>(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
         if (status.isOk) {
             status = executeStatus<E, S>(dao, query, errorCode, methodName)
@@ -139,7 +149,7 @@ object QueryExecuter {
         val endStatus = executeStatus<E, S>(
             dao,
             QueryBuilder.END_TRANSACTION_QUERY,
-            DEFAULT_ERROR_CODE,
+            errorCode,
             methodName,
             notifyAll
         )

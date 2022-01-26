@@ -1,7 +1,6 @@
 package pro.krit.fmpdaoexample.models
 
 import com.google.gson.annotations.SerializedName
-import com.mobrun.plugin.api.request_assistant.PrimaryKey
 
 data class PmEtDataEntity(
     //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
@@ -187,8 +186,4 @@ data class PmEtDataEntity(
     @JvmField
     @SerializedName("CONFIRMATION")
     var confirmation: String? = null
-) {
-    companion object {
-        const val TABLE_NAME = "ZSR_TORO_PM_DATA_ET_DATA"
-    }
-}
+)

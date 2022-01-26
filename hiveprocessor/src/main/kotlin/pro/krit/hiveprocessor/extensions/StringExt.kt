@@ -21,7 +21,6 @@ import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
-import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.data.BindData
 import pro.krit.hiveprocessor.data.FieldData
 import java.util.*
@@ -32,7 +31,7 @@ const val MODEL_POSTFIX = "Model"
 const val STATUS_POSTFIX = "Status"
 const val RESULT_MODEL_POSTFIX = "ResultModel"
 const val RESPOND_STATUS_POSTFIX = "RespondStatus"
-const val RAW_MODEL_POSTFIX = "RawModel"
+//const val RAW_MODEL_POSTFIX = "RawModel"
 const val PARAMS_POSTFIX = "Params"
 
 

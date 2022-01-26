@@ -22,6 +22,7 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.FieldsBuilder
 import pro.krit.hiveprocessor.common.LimitedScalarParameter
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
@@ -55,6 +56,13 @@ fun IDao.getTrigger(): Flow<String> {
     return this.fmpDatabase.getTrigger(this)
 }
 
+/**
+ * Инициализация полей таблицы из модели данных
+ */
+inline fun <reified E : Any> IDao.initFields() {
+    FieldsBuilder.initFields(this, E::class.java.fields)
+}
+
 /*
 fun IDao.getNotEmptyTrigger(): Flow<String> {
     return this.fmpDatabase.getTrigger(this).filter { it.isNotEmpty() }
@@ -73,6 +81,17 @@ suspend fun IDao.isTriggerEmpty(): Boolean {
     return getTrigger().firstOrNull().isNullOrEmpty()
 }
 
+/**
+ * Создает Flow, который эмитит количество данных в таблице
+ *
+ * @param where - тело запроса для count(*), если пустой то выбирает все данные
+ * @param withStart - начать эмитить данные при создании потока
+ * @param emitDelay - задержка при эмитинге данных
+ * @param withDistinct - использовать эмитинг только уникальных данных
+ * @param byField - поиск количества по не пустому полю
+ *
+ * @return - Flow<Int> поток данных из базы данных
+ */
 fun IDao.flowableCount(
     where: String = "",
     withStart: Boolean = true,
@@ -103,7 +122,14 @@ fun IDao.flowableCount(
     }
 }
 
-/// Counts Queries
+/**
+ * Возвращает количество данных в таблице
+ *
+ * @param where - тело запроса для count(*), если пустой то выбирает все данные
+ * @param byField - поиск количества по не пустому полю
+ *
+ * @return Int
+ */
 fun IDao.count(
     where: String = "",
     byField: String? = null

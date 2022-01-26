@@ -15,7 +15,6 @@
 package pro.krit.hiveprocessor.common
 
 import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.base.IDao.IFieldsDao
 import pro.krit.hiveprocessor.extensions.fullTableName
 import pro.krit.hiveprocessor.extensions.withoutInt
 
@@ -43,6 +42,8 @@ object QueryBuilder {
 
     private const val INSERT_OR_REPLACE = "INSERT OR REPLACE INTO "
     private const val VALUES = " VALUES "
+    private const val FINISH_MARK = "; "
+    private const val DELIM_MARK = ", "
 
     fun createQuery(
         dao: IDao,
@@ -70,6 +71,7 @@ object QueryBuilder {
             append(limitQuery)
             append(offsetQuery)
             append(orderByQuery)
+            append(FINISH_MARK)
         }
         return query
     }
@@ -84,7 +86,6 @@ object QueryBuilder {
 
         var prefix = ""
         val localFieldNames = fieldsNames.orEmpty()
-        val localFieldsSize = localFieldNames.size
         return buildString {
             append(CREATE_TABLE_QUERY)
             append(dao.fullTableName)
@@ -93,25 +94,20 @@ object QueryBuilder {
             primaryKeyName?.let {
                 append(it)
                 append(TEXT_PRIMARY_KEY)
-                prefix = ", "
+                prefix = DELIM_MARK
             }
 
-            var counter = 0
             for (entry in localFieldNames) {
-                counter++
                 val fieldName = entry.key
                 val fieldType = entry.value
 
                 append(prefix)
                 append(fieldName.withoutInt())
                 append(getFieldType(fieldType))
-                prefix = if (counter < localFieldsSize) {
-                    ", "
-                } else {
-                    ""
-                }
+                prefix = DELIM_MARK
             }
             append(")")
+            append(FINISH_MARK)
         }
     }
 
@@ -133,11 +129,12 @@ object QueryBuilder {
                 append(WHERE)
                 append(where.withoutInt())
             }
+            append(FINISH_MARK)
         }
     }
 
     fun <E : Any> createInsertOrReplaceQuery(
-        dao: IFieldsDao,
+        dao: IDao,
         item: E
     ): String {
 
@@ -150,29 +147,41 @@ object QueryBuilder {
             append(dao.fullTableName)
             append(" ")
             append("$fieldsForQuery$VALUES$fieldsValues")
+            append(FINISH_MARK)
         }
     }
 
     fun <E : Any> createInsertOrReplaceQuery(
-        dao: IFieldsDao,
+        dao: IDao,
         items: List<E>
     ): String {
+        val fieldsForQuery = dao.fieldsData?.fieldsForQuery
+            ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
+
+        var prefix = ""
         return buildString {
-            for (item in items) {
-                append(createInsertOrReplaceQuery(dao, item))
-                append("; ")
+            if(items.isNotEmpty()) {
+                append(INSERT_OR_REPLACE)
+                append(dao.fullTableName)
+                append(" ")
+                append("$fieldsForQuery$VALUES")
+                for (item in items) {
+                    append(prefix)
+                    val fieldsValues = FieldsBuilder.getValues(dao, item)
+                    append(fieldsValues)
+                    prefix = DELIM_MARK
+                }
+                append(FINISH_MARK)
             }
         }
     }
 
-    fun <E : Any> createDeleteQuery(
-        dao: IFieldsDao,
-        item: E
-    ): String {
+    fun <E : Any> createDeleteQuery(dao: IDao, item: E): String {
         val tableName = dao.fullTableName
         val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val primaryKeyName = localDaoFields?.primaryKeyName
+
         if (primaryKeyField == null || primaryKeyName.isNullOrEmpty()) {
             throw UnsupportedOperationException("No 'primaryKeyField' for operation 'createDeleteQuery'")
         }
@@ -187,21 +196,43 @@ object QueryBuilder {
             append(tableName)
             append(WHERE)
             append("$primaryKeyName = '$keyValue'")
+            append(FINISH_MARK)
         }
     }
 
-    fun <E : Any> createDeleteQuery(dao: IFieldsDao, items: List<E>): String {
+    fun <E : Any> createDeleteQuery(dao: IDao, items: List<E>): String {
+        val tableName = dao.fullTableName
+        val localDaoFields = dao.fieldsData
+        val primaryKeyField = localDaoFields?.primaryKeyField
+        val primaryKeyName = localDaoFields?.primaryKeyName
+
+        if (primaryKeyField == null || primaryKeyName.isNullOrEmpty()) {
+            throw UnsupportedOperationException("No 'primaryKeyField' for operation 'createDeleteListQuery'")
+        }
+
+        var prefix = ""
         return buildString {
-            for (item in items) {
-                append(createDeleteQuery(dao, item))
-                append("; ")
+            if(items.isNotEmpty()) {
+                append(DELETE_QUERY)
+                append(tableName)
+                append(WHERE)
+                append("$primaryKeyName IN ")
             }
+            append("(")
+            for (item in items) {
+                append(prefix)
+                val keyValue: Any = primaryKeyField[item]
+                append("'$keyValue'")
+                prefix = DELIM_MARK
+            }
+            append(")")
+            append(FINISH_MARK)
         }
     }
 
     fun createWithFields(prefix: String, fields: List<String>? = null): String {
         val prefixQuery = fields.takeIf { !it.isNullOrEmpty() }?.let {
-            val fieldsStatement = it.joinToString(", ")
+            val fieldsStatement = it.joinToString(DELIM_MARK)
             fieldsStatement.withoutInt()
         } ?: SELECT_ALL_MAKER
         return try {

@@ -115,7 +115,7 @@ object DaoInstance {
 
     /////---------- DELETE QUERIES
     inline fun <reified E : Any> delete(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         where: String = "",
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
@@ -130,7 +130,7 @@ object DaoInstance {
     }
 
     inline fun <reified E : Any> delete(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         item: E,
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
@@ -145,7 +145,7 @@ object DaoInstance {
     }
 
     inline fun <reified E : Any> delete(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         items: List<E>,
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
@@ -161,7 +161,7 @@ object DaoInstance {
 
     ////--------- UPDATE QUERIES
     inline fun <reified E : Any> update(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         setQuery: String,
         from: String = "",
         where: String = "",
@@ -179,7 +179,7 @@ object DaoInstance {
 
     ////--------- INSERT QUERIES
     inline fun <reified E : Any> insertOrReplace(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         item: E,
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
@@ -188,13 +188,13 @@ object DaoInstance {
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_INSERT,
-            methodName = "insertOrReplace",
+            methodName = "insertOrReplaceItem",
             notifyAll
         )
     }
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
-        dao: IDao.IFieldsDao,
+        dao: IDao,
         items: List<E>,
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {

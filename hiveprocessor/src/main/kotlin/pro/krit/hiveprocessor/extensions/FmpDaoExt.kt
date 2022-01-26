@@ -26,7 +26,7 @@ import pro.krit.hiveprocessor.base.IDao
  * @param withStart - начать эмитить данные при создании потока
  * @param emitDelay - задержка при эмитинге данных
  * @param withDistinct - использовать эмитинг только уникальных данных
- * @param fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
  *
  * @return - Flow<List<E>> поток данных из базы данных
  */
@@ -58,6 +58,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
  * @param limit - лимитированное количество данных
  * @param offset - отступ в получении данных
  * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.select(
     where: String = "",
@@ -74,6 +75,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
  * @param limit - лимитированное количество данных
  * @param offset - отступ в получении данных
  * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectResult(
     where: String = "",
