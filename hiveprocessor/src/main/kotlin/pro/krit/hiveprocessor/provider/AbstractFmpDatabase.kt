@@ -130,10 +130,15 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return DatabaseState(isOpened = false, isClosed = isClosed)
     }
 
-    override fun closeAndClearProviders(pathBase: String) {
-        if (tryToCloseDatabase(pathBase)) {
+    override fun closeAndClearProviders(pathBase: String): DatabaseState {
+        var isClosed = tryToCloseDatabase(pathBase)
+        if (!isClosed) {
+            isClosed = tryToCloseDatabase(pathBase)
+        }
+        if(isClosed) {
             clearProviders()
         }
+        return DatabaseState(isOpened = false, isClosed = isClosed)
     }
 
     private fun tryToOpenDatabase(fmpKey: String = "", pathBase: String = ""): Boolean {
