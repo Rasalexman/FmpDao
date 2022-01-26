@@ -17,7 +17,7 @@ sourceSets {
     }
 }
 
-tasks.register<Jar>(name = "sourceJar") {
+tasks.create(name = "sourceJar", type = Jar::class) {
     from(sourceSets["main"].java.srcDirs)
     archiveClassifier.set("sources")
 }
@@ -46,10 +46,6 @@ dependencies {
     implementation(config.Libs.Processor.autoService)
     kapt(config.Libs.Processor.autoService)
 }
-
-/*tasks.create(name = "sourceJar", type = Jar::class) {
-    archiveClassifier.set("sources")
-}*/
 
 publishing {
     publications {
