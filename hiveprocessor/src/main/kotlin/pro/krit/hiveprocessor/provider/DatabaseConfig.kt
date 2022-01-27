@@ -28,6 +28,8 @@ data class DatabaseConfig(
     val projectVersion: String = "app",
     val retryCount: Int = 5,
     val retryInterval: Int = 10,
+    val isLoggingEnabled: Boolean = true,
     val logLevel: Int = LoggingAPI.Type.LOGCAT.type,
+    val logOutputType: LoggingAPI.Type = LoggingAPI.Type.LOGCAT,
     val isSharedTrigger: Boolean = false
 )
