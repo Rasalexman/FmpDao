@@ -102,7 +102,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create())
             .setHostWithSchema(config.serverAddress)
             .apply {
-                hyperHive = buildHyperHive().setupLogs(config.logLevel)
+                hyperHive = buildHyperHive().setupLogs(config)
             }
         return this as T
     }
@@ -172,9 +172,10 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         hyperHiveState = null
     }
 
-    private fun HyperHive.setupLogs(logLevel: Int): HyperHive {
-        this.loggingAPI.setLogEnabled(logLevel >= 0)
-        this.loggingAPI.setLogLevel(logLevel)
+    private fun HyperHive.setupLogs(config: DatabaseConfig): HyperHive {
+        this.loggingAPI.setLogEnabled(config.isLoggingEnabled)
+        this.loggingAPI.setLogLevel(config.logLevel)
+        //this.loggingAPI.setLogOutputType(config.logOutputType)
         return this
     }
 
