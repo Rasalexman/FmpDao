@@ -12,46 +12,25 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+@file:Suppress("unused")
+
 package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.FlowableConfig
 import pro.krit.hiveprocessor.common.QueryExecuter
 
 /**
  * Создает Flow, который эмитит данные при подписке
  *
- * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
- * @param limit - лимитированное количество данных
- * @param offset - отступ в получении данных
- * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
- * @param withStart - начать эмитить данные при создании потока
- * @param emitDelay - задержка при эмитинге данных
- * @param withDistinct - использовать эмитинг только уникальных данных
- * @param fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
+ * @param builderBlock - конструктор запроса
  *
  * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.flowable(
-    where: String = "",
-    limit: Int = 0,
-    offset: Int = 0,
-    orderBy: String = "",
-    withStart: Boolean = true,
-    emitDelay: Long = 0L,
-    withDistinct: Boolean = false,
-    fields: List<String>? = null
-) = DaoInstance.flowable<E, S>(
-    dao = this,
-    where = where,
-    limit = limit,
-    offset = offset,
-    orderBy = orderBy,
-    withStart = withStart,
-    emitDelay = emitDelay,
-    withDistinct = withDistinct,
-    fields = fields
-)
+    builderBlock: FlowableConfig.() -> Unit
+) = DaoInstance.flowable<E, S>(dao = this, config = FlowableConfig().apply(builderBlock))
 
 /**
  * Простой запрос в таблицу базы данных
@@ -180,7 +159,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 
 ////--------- INSERT QUERIES
 /**
- * Вставка или замена данных из таблицы по уникальному ключу [PrimaryKey]
+ * Вставка или замена данных из таблицы по уникальному ключу [com.mobrun.plugin.api.request_assistant.PrimaryKey]
  *
  * @param item - экземпляров данных
  * @param notifyAll - тригер на одновление всех значений
@@ -195,7 +174,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 }
 
 /**
- * Вставка или замена списка данных по уникальному ключу [PrimaryKey]
+ * Вставка или замена списка данных по уникальному ключу [com.mobrun.plugin.api.request_assistant.PrimaryKey]
  *
  * @param items - [List] экземпляров данных
  * @param notifyAll - тригер на одновление всех значений

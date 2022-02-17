@@ -64,9 +64,9 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun getTrigger(dao: IDao): Flow<String> {
-        val daoTableName = dao.fullTableName
-        return triggers.getOrPut(daoTableName) {
-            createTrigger(daoTableName)
+        val triggerKey = dao.fullTableName
+        return triggers.getOrPut(triggerKey) {
+            createTrigger(triggerKey)
         }
     }
 

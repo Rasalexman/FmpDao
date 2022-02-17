@@ -22,8 +22,11 @@ import pro.krit.fmpdaoexample.models.SymptomItemUI
 import pro.krit.fmpdaoexample.models.UserItemUI
 import pro.krit.generated.dao.ZfmToroSymptomListModel
 import pro.krit.generated.dao.ZfmToroSymptomListStatus
+import pro.krit.hiveprocessor.extensions.createTable
+import pro.krit.hiveprocessor.extensions.insertOrReplace
 import pro.krit.hiveprocessor.extensions.select
 import pro.krit.hiveprocessor.extensions.update
+import kotlin.random.Random
 
 class SymptomsViewModel(
     savedStateHandle: SavedStateHandle
@@ -69,7 +72,9 @@ class SymptomsViewModel(
         input: List<ZfmToroSymptomListModel>,
         userSymptomCode: String
     ): ResultList<SymptomItemUI> = doAsync {
-        input.map { item ->
+        //zfmToroSymptomList.delete<ZfmToroSymptomListModel>()
+        val realInput = input.takeIf { it.isNotEmpty() } ?: createSymptoms()
+        realInput.map { item ->
             val alreadySelected = userSymptomCode == item.symptomCode
             SymptomItemUI(
                 symptomCode = item.symptomCode.orEmpty(),
@@ -77,12 +82,36 @@ class SymptomsViewModel(
                 symptomText = item.symptomText.orEmpty(),
                 rbnr = item.rbnr.orZero().toStringOrEmpty()
             ).apply {
-                if(alreadySelected) {
+                if (alreadySelected) {
                     isSelected.set(alreadySelected)
                     lastSelectedSymptom = this
                 }
             }
         }.toSuccessListResult()
+    }
+
+    private fun createSymptoms(): List<ZfmToroSymptomListModel> {
+        val groups = Random.nextInt(10, 20)
+        val codes = Random.nextInt(10, 30)
+        val localSymptoms = mutableListOf<ZfmToroSymptomListModel>()
+        repeat(groups) { group ->
+            repeat(codes) { code ->
+                val cGrp = group + 1
+                val cCd = code + 1
+                val realCode = "$cGrp$cCd"
+                localSymptoms.add(
+                    ZfmToroSymptomListModel(
+                        symptomCode = realCode,
+                        symptGrpCode = "$cGrp",
+                        symptomText = "Симптом с кодом $realCode",
+                        rbnr = Random.nextInt(100, 104)
+                    )
+                )
+            }
+        }
+        zfmToroSymptomList.createTable<ZfmToroSymptomListModel>()
+        zfmToroSymptomList.insertOrReplace(localSymptoms, true, withoutPrimaryKey = true)
+        return localSymptoms
     }
 
     override fun onBackClicked() = launchUITryCatch {
@@ -113,25 +142,33 @@ class SymptomsViewModel(
     }
 
     private suspend fun saveSymptomToUser(symptomCode: String = ""): AnyResult = doAsync {
-        val lastSymptomCode = selectedUser.value?.symptomCode.orEmpty()
-        val isUpdateOk = if(lastSymptomCode != symptomCode) {
-            val setQuery = "${Fields.SYMPTOM_CODE} = '$symptomCode'"
-            val whereQuery = "${Fields.LOCAL_ID} = '${selectedUser.value?.id}'"
-            val updateStatus = usersDao.update(
-                setQuery = setQuery,
-                where = whereQuery,
-                notifyAll = true
-            )
-            updateStatus.isOk
-        } else {
-            true
-        }
-
-
-        if (isUpdateOk) {
-            anySuccess()
-        } else {
+        val user = takeCurrentUser()
+        if(user == null) {
+            supportLiveData.postValue(errorResult("Юзер не выбран"))
             emptyResult()
+        } else {
+            val lastSymptomCode = user.symptomCode
+            val isUpdateOk = if (lastSymptomCode != symptomCode) {
+                val setQuery = "${Fields.SYMPTOM_CODE} = '$symptomCode'"
+                val whereQuery = "${Fields.LOCAL_ID} = '${user.id}'"
+                val updateStatus = usersDao.update(
+                    setQuery = setQuery,
+                    where = whereQuery,
+                    notifyAll = true
+                )
+                updateStatus.isOk
+            } else {
+                true
+            }
+            if (isUpdateOk) {
+                anySuccess()
+            } else {
+                emptyResult()
+            }
         }
+    }
+
+    private fun takeCurrentUser(): UserItemUI? {
+        return selectedUser.value
     }
 }

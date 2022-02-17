@@ -153,7 +153,8 @@ object QueryBuilder {
 
     fun <E : Any> createInsertOrReplaceQuery(
         dao: IDao,
-        items: List<E>
+        items: List<E>,
+        withoutPrimaryKey: Boolean = false
     ): String {
         val fieldsForQuery = dao.fieldsData?.fieldsForQuery
             ?: throw UnsupportedOperationException("No 'fieldsForQuery' key for operation 'createInsertOrReplaceQuery'")
@@ -167,7 +168,7 @@ object QueryBuilder {
                 append("$fieldsForQuery$VALUES")
                 for (item in items) {
                     append(prefix)
-                    val fieldsValues = FieldsBuilder.getValues(dao, item)
+                    val fieldsValues = FieldsBuilder.getValues(dao, item, withoutPrimaryKey)
                     append(fieldsValues)
                     prefix = DELIM_MARK
                 }

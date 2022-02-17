@@ -63,22 +63,11 @@ inline fun <reified E : Any> IDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
 }
 
-/*
-fun IDao.getNotEmptyTrigger(): Flow<String> {
-    return this.fmpDatabase.getTrigger(this).filter { it.isNotEmpty() }
-}
-
-fun IDao.getStartedTrigger(withStart: Boolean): Flow<String> {
-    return if (withStart) {
-        triggerFlow()
-        getNotEmptyTrigger()
-    } else {
-        getTrigger()
+fun IDao.dropTrigger() {
+    when(val trigger = this.getTrigger()) {
+        is MutableSharedFlow -> trigger.tryEmit("")
+        is MutableStateFlow -> trigger.tryEmit("")
     }
-}*/
-
-suspend fun IDao.isTriggerEmpty(): Boolean {
-    return getTrigger().firstOrNull().isNullOrEmpty()
 }
 
 /**
@@ -112,7 +101,7 @@ fun IDao.flowableCount(
             }*/
         }
     }.onStart {
-        if(withStart && this@flowableCount.isTriggerEmpty()) {
+        if(withStart && trigger.firstOrNull().isNullOrEmpty()) {
             this@flowableCount.triggerFlow()
         }
     }.apply {
@@ -161,13 +150,6 @@ fun IDao.triggerFlow() {
         is MutableStateFlow -> trigger.tryEmit(triggerValue)
     }
 }
-
-/*fun IDao.dropTrigger() {
-    when(val trigger = this.getTrigger()) {
-        is MutableSharedFlow -> trigger.tryEmit("")
-        is MutableStateFlow -> trigger.tryEmit("")
-    }
-}*/
 
 fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
     val statusName = this.status.name.uppercase()
