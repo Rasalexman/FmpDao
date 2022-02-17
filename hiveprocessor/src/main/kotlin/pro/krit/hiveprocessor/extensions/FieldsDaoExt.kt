@@ -2,42 +2,18 @@ package pro.krit.hiveprocessor.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.common.FieldsBuilder
+import pro.krit.hiveprocessor.common.FlowableConfig
 
 /**
  * Создает Flow, который эмитит данные при подписке
  *
- * @param where - тело запроса для SELECT, если пустой то выбирает все данные (SELECT *)
- * @param limit - лимитированное количество данных
- * @param offset - отступ в получении данных
- * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
- * @param withStart - начать эмитить данные при создании потока
- * @param emitDelay - задержка при эмитинге данных
- * @param withDistinct - использовать эмитинг только уникальных данных
- * @param fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
+ * @param builderBlock - конструктор запроса
  *
  * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.flowable(
-    where: String = "",
-    limit: Int = 0,
-    offset: Int = 0,
-    orderBy: String = "",
-    withStart: Boolean = true,
-    emitDelay: Long = 0L,
-    withDistinct: Boolean = false,
-    fields: List<String>? = null
-) = DaoInstance.flowable<E, S>(
-    dao = this,
-    where = where,
-    limit = limit,
-    offset = offset,
-    orderBy = orderBy,
-    withStart = withStart,
-    emitDelay = emitDelay,
-    withDistinct = withDistinct,
-    fields = fields
-)
+    builderBlock: FlowableConfig.() -> Unit
+) = DaoInstance.flowable<E, S>(dao = this, config = FlowableConfig().apply(builderBlock))
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -95,9 +71,10 @@ inline fun <reified E : Any> IDao.IFieldsDao.insertOrReplace(
 
 inline fun <reified E : Any> IDao.IFieldsDao.insertOrReplace(
     items: List<E>,
-    notifyAll: Boolean = false
+    notifyAll: Boolean = false,
+    withoutPrimaryKey: Boolean = false
 ): StatusSelectTable<E> {
-    return DaoInstance.insertOrReplace(this, items, notifyAll)
+    return DaoInstance.insertOrReplace(this, items, notifyAll, withoutPrimaryKey)
 }
 
 ///---- DELETE

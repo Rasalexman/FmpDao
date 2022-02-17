@@ -4,6 +4,7 @@ import com.mobrun.plugin.models.StatusSelectTable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import pro.krit.hiveprocessor.base.IDao
+import pro.krit.hiveprocessor.common.FlowableConfig
 import pro.krit.hiveprocessor.common.QueryBuilder
 import pro.krit.hiveprocessor.common.QueryExecuter
 
@@ -11,38 +12,38 @@ object DaoInstance {
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowable(
         dao: IDao,
-        where: String = "",
-        limit: Int = 0,
-        offset: Int = 0,
-        orderBy: String = "",
-        withStart: Boolean = true,
-        emitDelay: Long = 0L,
-        withDistinct: Boolean = false,
-        fields: List<String>? = null
+        config: FlowableConfig
     ): Flow<List<E>> {
-        val trigger = dao.getTrigger()
-        //println("------> onCreate trigger flow")
+        val trigger = dao.getTrigger().run {
+            if(config.isDevastate) this.filter { it.isNotEmpty() }
+            else this
+        }
+        println("------> onCreate trigger devastate = ${config.isDevastate}")
         return flow {
             trigger.collect {
-                if (emitDelay > 0) {
-                    delay(emitDelay)
+                if (config.emitDelay > 0) {
+                    delay(config.emitDelay)
                 }
-                //println("------> onCollect trigger value: $it")
-                val result = select<E, S>(dao, where, limit, offset, orderBy, fields)
+                println("------> onCollect trigger value: $it")
+                val result = config.run {
+                    select<E, S>(dao, where, limit, offset, orderBy, fields)
+                }
                 emit(result)
-                /*if(withStart) {
+                if(config.isDevastate) {
                     dao.dropTrigger()
-                }*/
+                }
             }
         }.onStart {
-            if(withStart && dao.isTriggerEmpty()) {
+            val isTriggerEmpty = dao.getTrigger().firstOrNull().isNullOrEmpty()
+            if (config.withStart && isTriggerEmpty) {
+                println("------> onStart")
                 dao.triggerFlow()
             }
         }.catch {
-            println("[ERROR]: database table '${dao.fullTableName}' error $it")
+            //println("[ERROR]: database table '${dao.fullTableName}' error $it")
             emit(emptyList())
         }.apply {
-            if (withDistinct) {
+            if (config.withDistinct) {
                 distinctUntilChanged()
             }
         }
@@ -196,9 +197,10 @@ object DaoInstance {
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> insertOrReplace(
         dao: IDao,
         items: List<E>,
-        notifyAll: Boolean = false
+        notifyAll: Boolean = false,
+        withoutPrimaryKey: Boolean = false
     ): StatusSelectTable<E> {
-        val query = QueryBuilder.createInsertOrReplaceQuery(dao, items)
+        val query = QueryBuilder.createInsertOrReplaceQuery(dao, items, withoutPrimaryKey)
         return QueryExecuter.executeTransactionStatus<E, S>(
             dao = dao,
             query = query,

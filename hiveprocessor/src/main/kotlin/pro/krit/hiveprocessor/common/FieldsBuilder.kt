@@ -79,29 +79,35 @@ object FieldsBuilder {
         )
     }
 
-    fun <E : Any> getValues(dao: IDao, item: E): String {
+    fun <E : Any> getValues(dao: IDao, item: E, withoutPrimaryKey: Boolean = false): String {
         val localDaoFields = dao.fieldsData
         val primaryKeyField = localDaoFields?.primaryKeyField
         val fields = localDaoFields?.fields
-        if (primaryKeyField == null || fields.isNullOrEmpty()) {
-            throw UnsupportedOperationException("No 'primaryKeyField' for operation $dao 'getValues'")
+
+        if(withoutPrimaryKey && fields.isNullOrEmpty()) {
+            throw UnsupportedOperationException("Table `fields` for resource ${dao.tableName} not initialized 'getValues'")
+        } else if (!withoutPrimaryKey && (primaryKeyField == null || fields.isNullOrEmpty())) {
+            throw UnsupportedOperationException("No 'primaryKeyField' for table ${dao.tableName} 'getValues'")
         }
 
         val stringBuilderRes = StringBuilder("(")
         var prefix = ""
-        try {
-            val primaryKeyValue = primaryKeyField[item]
-                ?: if (primaryKeyField.type.simpleName == PRIMARY_KEY_JAVA_TYPE) {
-                    generatePrimaryKeyValue()
-                } else VALUE_NULL
+        if(!withoutPrimaryKey && primaryKeyField != null) {
+            try {
+                val primaryKeyValue = primaryKeyField[item]
+                    ?: if (primaryKeyField.type.simpleName == PRIMARY_KEY_JAVA_TYPE) {
+                        generatePrimaryKeyValue()
+                    } else VALUE_NULL
 
-            stringBuilderRes.append("'")
-                .append(primaryKeyValue)
-                .append("'")
-            prefix = ", "
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
+                stringBuilderRes.append("'")
+                    .append(primaryKeyValue)
+                    .append("'")
+                prefix = ", "
+            } catch (e: IllegalAccessException) {
+                e.printStackTrace()
+            }
         }
+
 
         val localFields = fields.orEmpty()
         for (field in localFields) {

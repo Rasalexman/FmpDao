@@ -39,7 +39,10 @@ class UsersViewModel : BaseViewModel() {
     }
 
     private val usersFlowable: Flow<List<UserEntity>>
-        get() = usersDao.flowable(orderBy = "${Fields.TAB_NUM} ASC").flowOn(Dispatchers.IO)
+        get() = usersDao.flowable {
+            orderBy = "${Fields.TAB_NUM} ASC"
+            isDevastate = false
+        }.flowOn(Dispatchers.IO)
 
     override val resultLiveData: LiveData<ResultList<UserItemUI>> by unsafeLazy {
         usersFlowable.asLiveData(timeoutInMs = 0L).switchMap { usersList ->
