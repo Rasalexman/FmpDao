@@ -7,7 +7,7 @@ object Versions {
 
     const val appCoreX = "1.7.0"
     const val coroutines = "1.6.0"
-    const val navigation = "2.4.0-rc01"
+    const val navigation = "2.4.0"
 
     const val sresult: String = "1.3.36"
     const val gson: String = "2.8.8"
