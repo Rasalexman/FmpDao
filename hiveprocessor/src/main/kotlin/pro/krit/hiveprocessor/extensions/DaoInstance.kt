@@ -18,13 +18,13 @@ object DaoInstance {
             if(config.isDevastate) this.filter { it.isNotEmpty() }
             else this
         }
-        println("------> onCreate trigger devastate = ${config.isDevastate}")
+        //println("------> onCreate trigger devastate = ${config.isDevastate}")
         return flow {
             trigger.collect {
                 if (config.emitDelay > 0) {
                     delay(config.emitDelay)
                 }
-                println("------> onCollect trigger value: $it")
+                //println("------> onCollect trigger value: $it")
                 val result = config.run {
                     select<E, S>(dao, where, limit, offset, orderBy, fields)
                 }
@@ -36,7 +36,7 @@ object DaoInstance {
         }.onStart {
             val isTriggerEmpty = dao.getTrigger().firstOrNull().isNullOrEmpty()
             if (config.withStart && isTriggerEmpty) {
-                println("------> onStart")
+                //println("------> onStart")
                 dao.triggerFlow()
             }
         }.catch {
