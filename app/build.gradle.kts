@@ -1,6 +1,3 @@
-import config.Builds
-import config.Libs
-
 plugins {
     id("com.android.application")
     kotlin("android")
@@ -10,26 +7,29 @@ plugins {
 }
 
 android {
-    compileSdk = (Builds.COMPILE_VERSION)
-    buildToolsVersion = Builds.BUILD_TOOLS
+    val buildSdkVersion: Int by extra
+    val minSdkVersion: Int by extra
+    val codePath: String by extra
+    val srcDirs = listOf(codePath)
+
+    compileSdk = buildSdkVersion
     defaultConfig {
-        applicationId = Builds.APP_ID
-        minSdk = (Builds.MIN_VERSION)
-        targetSdk = (Builds.TARGET_VERSION)
-        //versionCode = Builds.App.VERSION_CODE
-        version = Builds.App.VERSION_NAME
+        applicationId = "pro.krit.fmpdaoexample"
+        minSdk = minSdkVersion
+        targetSdk = buildSdkVersion
+        version = "1.0.2"
         multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
-        getByName(Builds.Types.DEBUG) {
+        getByName("debug") {
             isMinifyEnabled = false
            //isDebuggable = true
         }
 
-        getByName(Builds.Types.RELEASE) {
+        getByName("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
@@ -43,7 +43,7 @@ android {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/fmp_release.kotlin_module")
-        this.resources.excludes.add("com.mobrun.plugin.BuildConfige")
+        this.resources.excludes.add("com.mobrun.plugin.BuildConfig")
     }
 
     // Declare the task that will monitor all configurations.
@@ -61,7 +61,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.setSrcDirs(Builds.codeDirs)
+            java.setSrcDirs(srcDirs)
         }
     }
 
@@ -77,13 +77,19 @@ android {
 }
 
 dependencies {
-    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
-    //implementation(kotlin("stdlib-jdk8", config.Versions.kotlin))
-    
-    implementation(Libs.Core.coreKtx)
-    implementation(Libs.Core.coroutinesCore)
-    implementation(Libs.Common.sresultpresentation)
-    implementation(Libs.Common.gson)
+    val core: String by rootProject.extra
+    val coroutinesCore: String by rootProject.extra
+    val sresultpresentation: String by rootProject.extra
+    val gson: String by rootProject.extra
+    val junit: String by rootProject.extra
+    val leakCanary: String by rootProject.extra
+    val runner: String by rootProject.extra
+    val espresso: String by rootProject.extra
+
+    implementation(core)
+    implementation(coroutinesCore)
+    implementation(sresultpresentation)
+    implementation(gson)
 
     implementation(project(":hhive"))
 
@@ -92,7 +98,8 @@ dependencies {
     }
     kapt(project(":hiveprocessor"))
 
-    testImplementation(Libs.Tests.junit)
-    androidTestImplementation(Libs.Tests.runner)
-    androidTestImplementation(Libs.Tests.espresso)
+    debugImplementation(leakCanary)
+    testImplementation(junit)
+    androidTestImplementation(runner)
+    androidTestImplementation(espresso)
 }
