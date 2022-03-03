@@ -29,7 +29,7 @@ import pro.krit.hiveprocessor.common.QueryExecuter
  * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.flowable(
-    builderBlock: FlowableConfig.() -> Unit
+    builderBlock: FlowableConfig.() -> Unit = {}
 ) = DaoInstance.flowable<E, S>(dao = this, config = FlowableConfig().apply(builderBlock))
 
 /**
