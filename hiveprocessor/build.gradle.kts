@@ -1,5 +1,3 @@
-import config.Builds
-
 plugins {
     id("java-library")
     id("kotlin")
@@ -7,12 +5,16 @@ plugins {
     kotlin("kapt")
 }
 
+val codePath: String by rootProject.extra
+val hhiveVersion: String by rootProject.extra
+val srcDirs = listOf(codePath)
+
 group = "pro.krit.hiveprocessor"
-version = Builds.Processor.VERSION_NAME
+version = hhiveVersion
 
 sourceSets {
     getByName("main") {
-        java.setSrcDirs(Builds.codeDirs)
+        java.setSrcDirs(srcDirs)
         //java.exclude("com.mobrun.plugin.BuildConfig")
     }
 }
@@ -25,7 +27,7 @@ tasks.create(name = "sourceJar", type = Jar::class) {
 java {
     this.sourceSets {
         getByName("main") {
-            java.setSrcDirs(Builds.codeDirs)
+            java.setSrcDirs(srcDirs)
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11
@@ -37,14 +39,23 @@ java {
 
 dependencies {
     //libsTree.exclude(listOf("*BuildConfig*"))
+    val gson: String by rootProject.extra
+    val coroutinesCore: String by rootProject.extra
+    val kotlinPoet: String by rootProject.extra
+    val autoService: String by rootProject.extra
+    val excludes = listOf(
+        "com/mobrun/plugin/BuildConfig.java",
+        "META-INF",
+        "ru/fsight/fmp/*"
+    )
 
-    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to Builds.excludes)))
-    compileOnly(config.Libs.Common.gson)
-    compileOnly(config.Libs.Core.coroutinesCore)
+    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
+    compileOnly(gson)
+    compileOnly(coroutinesCore)
 
-    implementation(config.Libs.Processor.kotlinPoet)
-    implementation(config.Libs.Processor.autoService)
-    kapt(config.Libs.Processor.autoService)
+    implementation(kotlinPoet)
+    implementation(autoService)
+    kapt(autoService)
 }
 
 publishing {
@@ -54,7 +65,7 @@ publishing {
             // You can then customize attributes of the publication as shown below.
             groupId = "pro.krit.hiveprocessor"
             artifactId = "hiveprocessor"
-            version = Builds.Processor.VERSION_NAME
+            version = hhiveVersion
 
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
