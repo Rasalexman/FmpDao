@@ -12,7 +12,7 @@ import pro.krit.hiveprocessor.common.FlowableConfig
  * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFieldsDao.flowable(
-    builderBlock: FlowableConfig.() -> Unit
+    builderBlock: FlowableConfig.() -> Unit = {}
 ) = DaoInstance.flowable<E, S>(dao = this, config = FlowableConfig().apply(builderBlock))
 
 /**
