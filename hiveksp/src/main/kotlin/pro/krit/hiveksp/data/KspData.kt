@@ -12,9 +12,21 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package pro.krit.hiveprocessor.data
+package pro.krit.hiveksp.data
 
-data class TypeData(
-    val packName: String,
-    val className:String
+import com.google.devtools.ksp.symbol.KSDeclaration
+import pro.krit.hiveprocessor.data.TypeData
+
+data class KspData(
+    val element: KSDeclaration,
+    val fileName: String,
+    val mainData: TypeData,
+    val createTableOnInit: Boolean,
+    val parameters: List<String> = emptyList(),
+    val fields: List<String> = emptyList(),
+    val resourceName: String = "",  // current resource name
+    val tableName: String = "",  // current table name
+    val isDelta: Boolean = false, // using deltaStream
+    val isLocal: Boolean = false, // is this a local dao
+    val isRequest: Boolean = false // is this a request interface with @FmpWebRequest or @FmpRestRequest
 )

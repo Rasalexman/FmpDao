@@ -62,7 +62,7 @@ fun String.withoutInt(): String {
     return this.replace(FIELD_NAME_INT, "", true)
 }
 
-internal fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
+fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
     var className = this
     val classNameFirstChar = className.first()
     if (classNameFirstChar == PREFIX_UPPER || classNameFirstChar == PREFIX_LOWER) {
@@ -71,7 +71,7 @@ internal fun String.createFileName(postFix: String = CLASS_POSTFIX): String {
     return className + postFix
 }
 
-internal fun String.createReturnType(returnPack: String, returnClass: String): TypeName {
+fun String.createReturnType(returnPack: String, returnClass: String): TypeName {
     val isList = this.contains(LIST_RETURN_TYPE)
     return if (isList) {
         val list = ClassName(KOTLIN_COLLECTION_PATH, KOTLIN_LIST_NAME)
@@ -81,7 +81,7 @@ internal fun String.createReturnType(returnPack: String, returnClass: String): T
     }
 }
 
-internal fun String.getPackAndClass(): Pair<String, String> {
+fun String.getPackAndClass(): Pair<String, String> {
     val withoutSuspend = this.withoutSuspend()
     val withoutBraces = withoutSuspend.replace("()", "")
     //
@@ -98,7 +98,7 @@ internal fun String.getPackAndClass(): Pair<String, String> {
     return packName to className
 }
 
-internal fun String.withoutSuspend(): String {
+fun String.withoutSuspend(): String {
     val isSuspend = this.contains(SUSPEND_QUALIFIER)
     return if (isSuspend) {
         val indexStart = this.indexOf(LIST_RETURN_TYPE)
@@ -109,7 +109,7 @@ internal fun String.withoutSuspend(): String {
     }
 }
 
-internal fun String.replaceTablePattern(returnClass: String, bindData: BindData): String {
+fun String.replaceTablePattern(returnClass: String, bindData: BindData): String {
     val tablePattern = ":$returnClass"
     return if (this.contains(tablePattern)) {
         val tableName = "${bindData.resourceName}_${bindData.tableName}"
@@ -117,7 +117,7 @@ internal fun String.replaceTablePattern(returnClass: String, bindData: BindData)
     } else this
 }
 
-internal fun String?.splitGenericsArray(): List<String> {
+fun String?.splitGenericsArray(): List<String> {
     val genericsList = mutableListOf<String>()
     //println("------> splitGenericsArray = $this")
     this?.let { currentSupertype ->
@@ -142,7 +142,7 @@ internal fun String?.splitGenericsArray(): List<String> {
     return genericsList
 }
 
-internal fun String.screenParameter(className: String): String {
+fun String.screenParameter(className: String): String {
     return if (className == KOTLIN_STRING_TYPE_NAME) {
         "\'$$this\'"
     } else {
@@ -150,7 +150,7 @@ internal fun String.screenParameter(className: String): String {
     }
 }
 
-internal fun String.asModelFieldData(): FieldData {
+fun String.asModelFieldData(): FieldData {
     val propSplit = this.split("_").map { it.lowercase() }.toMutableList()
     var type: KClass<*> = String::class
     val indexOfInt = propSplit.indexOf(MODEL_FIELD_TYPE_INT)

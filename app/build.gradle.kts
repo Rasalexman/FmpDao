@@ -4,6 +4,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
+    id("com.google.devtools.ksp") version "1.6.10-1.0.4"
 }
 
 android {
@@ -42,7 +43,7 @@ android {
     packagingOptions {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
-        this.resources.excludes.add("META-INF/fmp_release.kotlin_module")
+        this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
         this.resources.excludes.add("com.mobrun.plugin.BuildConfig")
     }
 
@@ -67,6 +68,15 @@ android {
 
     buildFeatures {
         dataBinding = true
+    }
+
+    kotlin {
+        sourceSets.release {
+            kotlin.srcDirs("build/generated/ksp/release/kotlin")
+        }
+        sourceSets.debug {
+            kotlin.srcDirs("build/generated/ksp/debug/kotlin")
+        }
     }
 
     kotlinOptions {
@@ -97,6 +107,9 @@ dependencies {
         exclude(group = "com.mobrun", module = "plugin")
     }
     kapt(project(":hiveprocessor"))
+
+    implementation(project(":hiveksp"))
+    ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
     testImplementation(junit)

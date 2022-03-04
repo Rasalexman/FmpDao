@@ -16,7 +16,7 @@ package pro.krit.hiveprocessor.data
 
 import javax.lang.model.element.Element
 
-internal data class BindData(
+data class BindData(
     val element: Element,
     val fileName: String,
     val mainData: TypeData,
