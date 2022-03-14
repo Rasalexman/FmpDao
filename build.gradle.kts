@@ -24,6 +24,10 @@ buildscript {
     }
 }
 
+configurations.all {
+    resolutionStrategy.cacheChangingModulesFor(0, "seconds")
+}
+
 allprojects {
     apply(from="${rootDir}/versions.gradle.kts")
     val apiVersion: String by extra
