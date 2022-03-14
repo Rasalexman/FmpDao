@@ -12,6 +12,7 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
         maven { url = uri(jitpackPath) }
+        maven { url = uri("https://plugins.gradle.org/m2/") }
     }
     dependencies {
         classpath("com.android.tools.build:gradle:$agpVersion")
