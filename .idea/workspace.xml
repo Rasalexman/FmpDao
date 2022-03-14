@@ -15,7 +15,18 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="">
+    <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="version to 1.3.49">
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/versions.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/versions.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -26,7 +37,6 @@
   <component name="CompilerWorkspaceConfiguration">
     <option name="PARALLEL_COMPILATION" value="true" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/alexander/.android/avd/Nexus_5X_API_R.avd]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -112,7 +122,7 @@
     <property name="project.structure.last.edited" value="SDK Location" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
-    <property name="settings.editor.selected.configurable" value="memory.settings" />
+    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.project.gradle" />
   </component>
   <component name="PsdUISettings">
     <option name="MODULE_TAB" value="Signing Configs" />
@@ -155,7 +165,7 @@
       <command value="gradle --scan" />
     </option>
   </component>
-  <component name="RunManager" selected="Android App.app">
+  <component name="RunManager" selected="Kotlin script.build.gradle.kts">
     <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
       <option name="TEST_OBJECT" value="class" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -266,6 +276,13 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="build.gradle.kts" type="KotlinStandaloneScriptRunConfigurationType" temporary="true" nameIsGenerated="true">
+      <module name="FmpDao" />
+      <option name="filePath" value="$PROJECT_DIR$/hiveprocessor/build.gradle.kts" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="TestNG">
       <option name="TEST_OBJECT" value="CLASS" />
       <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
@@ -278,9 +295,11 @@
     <list>
       <item itemvalue="Android App.app" />
       <item itemvalue="Gradle.FmpDao" />
+      <item itemvalue="Kotlin script.build.gradle.kts" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Kotlin script.build.gradle.kts" />
         <item itemvalue="Gradle.FmpDao" />
         <item itemvalue="Gradle.FmpDao" />
         <item itemvalue="Gradle.FmpDao" />
@@ -296,13 +315,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1622325960385</updated>
-    </task>
-    <task id="LOCAL-00048" summary="release 1.3.8&#10;- remove selectResultAsync because it's produce uncatched bug with suspend functions">
-      <created>1623985939451</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1623985939451</updated>
     </task>
     <task id="LOCAL-00049" summary="release 1.3.8&#10;- remove selectResultAsync because it's produce uncatched bug with suspend functions">
       <created>1624310601777</created>
@@ -640,7 +652,14 @@
       <option name="project" value="LOCAL" />
       <updated>1647279584494</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="downgrade version to 1.3.48">
+      <created>1647279662586</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1647279662586</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -656,7 +675,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="release 1.3.36&#10;- aggregating annotation process" />
     <MESSAGE value="release 1.3.36" />
     <MESSAGE value="release 1.3.37&#10;- правильный порядок запросов инициализации фмп slug" />
     <MESSAGE value="release 1.3.38&#10;- поправлен баг с интовыми значениями при выборке из локальной ДБ&#10;- убраны лишние логи на println&#10;- добавлен метод для вызова триггерного флоу DaoInstance.kt `flowableTriggered` и замененм во всех расширениях&#10;- вынесен метод ссоздания таблиц для всех дао" />
@@ -681,7 +699,8 @@
     <MESSAGE value="release version 1.4.0" />
     <MESSAGE value="added gradle build" />
     <MESSAGE value="idea and buildgr" />
-    <option name="LAST_COMMIT_MESSAGE" value="idea and buildgr" />
+    <MESSAGE value="downgrade version to 1.3.48" />
+    <option name="LAST_COMMIT_MESSAGE" value="downgrade version to 1.3.48" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
