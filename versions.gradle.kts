@@ -1,5 +1,5 @@
 //------ APP VERSION
-extra["hhiveVersion"] = "1.3.47"
+extra["hhiveVersion"] = "1.4.0"
 
 //------ CONFIG DATA
 extra["minSdkVersion"] = 19
