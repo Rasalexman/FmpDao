@@ -26,6 +26,14 @@ buildscript {
 
 allprojects {
     apply(from="${rootDir}/versions.gradle.kts")
+
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://plugins.gradle.org/m2/") }
+    }
 }
 
 tasks.register("clean", Delete::class) {

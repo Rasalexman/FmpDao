@@ -16,7 +16,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="- начал писать ksp processor">
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/resourceHashesCache.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/resourceHashesCache.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +116,7 @@
     <property name="android.sdk.path" value="$PROJECT_DIR$/../Library/Android/sdk" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable" value="ALL" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/hiveksp/libs" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="project.structure.last.edited" value="SDK Location" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -121,10 +129,10 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/hiveksp/libs" />
       <recent name="$PROJECT_DIR$/hiveksp/src/main/resources/META-INF" />
       <recent name="$PROJECT_DIR$/hiveksp" />
-      <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/hivesymbolprocessor/src/main/resources" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -296,13 +304,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1622325960385</updated>
-    </task>
-    <task id="LOCAL-00040" summary="release 1.3.3&#10;- fix bug with empty table name in dao">
-      <created>1623144984024</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1623144984024</updated>
     </task>
     <task id="LOCAL-00041" summary="release 1.3.4&#10;- request builder params">
       <created>1623247713573</created>
@@ -640,7 +641,14 @@
       <option name="project" value="LOCAL" />
       <updated>1646353640088</updated>
     </task>
-    <option name="localTasksCounter" value="89" />
+    <task id="LOCAL-00089" summary="- added gradlew">
+      <created>1647276167414</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1647276167414</updated>
+    </task>
+    <option name="localTasksCounter" value="90" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -656,7 +664,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="map list of string in entity" />
     <MESSAGE value="release 1.3.27&#10;- added numerated fields model generation" />
     <MESSAGE value="release 1.3.27&#10;- фиксы багов" />
     <MESSAGE value="release 1.3.28&#10;- return replay for trigger" />
@@ -681,7 +688,8 @@
     <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2" />
     <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2&#10;- добавил конфиг по умолчанию для flowable" />
     <MESSAGE value="- начал писать ksp processor" />
-    <option name="LAST_COMMIT_MESSAGE" value="- начал писать ksp processor" />
+    <MESSAGE value="- added gradlew" />
+    <option name="LAST_COMMIT_MESSAGE" value="- added gradlew" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
