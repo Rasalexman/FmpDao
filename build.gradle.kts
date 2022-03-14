@@ -26,24 +26,27 @@ buildscript {
 
 allprojects {
     apply(from="${rootDir}/versions.gradle.kts")
+    val apiVersion: String by extra
+    val jvmVersion: String by extra
 
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-        maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://plugins.gradle.org/m2/") }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions {
+            this.apiVersion = apiVersion
+            this.languageVersion = apiVersion
+            this.jvmTarget = jvmVersion
+            this.freeCompilerArgs += listOf(
+                "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-opt-in=kotlin.RequiresOptIn"
+            )
+        }
+    }
+
+    tasks.withType<JavaCompile>().configureEach {
+        sourceCompatibility = jvmVersion
+        targetCompatibility = jvmVersion
     }
 }
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
-}
-
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions {
-        apiVersion = "1.6"
-        languageVersion = "1.6"
-        jvmTarget = "11"
-    }
 }
