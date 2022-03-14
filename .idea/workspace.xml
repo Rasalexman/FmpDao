@@ -1,0 +1,722 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AndroidGradleBuildConfiguration">
+    <option name="COMMAND_LINE_OPTIONS" value="--stacktrace --debug" />
+  </component>
+  <component name="AndroidLayouts">
+    <shared>
+      <config />
+    </shared>
+  </component>
+  <component name="AndroidLogFilters">
+    <option name="TOOL_WINDOW_CONFIGURED_FILTER" value="Show only selected application" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CompilerWorkspaceConfiguration">
+    <option name="PARALLEL_COMPILATION" value="true" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/alexander/.android/avd/Nexus_5X_API_R.avd]" />
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="FmpDao" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Kotlin Sealed Interface" />
+        <option value="Kotlin Sealed Class" />
+        <option value="Kotlin Enum" />
+        <option value="Kotlin Interface" />
+        <option value="Kotlin Annotation" />
+        <option value="navigationResourceFile" />
+        <option value="layoutResourceFile" />
+        <option value="layoutResourceFile_vertical" />
+        <option value="Kotlin Data Class" />
+        <option value="Kotlin File" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin Object" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="KotlinMultiplatform">
+    <allAvailableExecutables />
+  </component>
+  <component name="ProjectId" id="1tEEgazf2z0ihA3Fr3mcKRp81dz" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DEBUGGABLE_DEVICE" value="Nexus_5X_API_R [emulator-5554]" />
+    <property name="DEBUGGABLE_PROCESS" value="pro.krit.omk" />
+    <property name="DEBUGGER_ID" value="Auto" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
+    <property name="SHOW_ALL_PROCESSES" value="true" />
+    <property name="android-custom-view/Users/alexander/.gradle/caches/modules-2/files-2.1/androidx.appcompat/appcompat/1.2.0/13e8ff89631c2e101eb6bddd12c2fb4bbd74b15d/appcompat-1.2.0-sources.jar!/androidx/appcompat/widget/Toolbar.java_SELECTED" value="Toolbar" />
+    <property name="android.project.structure.last.selected" value="SDK Location" />
+    <property name="android.project.structure.proportion" value="0.15" />
+    <property name="android.sdk.path" value="$PROJECT_DIR$/../Library/Android/sdk" />
+    <property name="cidr.known.project.marker" value="true" />
+    <property name="com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable" value="ALL" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/gradle/wrapper" />
+    <property name="project.structure.last.edited" value="SDK Location" />
+    <property name="project.structure.proportion" value="0.17" />
+    <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="memory.settings" />
+  </component>
+  <component name="PsdUISettings">
+    <option name="MODULE_TAB" value="Signing Configs" />
+    <option name="LAST_EDITED_SIGNING_CONFIG" value="debug" />
+    <option name="LAST_EDITED_BUILD_TYPE" value="release" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/gradle/wrapper" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/hiveksp/libs" />
+      <recent name="$PROJECT_DIR$/hiveksp/src/main/resources/META-INF" />
+      <recent name="$PROJECT_DIR$/hiveksp" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/hiveprocessor/backups" />
+      <recent name="$PROJECT_DIR$/app/src/main/kotlin" />
+      <recent name="$PROJECT_DIR$/hiveprocessor/src/main/kotlin" />
+    </key>
+    <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="pro.krit.hivesymbolprocessor" />
+      <recent name="pro.krit.fmpdaoexample.fragments.users" />
+      <recent name="pro.krit.fmpdaoexample.statuses" />
+      <recent name="pro.krit.fmpdaoexample.models" />
+      <recent name="pro.krit.fmpdaoexample.fmpresources" />
+    </key>
+    <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
+      <recent name="" />
+    </key>
+    <key name="CopyKotlinDeclarationDialog.RECENTS_KEY">
+      <recent name="pro.krit.hiveksp.data" />
+      <recent name="pro.krit.fmpdaoexample" />
+      <recent name="pro.krit.hiveprocessor.processor" />
+      <recent name="pro.krit.hiveprocessor" />
+      <recent name="pro.krit.fmpdaoexample.models" />
+    </key>
+  </component>
+  <component name="RunAnythingCache">
+    <option name="myCommands">
+      <command value="gradle --scan" />
+    </option>
+  </component>
+  <component name="RunManager" selected="Android App.app">
+    <configuration default="true" type="AndroidJUnit" factoryName="Android JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="&lt;template&gt;" type="Applet" default="true" selected="false">
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+    </configuration>
+    <configuration name="&lt;template&gt;" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" default="true" selected="false">
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+    </configuration>
+    <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
+      <module name="FmpDao.app" />
+      <option name="DEPLOY" value="true" />
+      <option name="DEPLOY_APK_FROM_BUNDLE" value="false" />
+      <option name="DEPLOY_AS_INSTANT" value="false" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ALL_USERS" value="false" />
+      <option name="ALWAYS_INSTALL_WITH_PM" value="false" />
+      <option name="DYNAMIC_FEATURES_DISABLED_LIST" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
+      <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
+      <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
+      <option name="SELECTED_CLOUD_MATRIX_PROJECT_ID" value="" />
+      <option name="DEBUGGER_TYPE" value="Auto" />
+      <Auto>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Auto>
+      <Hybrid>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Hybrid>
+      <Java />
+      <Native>
+        <option name="USE_JAVA_AWARE_DEBUGGER" value="false" />
+        <option name="SHOW_STATIC_VARS" value="true" />
+        <option name="WORKING_DIR" value="" />
+        <option name="TARGET_LOGGING_CHANNELS" value="lldb process:gdb-remote packets" />
+        <option name="SHOW_OPTIMIZED_WARNING" value="true" />
+      </Native>
+      <Profilers>
+        <option name="ADVANCED_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_ENABLED" value="false" />
+        <option name="STARTUP_CPU_PROFILING_CONFIGURATION_NAME" value="Callstack Sample" />
+        <option name="STARTUP_NATIVE_MEMORY_PROFILING_ENABLED" value="false" />
+        <option name="NATIVE_MEMORY_SAMPLE_RATE_BYTES" value="2048" />
+      </Profilers>
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <option name="SEARCH_ACTIVITY_IN_GLOBAL_SCOPE" value="false" />
+      <option name="SKIP_ACTIVITY_VALIDATION" value="false" />
+      <method v="2">
+        <option name="Android.Gradle.BeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="FmpDao" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" value="" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" value="" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <option name="TEST_OBJECT" value="class" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="TestNG">
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <properties />
+      <listeners />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="Android App.app" />
+      <item itemvalue="Gradle.FmpDao" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.FmpDao" />
+        <item itemvalue="Gradle.FmpDao" />
+        <item itemvalue="Gradle.FmpDao" />
+        <item itemvalue="Gradle.FmpDao" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="" />
+      <created>1622325960385</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1622325960385</updated>
+    </task>
+    <task id="LOCAL-00047" summary="release 1.3.8&#10;- remove selectResultAsync because it's produce uncatched bug with suspend functions">
+      <created>1623985887561</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1623985887561</updated>
+    </task>
+    <task id="LOCAL-00048" summary="release 1.3.8&#10;- remove selectResultAsync because it's produce uncatched bug with suspend functions">
+      <created>1623985939451</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1623985939451</updated>
+    </task>
+    <task id="LOCAL-00049" summary="release 1.3.8&#10;- remove selectResultAsync because it's produce uncatched bug with suspend functions">
+      <created>1624310601777</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1624310601777</updated>
+    </task>
+    <task id="LOCAL-00050" summary="release 1.3.9&#10;- params with list">
+      <created>1624310646565</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1624310646566</updated>
+    </task>
+    <task id="LOCAL-00051" summary="release 1.3.10&#10;- params with list">
+      <created>1628618577240</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1628618577243</updated>
+    </task>
+    <task id="LOCAL-00052" summary="release 1.3.10&#10;- params with list">
+      <created>1628619547198</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1628619547198</updated>
+    </task>
+    <task id="LOCAL-00053" summary="release 1.3.12&#10;- add FmpParam.kt for create custom request params">
+      <created>1628768031654</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1628768031654</updated>
+    </task>
+    <task id="LOCAL-00054" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
+      <created>1634647913295</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1634647913296</updated>
+    </task>
+    <task id="LOCAL-00055" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
+      <created>1634651651018</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1634651651019</updated>
+    </task>
+    <task id="LOCAL-00056" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
+      <created>1634652865411</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1634652865411</updated>
+    </task>
+    <task id="LOCAL-00057" summary="release 1.3.14&#10;- added numerated fields model generation">
+      <created>1635435681207</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1635435681208</updated>
+    </task>
+    <task id="LOCAL-00058" summary="release 1.3.16&#10;- added numerated fields model generation">
+      <created>1635923084426</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1635923084426</updated>
+    </task>
+    <task id="LOCAL-00059" summary="release 1.3.22&#10;- added offset and orderBy in select requests">
+      <created>1637159168284</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1637159168284</updated>
+    </task>
+    <task id="LOCAL-00060" summary="release 1.3.22&#10;- added documentation">
+      <created>1637161305691</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1637161305691</updated>
+    </task>
+    <task id="LOCAL-00061" summary="release 1.3.23&#10;- update kotlin version&#10;- update logs printing">
+      <created>1637166255536</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1637166255536</updated>
+    </task>
+    <task id="LOCAL-00062" summary="release 1.3.24&#10;- added `update` function to FmpLocalDaoExt.kt&#10;- added `query` function to FmpLocalDaoExt.kt&#10;- fully migrate to java 11">
+      <created>1637269667734</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1637269667735</updated>
+    </task>
+    <task id="LOCAL-00063" summary="release 1.3.25&#10;- added scalar parameters to fmpRequest.tableListStatus">
+      <created>1638187125983</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1638187125983</updated>
+    </task>
+    <task id="LOCAL-00064" summary="release">
+      <created>1638257128216</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1638257128216</updated>
+    </task>
+    <task id="LOCAL-00065" summary="map list of string in entity">
+      <created>1639047176116</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1639047176117</updated>
+    </task>
+    <task id="LOCAL-00066" summary="release 1.3.27&#10;- added numerated fields model generation">
+      <created>1640004791205</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1640004791205</updated>
+    </task>
+    <task id="LOCAL-00067" summary="release 1.3.27&#10;- фиксы багов">
+      <created>1640005666241</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1640005666242</updated>
+    </task>
+    <task id="LOCAL-00068" summary="release 1.3.28&#10;- return replay for trigger">
+      <created>1640245243230</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1640245243230</updated>
+    </task>
+    <task id="LOCAL-00069" summary="release 1.3.34&#10;- глобальный рефакторинг&#10;- капт работает в изолированной среде&#10;- версия Котлин 1.6.10&#10;- минимальная версия понижена до 19">
+      <created>1642362493791</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1642362493791</updated>
+    </task>
+    <task id="LOCAL-00070" summary="release 1.3.35&#10;- проверка на создание таблицы в базе данных после выполнения запроса">
+      <created>1642365699054</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1642365699055</updated>
+    </task>
+    <task id="LOCAL-00071" summary="release 1.3.36&#10;- aggregating annotation process">
+      <created>1642450537750</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1642450537751</updated>
+    </task>
+    <task id="LOCAL-00072" summary="release 1.3.36">
+      <created>1642451241976</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1642451241976</updated>
+    </task>
+    <task id="LOCAL-00073" summary="release 1.3.37&#10;- правильный порядок запросов инициализации фмп slug">
+      <created>1642544997626</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1642544997626</updated>
+    </task>
+    <task id="LOCAL-00074" summary="release 1.3.38&#10;- поправлен баг с интовыми значениями при выборке из локальной ДБ&#10;- убраны лишние логи на println&#10;- добавлен метод для вызова триггерного флоу DaoInstance.kt `flowableTriggered` и замененм во всех расширениях&#10;- вынесен метод ссоздания таблиц для всех дао">
+      <created>1642962532183</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1642962532183</updated>
+    </task>
+    <task id="LOCAL-00075" summary="- добавлена возможноссть запросов по конкретным полям модели ДБ&#10;- рефактор кода&#10;- убраны обязательные reified статусы из запросов к БД">
+      <created>1642968372215</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1642968372216</updated>
+    </task>
+    <task id="LOCAL-00076" summary="release 1.3.38&#10;- полностью переработанная модель подписки на flow">
+      <created>1642990948165</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1642990948165</updated>
+    </task>
+    <task id="LOCAL-00077" summary="release 1.3.38&#10;- удалил не нужные принты">
+      <created>1642991032646</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1642991032647</updated>
+    </task>
+    <task id="LOCAL-00078" summary="release 1.3.41&#10;- добавлена полная очистка всех провайдеров базы данных через метод `clearProviders`">
+      <created>1643144828223</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1643144828223</updated>
+    </task>
+    <task id="LOCAL-00079" summary="release 1.3.42&#10;- проверка на создание таблицы в базе данных после выполнения запроса">
+      <created>1643212382330</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1643212382330</updated>
+    </task>
+    <task id="LOCAL-00080" summary="release 1.3.42&#10;- обновил сборку jar с ресурсами">
+      <created>1643212511317</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1643212511317</updated>
+    </task>
+    <task id="LOCAL-00081" summary="logs">
+      <created>1643292515132</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1643292515133</updated>
+    </task>
+    <task id="LOCAL-00082" summary="release 1.3.44&#10;- добавил конфигурацию для запросов flowable">
+      <created>1645110642681</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1645110642681</updated>
+    </task>
+    <task id="LOCAL-00083" summary="release 1.3.44&#10;- убрал логи">
+      <created>1646086642896</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1646086642896</updated>
+    </task>
+    <task id="LOCAL-00084" summary="- начал переписывать на ксп">
+      <created>1646121370609</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1646121370609</updated>
+    </task>
+    <task id="LOCAL-00085" summary="промежуточный коммит с градл скриптом">
+      <created>1646339638700</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1646339638701</updated>
+    </task>
+    <task id="LOCAL-00086" summary="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2">
+      <created>1646342596435</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1646342596435</updated>
+    </task>
+    <task id="LOCAL-00087" summary="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2&#10;- добавил конфиг по умолчанию для flowable">
+      <created>1646344171071</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1646344171071</updated>
+    </task>
+    <task id="LOCAL-00088" summary="- начал писать ksp processor">
+      <created>1646353640088</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1646353640088</updated>
+    </task>
+    <task id="LOCAL-00089" summary="- added gradlew">
+      <created>1647276167414</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1647276167414</updated>
+    </task>
+    <task id="LOCAL-00090" summary="- update settings">
+      <created>1647276662297</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1647276662297</updated>
+    </task>
+    <task id="LOCAL-00091" summary="- rebuild project">
+      <created>1647277557731</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1647277557732</updated>
+    </task>
+    <task id="LOCAL-00092" summary="release version 1.4.0">
+      <created>1647277604547</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1647277604547</updated>
+    </task>
+    <task id="LOCAL-00093" summary="release version 1.4.0">
+      <created>1647278009813</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1647278009813</updated>
+    </task>
+    <task id="LOCAL-00094" summary="added gradle build">
+      <created>1647278335518</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1647278335518</updated>
+    </task>
+    <task id="LOCAL-00095" summary="added gradle build">
+      <created>1647278373589</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1647278373589</updated>
+    </task>
+    <option name="localTasksCounter" value="96" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="release 1.3.35&#10;- проверка на создание таблицы в базе данных после выполнения запроса" />
+    <MESSAGE value="release 1.3.36&#10;- aggregating annotation process" />
+    <MESSAGE value="release 1.3.36" />
+    <MESSAGE value="release 1.3.37&#10;- правильный порядок запросов инициализации фмп slug" />
+    <MESSAGE value="release 1.3.38&#10;- поправлен баг с интовыми значениями при выборке из локальной ДБ&#10;- убраны лишние логи на println&#10;- добавлен метод для вызова триггерного флоу DaoInstance.kt `flowableTriggered` и замененм во всех расширениях&#10;- вынесен метод ссоздания таблиц для всех дао" />
+    <MESSAGE value="- добавлена возможноссть запросов по конкретным полям модели ДБ&#10;- рефактор кода&#10;- убраны обязательные статусы из reified типов" />
+    <MESSAGE value="- добавлена возможноссть запросов по конкретным полям модели ДБ&#10;- рефактор кода&#10;- убраны обязательные reified статусы из запросов к БД" />
+    <MESSAGE value="release 1.3.38&#10;- полностью переработанная модель подписки на flow" />
+    <MESSAGE value="release 1.3.38&#10;- удалил не нужные принты" />
+    <MESSAGE value="release 1.3.41&#10;- добавлена полная очистка всех провайдеров базы данных через метод `clearProviders`" />
+    <MESSAGE value="release 1.3.42&#10;- проверка на создание таблицы в базе данных после выполнения запроса" />
+    <MESSAGE value="release 1.3.42&#10;- обновил сборку jar с ресурсами" />
+    <MESSAGE value="logs" />
+    <MESSAGE value="release 1.3.44&#10;- добавил конфигурацию для запросов flowable" />
+    <MESSAGE value="release 1.3.44&#10;- убрал логи" />
+    <MESSAGE value="- начал переписывать на ксп" />
+    <MESSAGE value="промежуточный коммит с градл скриптом" />
+    <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2" />
+    <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2&#10;- добавил конфиг по умолчанию для flowable" />
+    <MESSAGE value="- начал писать ksp processor" />
+    <MESSAGE value="- added gradlew" />
+    <MESSAGE value="- update settings" />
+    <MESSAGE value="- rebuild project" />
+    <MESSAGE value="release version 1.4.0" />
+    <MESSAGE value="added gradle build" />
+    <option name="LAST_COMMIT_MESSAGE" value="added gradle build" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/hiveprocessor/src/main/kotlin/pro/krit/hiveprocessor/adapters/PmAdapter.kt</url>
+          <line>84</line>
+          <option name="timeStamp" value="39" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/hiveprocessor/src/main/kotlin/pro/krit/hiveprocessor/adapters/PmAdapter.kt</url>
+          <line>94</line>
+          <option name="timeStamp" value="40" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/hiveprocessor/src/main/kotlin/pro/krit/hiveprocessor/adapters/PmAdapter.kt</url>
+          <line>73</line>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="kotlin-line">
+          <url>file://$PROJECT_DIR$/hiveprocessor/src/main/kotlin/pro/krit/hiveprocessor/adapters/PmAdapter.kt</url>
+          <line>72</line>
+          <option name="timeStamp" value="42" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="app">
+        <watch expression="status" language="kotlin" />
+        <watch expression="e" language="kotlin" />
+        <watch expression="rawRequest" language="kotlin" />
+        <watch expression="rawRecord" language="kotlin" />
+      </configuration>
+    </watches-manager>
+  </component>
+</project>
