@@ -1,5 +1,5 @@
 //------ APP VERSION
-extra["hhiveVersion"] = "1.3.49"
+extra["hhiveVersion"] = "1.3.50"
 
 //------ CONFIG DATA
 extra["minSdkVersion"] = 19
@@ -15,6 +15,7 @@ extra["codePath"] = "src/main/kotlin"
 //------- LIBS VERSIONS
 val gson = "2.8.9"
 val navigation = "2.4.1"//"2.5.0-alpha01"
+val kodi = "1.6.1"
 val leakcanary = "2.8.1"
 val sresult = "1.3.42"
 val junit = "4.13.2"
@@ -34,6 +35,7 @@ extra["coroutinesCore"] = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$corout
 extra["core"] = "androidx.core:core-ktx:$core"
 extra["kotlinPoet"] = "com.squareup:kotlinpoet:1.10.2"
 extra["autoService"] = "com.google.auto.service:auto-service:1.0.1"
+extra["kodi"] = "com.github.Rasalexman.KODI:kodi:$kodi"
 
 extra["junit"] = "junit:junit:$junit"
 extra["runner"] = "androidx.test:runner:$runner"

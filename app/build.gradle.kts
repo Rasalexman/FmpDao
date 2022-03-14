@@ -85,8 +85,10 @@ dependencies {
     val leakCanary: String by rootProject.extra
     val runner: String by rootProject.extra
     val espresso: String by rootProject.extra
+    val kodi: String by rootProject.extra
 
     implementation(core)
+    implementation(kodi)
     implementation(coroutinesCore)
     implementation(sresultpresentation)
     implementation(gson)
