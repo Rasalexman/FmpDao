@@ -392,7 +392,8 @@ class FmpProcessor : AbstractProcessor() {
                 //classTypeSpec.addFunction(requestFuncAsync.build())
             }
 
-            if (bindData.fields.isNotEmpty()) {
+            val fields = bindData.fields
+            if (fields.isNotEmpty()) {
                 val fileModelName = className.createFileName(MODEL_POSTFIX)
                 val fileStatusName = className.createFileName(STATUS_POSTFIX)
 
@@ -417,10 +418,10 @@ class FmpProcessor : AbstractProcessor() {
                 val annotationJvmField = AnnotationSpec.builder(JvmField::class).build()
                 val annotationPrimaryKey = AnnotationSpec.builder(PrimaryKey::class).build()
 
-                bindData.fields.forEach { field ->
+                fields.forEach { field ->
                     val data = field.asModelFieldData()
                     val annotationSerialize = data.annotate.createSerializedAnnotation()
-
+                    //-----
                     val currentType = data.type.asTypeName().copy(nullable = true)
                     val prop =
                         PropertySpec.builder(data.name, currentType)
@@ -434,8 +435,7 @@ class FmpProcessor : AbstractProcessor() {
                             }
                             .addAnnotation(annotationSerialize)
                             .build()
-
-
+                    //-----
                     constructorSpec.addParameter(
                         ParameterSpec.builder(data.name, currentType)
                             .defaultValue(NULL_INITIALIZER)
@@ -624,9 +624,8 @@ class FmpProcessor : AbstractProcessor() {
                 val isLocalProp = ParameterSpec.builder(
                     FIELD_DAO_FIELDS,
                     DaoFieldsData::class.asTypeName().copy(nullable = true)
-                )
-                    .defaultValue(NULL_INITIALIZER)
-                    .build()
+                ).defaultValue(NULL_INITIALIZER).build()
+                //
                 addParameter(isLocalProp)
 
                 //println("--------> superTypeGenerics = $superTypeGenerics")
@@ -706,9 +705,9 @@ class FmpProcessor : AbstractProcessor() {
 
         if (fields.isNotEmpty()) {
             checkElementForRestrictions(element = element, annotationName = FMP_FIELDS_DAO_NAME)
-        } else {
+        } /*else {
             checkElementForRestrictions(element = element, annotationName = annotationName)
-        }
+        }*/
 
         val annotationType = element.asType()
         val elementClassName = ClassName.bestGuess(annotationType.toString())

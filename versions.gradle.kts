@@ -1,5 +1,5 @@
 //------ APP VERSION
-extra["hhiveVersion"] = "1.3.50"
+extra["hhiveVersion"] = "1.3.51"
 
 //------ CONFIG DATA
 extra["minSdkVersion"] = 19
@@ -14,10 +14,10 @@ extra["codePath"] = "src/main/kotlin"
 
 //------- LIBS VERSIONS
 val gson = "2.8.9"
-val navigation = "2.4.1"//"2.5.0-alpha01"
-val kodi = "1.6.1"
+val navigation = "2.5.0-alpha03"
+val kodi = "1.6.2"
 val leakcanary = "2.8.1"
-val sresult = "1.3.42"
+val sresult = "1.3.43"
 val junit = "4.13.2"
 val coroutines = "1.6.0"
 val core: String = "1.7.0"

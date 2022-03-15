@@ -57,6 +57,7 @@ class SymptomsViewModel(
         selectedUser.switchMap { user ->
             asyncLiveData(Dispatchers.IO) {
                 emit(loadingResult())
+
                 val query = "${Fields.RBNR_Int} = ${user.rbnr}"
                 val items =
                     zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus>(

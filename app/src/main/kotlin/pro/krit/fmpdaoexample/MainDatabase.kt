@@ -1,6 +1,7 @@
 package pro.krit.fmpdaoexample
 
 import pro.krit.fmpdaoexample.daos.*
+import pro.krit.fmpdaoexample.database.ISymptomList
 import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
 import pro.krit.fmpdaoexample.fmpresources.*
 import pro.krit.hiveprocessor.annotations.FmpDatabase
@@ -31,6 +32,7 @@ interface IMainRemoteDatabase {
     fun provideZsMp04Dao(): IZsMp04Dao
 
     fun provideIZfmToroSymptomList(): IZfmToroSymptomList
+    fun provideISymptomList(): ISymptomList
 }
 
 interface IMainRequest {
