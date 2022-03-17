@@ -6,8 +6,10 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hiveprocessor.annotations.*
 
+@KotlinPoetKspPreview
 class FmpSymbolProcessor(
     environment: SymbolProcessorEnvironment
 ) : SymbolProcessor {
@@ -21,6 +23,7 @@ class FmpSymbolProcessor(
     }
 
     private val logger = environment.logger
+    private val codeGenerator = environment.codeGenerator
 
     private lateinit var intType: KSType
 
@@ -39,13 +42,11 @@ class FmpSymbolProcessor(
             return emptyList()
         }
 
-
-
         // validate already generated files
         val unableToProcessWithDatabase = daoSymbols.filterNot { it.validate() }.toList()
 
         daoSymbols.filter { it.validate() }.forEach {
-            it.accept(FmpAnnotationVisitor(logger), Unit)
+            it.accept(FmpAnnotationVisitor(logger, codeGenerator), Unit)
         }
 
         logger.warn("----> FmpSymbolProcessor finished in `${System.currentTimeMillis() - startTime}` ms")

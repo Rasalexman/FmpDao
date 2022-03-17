@@ -3,8 +3,10 @@ package pro.krit.hiveksp
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.*
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hiveksp.base.BaseSymbolVisitor
 
+@KotlinPoetKspPreview
 class FmpAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator
