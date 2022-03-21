@@ -15,7 +15,7 @@
 package pro.krit.hiveksp.data
 
 import com.google.devtools.ksp.symbol.KSDeclaration
-import pro.krit.hiveprocessor.data.TypeData
+import pro.krit.core.data.TypeData
 
 data class KspData(
     val element: KSDeclaration,

@@ -3,9 +3,9 @@ package pro.krit.fmpdaoexample
 import pro.krit.fmpdaoexample.daos.*
 import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
 import pro.krit.fmpdaoexample.fmpresources.*
-import pro.krit.hiveprocessor.annotations.FmpDatabase
-import pro.krit.hiveprocessor.provider.AbstractFmpDatabase
-import pro.krit.hiveprocessor.provider.IFmpDatabase
+import pro.krit.core.annotations.FmpDatabase
+import pro.krit.core.provider.AbstractFmpDatabase
+import pro.krit.core.provider.IFmpDatabase
 
 @FmpDatabase(asDaoProvider = false)
 abstract class MainDatabase : AbstractFmpDatabase(), IMainDatabase {

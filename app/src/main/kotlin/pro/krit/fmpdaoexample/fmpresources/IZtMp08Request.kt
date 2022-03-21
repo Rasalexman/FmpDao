@@ -3,9 +3,9 @@ package pro.krit.fmpdaoexample.fmpresources
 import com.google.gson.annotations.SerializedName
 import pro.krit.generated.request.ZtMp05RequestRespondStatus
 import pro.krit.generated.request.ZtMp05RequestResultModel
-import pro.krit.hiveprocessor.annotations.FmpRestRequest
-import pro.krit.hiveprocessor.base.IRequest
-import pro.krit.hiveprocessor.request.ObjectRawStatus
+import pro.krit.core.annotations.FmpRestRequest
+import pro.krit.core.base.IRequest
+import pro.krit.core.request.ObjectRawStatus
 
 // Проводка поставки
 @FmpRestRequest(

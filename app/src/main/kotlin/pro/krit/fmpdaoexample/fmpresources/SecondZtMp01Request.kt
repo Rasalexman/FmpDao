@@ -1,9 +1,9 @@
 package pro.krit.fmpdaoexample.fmpresources
 
-import pro.krit.hiveprocessor.annotations.FmpParam
-import pro.krit.hiveprocessor.annotations.FmpRestRequest
-import pro.krit.hiveprocessor.annotations.FmpTable
-import pro.krit.hiveprocessor.base.IRequest
+import pro.krit.core.annotations.FmpParam
+import pro.krit.core.annotations.FmpRestRequest
+import pro.krit.core.annotations.FmpTable
+import pro.krit.core.base.IRequest
 
 
 @FmpRestRequest(

@@ -48,20 +48,7 @@ java {
 dependencies {
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
-    val gson: String by rootProject.extra
-    val excludes = listOf(
-        "com/mobrun/plugin/BuildConfig.java",
-        "META-INF",
-        "ru/fsight/fmp/*"
-    )
-
-    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
-
-    implementation(project(":hiveprocessor")) {
-        exclude(group = "com.mobrun", module = "plugin")
-    }
-
-    compileOnly(gson)
+    api(project(":core"))
     implementation(kotlinpoetKsp)
     implementation(kspapi)
 }

@@ -108,7 +108,7 @@ dependencies {
     }
     kapt(project(":hiveprocessor"))
 
-    implementation(project(":hiveksp"))
+    //implementation(project(":hiveksp"))
     ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
