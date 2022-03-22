@@ -17,8 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import pro.krit.fmpdaoexample.IMainDatabase
 import pro.krit.generated.database.MainDatabaseImpl
-import pro.krit.hiveprocessor.provider.DatabaseConfig
-import pro.krit.hiveprocessor.provider.DatabaseState
+import pro.krit.core.provider.DatabaseConfig
+import pro.krit.core.provider.DatabaseState
 import java.util.*
 import kotlin.coroutines.CoroutineContext
 

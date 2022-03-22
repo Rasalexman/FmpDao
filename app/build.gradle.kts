@@ -4,6 +4,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
+    id("com.google.devtools.ksp") version "1.6.10-1.0.4"
 }
 
 android {
@@ -42,12 +43,12 @@ android {
     packagingOptions {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
-        this.resources.excludes.add("META-INF/fmp_release.kotlin_module")
+        this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
         this.resources.excludes.add("com.mobrun.plugin.BuildConfig")
     }
 
     // Declare the task that will monitor all configurations.
-    /*configurations.all {
+    configurations.all {
         // 2 Define the resolution strategy in case of conflicts.
         resolutionStrategy {
             // Fail eagerly on version conflict (includes transitive dependencies),
@@ -57,7 +58,7 @@ android {
             // Prefer modules that are part of this build (multi-project or composite build) over external modules.
             preferProjectModules()
         }
-    }*/
+    }
 
     sourceSets {
         getByName("main") {
@@ -67,6 +68,15 @@ android {
 
     buildFeatures {
         dataBinding = true
+    }
+
+    kotlin {
+        sourceSets.release {
+            kotlin.srcDirs("build/generated/ksp/release/kotlin")
+        }
+        sourceSets.debug {
+            kotlin.srcDirs("build/generated/ksp/debug/kotlin")
+        }
     }
 
     kotlinOptions {
@@ -85,20 +95,23 @@ dependencies {
     val leakCanary: String by rootProject.extra
     val runner: String by rootProject.extra
     val espresso: String by rootProject.extra
-    val kodi: String by rootProject.extra
 
     implementation(core)
-    implementation(kodi)
     implementation(coroutinesCore)
     implementation(sresultpresentation)
     implementation(gson)
 
-    implementation(project(":hhive"))
+    //implementation(project(":hhive"))
 
-    implementation(project(":hiveprocessor")) {
+/*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")
     }
-    kapt(project(":hiveprocessor"))
+    kapt(project(":hiveprocessor"))*/
+
+    implementation(project(":hiveksp")) {
+        exclude(group = "com.mobrun", module = "plugin")
+    }
+    ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
     testImplementation(junit)

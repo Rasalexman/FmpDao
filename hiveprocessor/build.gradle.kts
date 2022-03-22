@@ -38,22 +38,9 @@ java {
 }
 
 dependencies {
-    //libsTree.exclude(listOf("*BuildConfig*"))
-    val gson: String by rootProject.extra
-    val coroutinesCore: String by rootProject.extra
-    val kotlinPoet: String by rootProject.extra
     val autoService: String by rootProject.extra
-    val excludes = listOf(
-        "com/mobrun/plugin/BuildConfig.java",
-        "META-INF",
-        "ru/fsight/fmp/*"
-    )
 
-    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
-    compileOnly(gson)
-    compileOnly(coroutinesCore)
-
-    implementation(kotlinPoet)
+    api(project(":core"))
     implementation(autoService)
     kapt(autoService)
 }
@@ -72,10 +59,10 @@ publishing {
         }
     }
 
-    repositories {
+    /*repositories {
         maven {
             name = "hiveprocessor"
             setUrl(uri("${buildDir}/publishing-repository"))
         }
-    }
+    }*/
 }

@@ -26,6 +26,9 @@ val core: String = "1.7.0"
 val kotest = "5.0.3"
 val runner = "1.1.0"
 val espresso = "3.1.0"
+val ksp = "1.6.10-1.0.4"
+val kotlinpoet = "1.10.2"
+val autoService = "1.0.1"
 
 extra["navigation"] = navigation
 
@@ -35,9 +38,11 @@ extra["leakCanary"] = "com.squareup.leakcanary:leakcanary-android:$leakcanary"
 extra["sresultpresentation"] = "com.github.Rasalexman.SResult:sresultpresentation:$sresult"
 extra["coroutinesCore"] = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
 extra["core"] = "androidx.core:core-ktx:$core"
-extra["kotlinPoet"] = "com.squareup:kotlinpoet:1.10.2"
-extra["autoService"] = "com.google.auto.service:auto-service:1.0.1"
 extra["kodi"] = "com.github.Rasalexman.KODI:kodi:$kodi"
+extra["kotlinPoet"] = "com.squareup:kotlinpoet:$kotlinpoet"
+extra["autoService"] = "com.google.auto.service:auto-service:$autoService"
+extra["kotlinpoetKsp"] = "com.squareup:kotlinpoet-ksp:$kotlinpoet"
+extra["kspapi"] = "com.google.devtools.ksp:symbol-processing-api:$ksp"
 
 extra["junit"] = "junit:junit:$junit"
 extra["runner"] = "androidx.test:runner:$runner"

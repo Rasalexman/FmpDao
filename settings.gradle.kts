@@ -31,14 +31,13 @@ dependencyResolutionManagement {
      * template that requires some).
      */
 
-    repositoriesMode.set(RepositoriesMode.PREFER_PROJECT)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
         maven { url = uri("https://jitpack.io") }
-        maven { url = uri("https://plugins.gradle.org/m2/") }
     }
 }
 
 rootProject.name = "FmpDao"
-include(":app", ":hhive", ":hiveksp", ":hiveprocessor")
+include(":app", ":core", ":hhive", ":hiveprocessor", ":hiveksp")

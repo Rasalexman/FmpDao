@@ -21,15 +21,15 @@ import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import pro.krit.hiveprocessor.annotations.*
-import pro.krit.hiveprocessor.base.IDao
-import pro.krit.hiveprocessor.base.IRequest
-import pro.krit.hiveprocessor.common.DaoFieldsData
-import pro.krit.hiveprocessor.data.BindData
-import pro.krit.hiveprocessor.data.TypeData
-import pro.krit.hiveprocessor.extensions.*
-import pro.krit.hiveprocessor.provider.IFmpDatabase
-import pro.krit.hiveprocessor.request.ObjectRawStatus
+import pro.krit.core.base.IDao
+import pro.krit.core.base.IRequest
+import pro.krit.core.common.DaoFieldsData
+import pro.krit.core.data.BindData
+import pro.krit.core.data.TypeData
+import pro.krit.core.annotations.*
+import pro.krit.core.extensions.*
+import pro.krit.core.provider.IFmpDatabase
+import pro.krit.core.request.ObjectRawStatus
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
@@ -41,7 +41,7 @@ import javax.lang.model.util.Types
 import javax.tools.Diagnostic
 import kotlin.properties.Delegates
 
-
+@DelicateKotlinPoetApi(message = "use with clear mind")
 @AutoService(Processor::class)
 class FmpProcessor : AbstractProcessor() {
 
@@ -53,8 +53,8 @@ class FmpProcessor : AbstractProcessor() {
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
         private const val REQUEST_PACKAGE_NAME = "pro.krit.generated.request"
 
-        private const val EXTENSIONS_PATH = "pro.krit.hiveprocessor.extensions"
-        private const val QUERY_EXECUTER_PATH = "pro.krit.hiveprocessor.common"
+        private const val EXTENSIONS_PATH = "pro.krit.core.extensions"
+        private const val QUERY_EXECUTER_PATH = "pro.krit.core.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
         private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
@@ -392,8 +392,7 @@ class FmpProcessor : AbstractProcessor() {
                 //classTypeSpec.addFunction(requestFuncAsync.build())
             }
 
-            val fields = bindData.fields
-            if (fields.isNotEmpty()) {
+            if (bindData.fields.isNotEmpty()) {
                 val fileModelName = className.createFileName(MODEL_POSTFIX)
                 val fileStatusName = className.createFileName(STATUS_POSTFIX)
 
@@ -418,10 +417,10 @@ class FmpProcessor : AbstractProcessor() {
                 val annotationJvmField = AnnotationSpec.builder(JvmField::class).build()
                 val annotationPrimaryKey = AnnotationSpec.builder(PrimaryKey::class).build()
 
-                fields.forEach { field ->
+                bindData.fields.forEach { field ->
                     val data = field.asModelFieldData()
-                    val annotationSerialize = data.annotate.createSerializedAnnotation()
-                    //-----
+                    val annotationSerialize: AnnotationSpec = data.annotate.createSerializedAnnotation()
+
                     val currentType = data.type.asTypeName().copy(nullable = true)
                     val prop =
                         PropertySpec.builder(data.name, currentType)
@@ -435,7 +434,8 @@ class FmpProcessor : AbstractProcessor() {
                             }
                             .addAnnotation(annotationSerialize)
                             .build()
-                    //-----
+
+
                     constructorSpec.addParameter(
                         ParameterSpec.builder(data.name, currentType)
                             .defaultValue(NULL_INITIALIZER)
@@ -624,8 +624,9 @@ class FmpProcessor : AbstractProcessor() {
                 val isLocalProp = ParameterSpec.builder(
                     FIELD_DAO_FIELDS,
                     DaoFieldsData::class.asTypeName().copy(nullable = true)
-                ).defaultValue(NULL_INITIALIZER).build()
-                //
+                )
+                    .defaultValue(NULL_INITIALIZER)
+                    .build()
                 addParameter(isLocalProp)
 
                 //println("--------> superTypeGenerics = $superTypeGenerics")
@@ -705,9 +706,9 @@ class FmpProcessor : AbstractProcessor() {
 
         if (fields.isNotEmpty()) {
             checkElementForRestrictions(element = element, annotationName = FMP_FIELDS_DAO_NAME)
-        } /*else {
+        } else {
             checkElementForRestrictions(element = element, annotationName = annotationName)
-        }*/
+        }
 
         val annotationType = element.asType()
         val elementClassName = ClassName.bestGuess(annotationType.toString())
@@ -755,7 +756,7 @@ class FmpProcessor : AbstractProcessor() {
 
         if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
-                "$annotationType with $realAnnotationName annotation should implement pro.krit.hiveprocessor.IDao.I${annotationName}" +
+                "$annotationType with $realAnnotationName annotation should implement pro.krit.core.IDao.I${annotationName}" +
                         " or have annotation parameter 'fields' to be correctly processed"
             )
         }
@@ -855,6 +856,7 @@ class FmpProcessor : AbstractProcessor() {
             }
         }
     }
+
 
     private fun processRequest(
         element: Element,

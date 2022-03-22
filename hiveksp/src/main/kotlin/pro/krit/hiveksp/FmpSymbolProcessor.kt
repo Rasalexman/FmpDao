@@ -6,6 +6,7 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
+import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hiveksp.data.KspData
 import pro.krit.hiveksp.generators.DaosCodeGenerator
@@ -13,6 +14,7 @@ import pro.krit.core.annotations.*
 import pro.krit.hiveksp.generators.DatabaseCodeGenerator
 import pro.krit.hiveksp.generators.RequestsCodeGenerator
 
+@DelicateKotlinPoetApi("Delicate api. Make sure that you know what you did")
 @KotlinPoetKspPreview
 class FmpSymbolProcessor(
     environment: SymbolProcessorEnvironment
