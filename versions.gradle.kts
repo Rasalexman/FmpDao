@@ -1,5 +1,7 @@
 //------ APP VERSION
-extra["hhiveVersion"] = "1.3.51"
+val hhiveVersion = "1.3.51"
+extra["hhiveVersion"] = hhiveVersion
+extra["hiveKspVersion"] = hhiveVersion
 
 //------ CONFIG DATA
 extra["minSdkVersion"] = 19
