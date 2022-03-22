@@ -103,12 +103,14 @@ dependencies {
 
     implementation(project(":hhive"))
 
-    implementation(project(":hiveprocessor")) {
+/*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")
     }
-    kapt(project(":hiveprocessor"))
+    kapt(project(":hiveprocessor"))*/
 
-    //implementation(project(":hiveksp"))
+    implementation(project(":hiveksp")) {
+        exclude(group = "com.mobrun", module = "plugin")
+    }
     ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)

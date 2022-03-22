@@ -32,6 +32,7 @@ abstract class BaseSymbolVisitor(
         val shortName = firstAnnotation?.shortName?.asString().orEmpty()
         val isLocal = shortName.contains("local", ignoreCase = true)
         val isRequest = shortName.contains("request", ignoreCase = true)
+        val isWebRequest = shortName.contains("web", ignoreCase = true)
 
         return KspData(
             element = element,
@@ -47,7 +48,8 @@ abstract class BaseSymbolVisitor(
             tableName = tableName,
             isDelta = isDelta,
             isLocal = isLocal,
-            isRequest = isRequest
+            isRequest = isRequest,
+            isWebRequest = isWebRequest
         ).also {
             //logger.warn("----> KSP DATA = $it")
         }

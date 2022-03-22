@@ -28,5 +28,6 @@ data class KspData(
     val tableName: String = "",  // current table name
     val isDelta: Boolean = false, // using deltaStream
     val isLocal: Boolean = false, // is this a local dao
-    val isRequest: Boolean = false // is this a request interface with @FmpWebRequest or @FmpRestRequest
+    val isRequest: Boolean = false, // is this a request interface with @FmpWebRequest or @FmpRestRequest,
+    val isWebRequest: Boolean = false
 )

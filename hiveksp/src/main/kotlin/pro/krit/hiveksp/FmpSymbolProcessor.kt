@@ -10,6 +10,7 @@ import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hiveksp.data.KspData
 import pro.krit.hiveksp.generators.DaosCodeGenerator
 import pro.krit.core.annotations.*
+import pro.krit.hiveksp.generators.DatabaseCodeGenerator
 import pro.krit.hiveksp.generators.RequestsCodeGenerator
 
 @KotlinPoetKspPreview
@@ -46,6 +47,7 @@ class FmpSymbolProcessor(
         val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME)
         val databaseLocalSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME)
         val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME)
+        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME)
 
         // Exit from the processor in case nothing is annotated
         /*if (!daoSymbols.iterator().hasNext()) {
@@ -57,24 +59,28 @@ class FmpSymbolProcessor(
         //val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }.toList()
         //val unableDatabaseToProcess = databaseLocalSymbols.filterNot { it.validate() }.toList()
 
-        //val kspDaoDataList = mutableListOf<KspData>()
+        val kspDaoDataList = mutableListOf<KspData>()
         val kspRequestsDataList = mutableListOf<KspData>()
-        /*daoSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
+        daoSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
             it.accept(kspAnnotationVisitor, Unit)
         }
         daoLocalSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
             it.accept(kspAnnotationVisitor, Unit)
         }
-        kspCodeGenerator.processDaos(kspDaoDataList)*/
+        daosCodeGenerator.processDaos(kspDaoDataList)
 
         restRequestSymbols.filter { it.validate() }.mapNotNullTo(kspRequestsDataList) {
             it.accept(kspAnnotationVisitor, Unit)
         }
+        webRequestSymbols.filter { it.validate() }.mapNotNullTo(kspRequestsDataList) {
+            it.accept(kspAnnotationVisitor, Unit)
+        }
         requestsCodeGenerator.processRequest(kspRequestsDataList)
 
-        /*databaseLocalSymbols.filter { it.validate() }.forEach {
-            it.accept(DatabaseCodeGenerator(logger, codeGenerator), kspDaoDataList)
-        }*/
+        val allKspDataList = kspDaoDataList + kspRequestsDataList
+        databaseLocalSymbols.filter { it.validate() }.forEach {
+            it.accept(DatabaseCodeGenerator(logger, codeGenerator), allKspDataList)
+        }
 
         logger.warn("----> FmpSymbolProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
         return emptyList()//(unableDaoToProcess + unableLocalDaoToProcess + unableDatabaseToProcess)
