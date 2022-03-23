@@ -4,7 +4,7 @@ extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
 
 //------ CONFIG DATA
-extra["minSdkVersion"] = 19
+extra["minSdkVersion"] = 18
 extra["buildSdkVersion"] = 31
 extra["toolsVersion"] = "31.0.0"
 extra["apiVersion"] = "1.6"
