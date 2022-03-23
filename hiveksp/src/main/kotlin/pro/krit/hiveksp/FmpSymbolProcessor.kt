@@ -42,24 +42,24 @@ class FmpSymbolProcessor(
         logger.warn("----> FmpSymbolProcessor start")
 
         //----- collect BindSingle annotations
-        val daoSymbols = resolver
-            // Getting all symbols that are annotated with @FmpDatabase.
-            .getSymbolsWithAnnotation(DAO_ANNOTATION_NAME)
-
-        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME)
-        val databaseLocalSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME)
-        val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME)
-        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME)
+        // Getting all symbols that are annotated with @FmpDatabase.
+        val daoSymbols = resolver.getSymbolsWithAnnotation(DAO_ANNOTATION_NAME).toList()
+        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME).toList()
+        val databaseLocalSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME).toList()
+        val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME).toList()
+        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME).toList()
 
         // Exit from the processor in case nothing is annotated
-        /*if (!daoSymbols.iterator().hasNext()) {
+        if (!databaseLocalSymbols.iterator().hasNext()) {
             return emptyList()
-        }*/
+        }
 
         // validate already generated files
-        //val unableDaoToProcess = daoSymbols.filterNot { it.validate() }.toList()
-        //val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }.toList()
-        //val unableDatabaseToProcess = databaseLocalSymbols.filterNot { it.validate() }.toList()
+        val unableDaoToProcess = daoSymbols.filterNot { it.validate() }
+        val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }
+        val unableDatabaseToProcess = databaseLocalSymbols.filterNot { it.validate() }
+        val unableRestToProcess = restRequestSymbols.filterNot { it.validate() }
+        val unableWebToProcess = webRequestSymbols.filterNot { it.validate() }
 
         val kspDaoDataList = mutableListOf<KspData>()
         val kspRequestsDataList = mutableListOf<KspData>()
@@ -83,9 +83,10 @@ class FmpSymbolProcessor(
         databaseLocalSymbols.filter { it.validate() }.forEach {
             it.accept(DatabaseCodeGenerator(logger, codeGenerator), allKspDataList)
         }
+        val allUnableToProcess = (unableDaoToProcess + unableLocalDaoToProcess + unableDatabaseToProcess + unableRestToProcess + unableWebToProcess)
 
         logger.warn("----> FmpSymbolProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
-        return emptyList()//(unableDaoToProcess + unableLocalDaoToProcess + unableDatabaseToProcess)
+        return allUnableToProcess
     }
 
 }

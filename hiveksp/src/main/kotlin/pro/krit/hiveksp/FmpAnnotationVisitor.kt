@@ -15,7 +15,7 @@ class FmpAnnotationVisitor(
 ) : BaseSymbolVisitor(logger) {
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit): KspData {
-        logger.warn("---> class name = ${classDeclaration.simpleName.asString()}")
+        //logger.warn("---> class name = ${classDeclaration.simpleName.asString()}")
         val kspData = getKspDataFromAnnotation(classDeclaration)
         return kspData
     }
