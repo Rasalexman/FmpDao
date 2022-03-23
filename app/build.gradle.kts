@@ -108,9 +108,9 @@ dependencies {
     }
     kapt(project(":hiveprocessor"))*/
 
-    implementation(project(":hiveksp")) {
+    implementation(project(":hiveksp"))/* {
         exclude(group = "com.mobrun", module = "plugin")
-    }
+    }*/
     ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
