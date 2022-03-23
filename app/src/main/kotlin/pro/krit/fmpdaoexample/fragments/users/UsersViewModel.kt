@@ -12,9 +12,9 @@ import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import pro.krit.core.extensions.count
-import pro.krit.core.extensions.flowable
-import pro.krit.core.extensions.insertOrReplace
+import pro.krit.processor.extensions.count
+import pro.krit.processor.extensions.flowable
+import pro.krit.processor.extensions.insertOrReplace
 import pro.krit.fmpdaoexample.daos.IUsersLocalDao
 import pro.krit.fmpdaoexample.database.DataBaseHolder
 import pro.krit.fmpdaoexample.fmpresources.Fields

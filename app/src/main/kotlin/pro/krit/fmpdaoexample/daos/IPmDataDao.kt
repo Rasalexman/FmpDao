@@ -1,7 +1,7 @@
 package pro.krit.fmpdaoexample.daos
 
-import pro.krit.core.annotations.FmpDao
-import pro.krit.core.base.IDao
+import pro.krit.processor.annotations.FmpDao
+import pro.krit.processor.base.IDao
 import pro.krit.fmpdaoexample.models.PmEtDataEntity
 import pro.krit.fmpdaoexample.statuses.PmStatus
 

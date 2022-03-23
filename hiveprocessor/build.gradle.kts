@@ -59,10 +59,10 @@ publishing {
         }
     }
 
-    /*repositories {
+    repositories {
         maven {
             name = "hiveprocessor"
             setUrl(uri("${buildDir}/publishing-repository"))
         }
-    }*/
+    }
 }

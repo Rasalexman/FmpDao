@@ -69,7 +69,7 @@ publishing {
 
     repositories {
         maven {
-            name = "kodiksp"
+            name = "hiveksp"
             url = uri("${buildDir}/publishing-repository")
         }
     }

@@ -101,7 +101,7 @@ dependencies {
     implementation(sresultpresentation)
     implementation(gson)
 
-    //implementation(project(":hhive"))
+    implementation(project(":hhive"))
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")

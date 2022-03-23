@@ -3,8 +3,8 @@ package pro.krit.hiveksp.base
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
-import pro.krit.core.data.TypeData
-import pro.krit.core.extensions.createFileName
+import pro.krit.processor.data.TypeData
+import pro.krit.processor.extensions.createFileName
 import pro.krit.hiveksp.common.Params.CREATE_TABLE_ON_INIT
 import pro.krit.hiveksp.common.Params.FIELDS
 import pro.krit.hiveksp.common.Params.IS_DELTA

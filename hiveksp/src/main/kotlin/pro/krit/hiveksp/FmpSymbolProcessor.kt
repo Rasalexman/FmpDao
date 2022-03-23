@@ -10,7 +10,7 @@ import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hiveksp.data.KspData
 import pro.krit.hiveksp.generators.DaosCodeGenerator
-import pro.krit.core.annotations.*
+import pro.krit.processor.annotations.*
 import pro.krit.hiveksp.generators.DatabaseCodeGenerator
 import pro.krit.hiveksp.generators.RequestsCodeGenerator
 

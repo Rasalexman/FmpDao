@@ -1,8 +1,8 @@
 package pro.krit.fmpdaoexample.database
 
 import pro.krit.fmpdaoexample.fmpresources.Fields
-import pro.krit.core.annotations.FmpDao
-import pro.krit.core.base.IDao
+import pro.krit.processor.annotations.FmpDao
+import pro.krit.processor.base.IDao
 
 // Перечень симптомов
 @FmpDao(

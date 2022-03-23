@@ -1,7 +1,7 @@
 package pro.krit.fmpdaoexample.daos
 
-import pro.krit.core.annotations.FmpLocalDao
-import pro.krit.core.base.IDao
+import pro.krit.processor.annotations.FmpLocalDao
+import pro.krit.processor.base.IDao
 
 @FmpLocalDao(
     resourceName = "ZSR_TORO_PM_DATA",

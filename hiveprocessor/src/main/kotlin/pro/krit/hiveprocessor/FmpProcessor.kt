@@ -21,15 +21,15 @@ import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import pro.krit.core.base.IDao
-import pro.krit.core.base.IRequest
-import pro.krit.core.common.DaoFieldsData
-import pro.krit.core.data.BindData
-import pro.krit.core.data.TypeData
-import pro.krit.core.annotations.*
-import pro.krit.core.extensions.*
-import pro.krit.core.provider.IFmpDatabase
-import pro.krit.core.request.ObjectRawStatus
+import pro.krit.processor.base.IDao
+import pro.krit.processor.base.IRequest
+import pro.krit.processor.common.DaoFieldsData
+import pro.krit.processor.data.BindData
+import pro.krit.processor.data.TypeData
+import pro.krit.processor.annotations.*
+import pro.krit.processor.extensions.*
+import pro.krit.processor.provider.IFmpDatabase
+import pro.krit.processor.request.ObjectRawStatus
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
@@ -53,8 +53,8 @@ class FmpProcessor : AbstractProcessor() {
         private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
         private const val REQUEST_PACKAGE_NAME = "pro.krit.generated.request"
 
-        private const val EXTENSIONS_PATH = "pro.krit.core.extensions"
-        private const val QUERY_EXECUTER_PATH = "pro.krit.core.common"
+        private const val EXTENSIONS_PATH = "pro.krit.processor.extensions"
+        private const val QUERY_EXECUTER_PATH = "pro.krit.processor.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
         private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
@@ -756,7 +756,7 @@ class FmpProcessor : AbstractProcessor() {
 
         if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
-                "$annotationType with $realAnnotationName annotation should implement pro.krit.core.IDao.I${annotationName}" +
+                "$annotationType with $realAnnotationName annotation should implement pro.krit.processor.IDao.I${annotationName}" +
                         " or have annotation parameter 'fields' to be correctly processed"
             )
         }

@@ -9,9 +9,9 @@ import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import pro.krit.core.base.IRequest
-import pro.krit.core.extensions.*
-import pro.krit.core.request.ObjectRawStatus
+import pro.krit.processor.base.IRequest
+import pro.krit.processor.extensions.*
+import pro.krit.processor.request.ObjectRawStatus
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.common.Params
 import pro.krit.hiveksp.data.KspData

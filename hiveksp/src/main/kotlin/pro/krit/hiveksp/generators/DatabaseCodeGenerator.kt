@@ -10,7 +10,7 @@ import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import pro.krit.core.extensions.createFileName
+import pro.krit.processor.extensions.createFileName
 import pro.krit.hiveksp.base.BaseDatabaseVisitor
 import pro.krit.hiveksp.data.KspData
 
