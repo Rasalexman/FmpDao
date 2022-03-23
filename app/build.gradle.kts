@@ -90,7 +90,7 @@ dependencies {
     val core: String by rootProject.extra
     val coroutinesCore: String by rootProject.extra
     val sresultpresentation: String by rootProject.extra
-    val gson: String by rootProject.extra
+    //val gson: String by rootProject.extra
     val junit: String by rootProject.extra
     val leakCanary: String by rootProject.extra
     val runner: String by rootProject.extra
@@ -99,7 +99,7 @@ dependencies {
     implementation(core)
     implementation(coroutinesCore)
     implementation(sresultpresentation)
-    implementation(gson)
+    //implementation(gson)
 
     implementation(project(":hhive"))
 
