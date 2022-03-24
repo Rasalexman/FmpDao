@@ -45,9 +45,12 @@ class DaosCodeGenerator(
         private const val FIELD_PARAMS_REPLACE = "(params = %s)"
 
         private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
+        private const val JVM_FIELD_PATH = "kotlin.jvm"
         private const val ASSISTANT_MODEL_PATH = "com.mobrun.plugin.api.request_assistant"
         private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
         private const val MOBRUN_BASE_NAME = "BaseStatus"
+        private const val CLASS_JVM_FIELD = "JvmField"
+        private const val CLASS_PRIMARY_FIELD = "PrimaryKey"
 
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
@@ -93,14 +96,14 @@ class DaosCodeGenerator(
                 genericsArray.add(statusClass.toString())
 
                 val baseClassType = if (bindData.isLocal) {
-                    IDao.IFmpLocalDao::class.asTypeName()
+                    IDao.IFmpLocalDao::class.asClassName()
                 } else {
-                    IDao.IFmpDao::class.asTypeName()
+                    IDao.IFmpDao::class.asClassName()
                 }
 
                 val constructorSpec = FunSpec.constructorBuilder()
-                val jvmFieldClassName = JvmField::class.asClassName()
-                val primaryKeyClassName = ClassName(ASSISTANT_MODEL_PATH, "PrimaryKey")
+                val jvmFieldClassName = ClassName(JVM_FIELD_PATH, CLASS_JVM_FIELD)
+                val primaryKeyClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_PRIMARY_FIELD)
                 val annotationJvmField = AnnotationSpec.builder(jvmFieldClassName).build()
                 val annotationPrimaryKey = AnnotationSpec.builder(primaryKeyClassName).build()
 
@@ -108,7 +111,7 @@ class DaosCodeGenerator(
                     val data = field.asModelFieldData()
                     val annotationSerialize = data.annotate.createSerializedAnnotation()
 
-                    val currentType = data.type.asTypeName().copy(nullable = true)
+                    val currentType = data.type.asClassName().copy(nullable = true)
                     val prop =
                         PropertySpec.builder(data.name, currentType)
                             .mutable(true)
@@ -189,7 +192,7 @@ class DaosCodeGenerator(
             .apply {
                 val isLocalProp = ParameterSpec.builder(
                     FIELD_DAO_FIELDS,
-                    DaoFieldsData::class.asTypeName().copy(nullable = true)
+                    DaoFieldsData::class.asClassName().copy(nullable = true)
                 )
                     .defaultValue(NULL_INITIALIZER)
                     .build()

@@ -8,7 +8,6 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.base.IRequest
 import pro.krit.hhivecore.extensions.*
-import pro.krit.hhivecore.request.ObjectRawStatus
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.common.Params
 import pro.krit.hiveksp.data.KspData
@@ -31,6 +30,8 @@ class RequestsCodeGenerator(
 
         private const val ASSISTANT_MODEL_PATH = "com.mobrun.plugin.api.request_assistant"
         private const val API_MODEL_PATH = "com.mobrun.plugin.api"
+        private const val OBJ_RAW_STATUS_PATH = "pro.krit.hhivecore.request"
+        private const val CLASS_OBJ_RAW_STATUS = "ObjectRawStatus"
         private const val CLASS_HYPER_HIVE = "HyperHive"
         private const val FIELD_HYPER_HIVE = "hyperHive"
         private const val FIELD_DEFAULT_HEADERS = "defaultHeaders"
@@ -56,7 +57,7 @@ class RequestsCodeGenerator(
             val parameters = data.parameters
             val mainPackName = data.mainData.packName
             val mainClassName = data.mainData.className
-            val requestInterface = if(data.isWebRequest) {
+            val requestInterface = if (data.isWebRequest) {
                 IRequest.IRestRequest::class
             } else {
                 IRequest.IWebRequest::class
@@ -112,9 +113,12 @@ class RequestsCodeGenerator(
 
                     val isTableAnnotation = tableAnnotation != null
                     val isParamAnnotation = paramAnnotation != null
-                    val arguments = tableAnnotation?.arguments ?: paramAnnotation?.arguments.orEmpty()
-                    val annotationInnerName: String = arguments.getArgumentValue<String>(Params.NAME).orEmpty()
-                    val propClassFields = arguments.getArgumentValue<List<String>>(Params.FIELDS).orEmpty()
+                    val arguments =
+                        tableAnnotation?.arguments ?: paramAnnotation?.arguments.orEmpty()
+                    val annotationInnerName: String =
+                        arguments.getArgumentValue<String>(Params.NAME).orEmpty()
+                    val propClassFields =
+                        arguments.getArgumentValue<List<String>>(Params.FIELDS).orEmpty()
 
                     //logger.warn("-----> annotationInnerName = $annotationInnerName")
 
@@ -124,7 +128,8 @@ class RequestsCodeGenerator(
                     val propModelData = annotationInnerName.asModelFieldData()
                     val propTypeClassName = propName.createFileName(postFixName).capitalizeFirst()
                     val propClassName = ClassName(REQUEST_PACKAGE_NAME, propTypeClassName)
-                    val propClassSpec = TypeSpec.classBuilder(propTypeClassName).addModifiers(KModifier.DATA)
+                    val propClassSpec =
+                        TypeSpec.classBuilder(propTypeClassName).addModifiers(KModifier.DATA)
                     val isList: Boolean = arguments.getArgumentValue(Params.IS_LIST) ?: false
 
                     // добавляем в маппу для параметров запроса
@@ -137,7 +142,8 @@ class RequestsCodeGenerator(
                     // table constructor properties
                     val constructorPropSpec = FunSpec.constructorBuilder()
                     // does table have numeric parameter in annotation
-                    val isNumericModel: Boolean = arguments.getArgumentValue(Params.IS_NUMERIC) ?: false
+                    val isNumericModel: Boolean =
+                        arguments.getArgumentValue(Params.IS_NUMERIC) ?: false
 
                     propClassFields.forEachIndexed { index, name ->
                         addTableModelProperty(
@@ -154,10 +160,12 @@ class RequestsCodeGenerator(
                         if (isNumericModel) {
                             addAnnotation(createCountFieldsAnnotation(propClassFields.size))
                             if (isTableAnnotation) {
-                                val numeratedFieldsClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_NUMERATED_FIELDS)
+                                val numeratedFieldsClassName =
+                                    ClassName(ASSISTANT_MODEL_PATH, CLASS_NUMERATED_FIELDS)
                                 addSuperinterface(numeratedFieldsClassName)
                             } else {
-                                val customClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_CUSTOM_PARAMETER)
+                                val customClassName =
+                                    ClassName(ASSISTANT_MODEL_PATH, CLASS_CUSTOM_PARAMETER)
                                 addSuperinterface(customClassName)
                                 val returnMapStatement = buildString {
                                     append("$RETURN_STATEMENT \"$annotationInnerName\"")
@@ -312,9 +320,9 @@ class RequestsCodeGenerator(
         rawModelClassName: ClassName
     ): TypeSpec.Builder {
         val respondStatusTypeSpec = TypeSpec.classBuilder(respondStatusClassName)
-        val baseRespondStatusClassType =
-            ObjectRawStatus::class.asTypeName().parameterizedBy(rawModelClassName)
-        return respondStatusTypeSpec.superclass(baseRespondStatusClassType)
+        val baseRespondStatusClassName = ClassName(OBJ_RAW_STATUS_PATH, CLASS_OBJ_RAW_STATUS)
+            .parameterizedBy(rawModelClassName)
+        return respondStatusTypeSpec.superclass(baseRespondStatusClassName)
     }
 
     private fun createValueParamsStatement(parameters: List<String>): String {

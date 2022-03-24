@@ -11,21 +11,6 @@ val srcDirs = listOf(codePath)
 group = "pro.krit.hivecore"
 version = hiveKspVersion
 
-sourceSets {
-    getByName("main") {
-        java.setSrcDirs(srcDirs)
-        java.exclude("com/mobrun/plugin/BuildConfig.java")
-    }
-}
-
-kotlin {
-    this.sourceSets {
-        getByName("main") {
-            this.kotlin.exclude("com/mobrun/plugin/BuildConfig.java")
-        }
-    }
-}
-
 java {
     this.sourceSets {
         getByName("main") {
