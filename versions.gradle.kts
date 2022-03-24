@@ -1,5 +1,5 @@
 //------ APP VERSION
-val hhiveVersion = "1.4.7"
+val hhiveVersion = "1.4.8"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
 
