@@ -15,7 +15,7 @@ version = hhiveVersion
 sourceSets {
     getByName("main") {
         java.setSrcDirs(srcDirs)
-        //java.exclude("com.mobrun.plugin.BuildConfig")
+        java.exclude("com.mobrun.plugin.BuildConfig")
     }
 }
 
@@ -28,6 +28,7 @@ java {
     this.sourceSets {
         getByName("main") {
             java.setSrcDirs(srcDirs)
+            java.exclude("com.mobrun.plugin.BuildConfig")
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11

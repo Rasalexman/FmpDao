@@ -44,7 +44,7 @@ android {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
-        this.resources.excludes.add("com.mobrun.plugin.BuildConfig")
+        this.resources.excludes.add("com/mobrun/plugin/*")
     }
 
     // Declare the task that will monitor all configurations.
@@ -53,7 +53,7 @@ android {
         resolutionStrategy {
             // Fail eagerly on version conflict (includes transitive dependencies),
             // e.g., multiple different versions of the same dependency (group and name are equal).
-            failOnVersionConflict()
+            //failOnVersionConflict()
 
             // Prefer modules that are part of this build (multi-project or composite build) over external modules.
             preferProjectModules()
@@ -79,6 +79,10 @@ android {
         }
     }
 
+    kapt {
+        generateStubs = false
+    }
+
     kotlinOptions {
         languageVersion = "1.6"
         apiVersion = "1.6"
@@ -90,7 +94,6 @@ dependencies {
     val core: String by rootProject.extra
     val coroutinesCore: String by rootProject.extra
     val sresultpresentation: String by rootProject.extra
-    //val gson: String by rootProject.extra
     val junit: String by rootProject.extra
     val leakCanary: String by rootProject.extra
     val runner: String by rootProject.extra
@@ -99,18 +102,17 @@ dependencies {
     implementation(core)
     implementation(coroutinesCore)
     implementation(sresultpresentation)
-    //implementation(gson)
 
-    implementation(project(":hhive"))
+    //implementation(project(":hhive"))
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")
     }
     kapt(project(":hiveprocessor"))*/
 
-    implementation(project(":hiveksp"))/* {
-        exclude(group = "com.mobrun", module = "plugin")
-    }*/
+    implementation(project(":hiveksp")) {
+        exclude(group = "com.mobrun.plugin")
+    }
     ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
