@@ -9,10 +9,10 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
-import pro.krit.processor.base.IDao
-import pro.krit.processor.common.DaoFieldsData
-import pro.krit.processor.extensions.*
-import pro.krit.processor.provider.IFmpDatabase
+import pro.krit.hhivecore.base.IDao
+import pro.krit.hhivecore.common.DaoFieldsData
+import pro.krit.hhivecore.extensions.*
+import pro.krit.hhivecore.provider.IFmpDatabase
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.data.KspData
 
@@ -25,7 +25,7 @@ class DaosCodeGenerator(
     companion object {
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
 
-        private const val EXTENSIONS_PATH = "pro.krit.processor.extensions"
+        private const val EXTENSIONS_PATH = "pro.krit.hhivecore.extensions"
 
         private const val INIT_CREATE_TABLE = "createTable"
 

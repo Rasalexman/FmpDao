@@ -7,8 +7,8 @@ import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pro.krit.processor.common.RequestExecuter.isNotBad
-import pro.krit.processor.extensions.*
+import pro.krit.hhivecore.common.RequestExecuter.isNotBad
+import pro.krit.hhivecore.extensions.*
 import pro.krit.fmpdaoexample.MainActivity
 import pro.krit.fmpdaoexample.daos.IPmDataLocalDao
 import pro.krit.fmpdaoexample.database.DataBaseHolder

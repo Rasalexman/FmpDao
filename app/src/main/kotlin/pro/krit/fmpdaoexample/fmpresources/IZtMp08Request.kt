@@ -1,8 +1,8 @@
 package pro.krit.fmpdaoexample.fmpresources
 
-import pro.krit.processor.annotations.FmpRestRequest
-import pro.krit.processor.annotations.FmpTable
-import pro.krit.processor.base.IRequest
+import pro.krit.hhivecore.annotations.FmpRestRequest
+import pro.krit.hhivecore.annotations.FmpTable
+import pro.krit.hhivecore.base.IRequest
 
 // Проводка поставки
 @FmpRestRequest(

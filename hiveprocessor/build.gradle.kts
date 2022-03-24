@@ -39,9 +39,9 @@ java {
 }
 
 dependencies {
+    implementation(project(":hivecore"))
     val autoService: String by rootProject.extra
 
-    api(project(":core"))
     implementation(autoService)
     kapt(autoService)
 }

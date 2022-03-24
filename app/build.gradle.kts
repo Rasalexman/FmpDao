@@ -110,7 +110,7 @@ dependencies {
     }
     kapt(project(":hiveprocessor"))*/
 
-    implementation(project(":hiveksp")) {
+    implementation(project(":hivecore")) {
         exclude(group = "com.mobrun.plugin")
     }
     ksp(project(":hiveksp"))

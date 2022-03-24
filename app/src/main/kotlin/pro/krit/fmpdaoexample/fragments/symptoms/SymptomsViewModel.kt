@@ -22,10 +22,10 @@ import pro.krit.fmpdaoexample.models.SymptomItemUI
 import pro.krit.fmpdaoexample.models.UserItemUI
 import pro.krit.generated.dao.ZfmToroSymptomListModel
 import pro.krit.generated.dao.ZfmToroSymptomListStatus
-import pro.krit.processor.extensions.createTable
-import pro.krit.processor.extensions.insertOrReplace
-import pro.krit.processor.extensions.select
-import pro.krit.processor.extensions.update
+import pro.krit.hhivecore.extensions.createTable
+import pro.krit.hhivecore.extensions.insertOrReplace
+import pro.krit.hhivecore.extensions.select
+import pro.krit.hhivecore.extensions.update
 import kotlin.random.Random
 
 class SymptomsViewModel(

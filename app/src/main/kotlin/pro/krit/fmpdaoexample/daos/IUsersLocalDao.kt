@@ -2,8 +2,8 @@ package pro.krit.fmpdaoexample.daos
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.fmpdaoexample.models.UserEntity
-import pro.krit.processor.annotations.FmpLocalDao
-import pro.krit.processor.base.IDao
+import pro.krit.hhivecore.annotations.FmpLocalDao
+import pro.krit.hhivecore.base.IDao
 
 @FmpLocalDao(
     resourceName = "USERS",

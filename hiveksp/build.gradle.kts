@@ -46,9 +46,9 @@ java {
 
 
 dependencies {
+    implementation(project(":hivecore"))
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
-    api(project(":core"))
     implementation(kotlinpoetKsp)
     implementation(kspapi)
 }

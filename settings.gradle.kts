@@ -40,4 +40,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "FmpDao"
-include(":app", ":core", ":hhive", ":hiveprocessor", ":hiveksp")
+include(":app", ":hivecore", ":hhive", ":hiveprocessor", ":hiveksp")
