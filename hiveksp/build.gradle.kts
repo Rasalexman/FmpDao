@@ -48,13 +48,7 @@ java {
 dependencies {
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
-    val excludes = listOf(
-    "com/mobrun/plugin/BuildConfig.java",
-    "META-INF",
-    "ru/fsight/fmp/*"
-)
-
-    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
+    api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
     implementation(project(":hivecore"))
     implementation(kotlinpoetKsp)
     implementation(kspapi)
