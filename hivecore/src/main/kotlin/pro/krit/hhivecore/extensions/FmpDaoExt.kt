@@ -49,6 +49,23 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
  *
  * @param where - тело запроса для SELECT
+ * @param offset - отступ в получении данных
+ * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
+ * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
+ *
+ * @return - E? с данными, либо пустой список
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpDao<E, S>.selectFirst(
+    where: String = "",
+    offset: Int = 0,
+    orderBy: String = "",
+    fields: List<String>? = null
+): E? = select(where, 1, offset, orderBy, fields).firstOrNull()
+
+/**
+ * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
+ *
+ * @param where - тело запроса для SELECT
  * @param limit - лимитированное количество данных
  * @param offset - отступ в получении данных
  * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
