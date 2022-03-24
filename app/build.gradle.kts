@@ -44,7 +44,7 @@ android {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
-        this.resources.excludes.add("com/mobrun/plugin/*")
+        //this.resources.excludes.add("com/mobrun/plugin/*")
     }
 
     // Declare the task that will monitor all configurations.

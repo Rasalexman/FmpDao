@@ -39,9 +39,15 @@ java {
 }
 
 dependencies {
-    implementation(project(":hivecore"))
     val autoService: String by rootProject.extra
+    val excludes = listOf(
+        "com/mobrun/plugin/BuildConfig.java",
+        "META-INF",
+        "ru/fsight/fmp/*"
+    )
 
+    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
+    implementation(project(":hivecore"))
     implementation(autoService)
     kapt(autoService)
 }
