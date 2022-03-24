@@ -4,7 +4,6 @@ import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSTypeReference
-import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
@@ -99,8 +98,10 @@ class DaosCodeGenerator(
                 }
 
                 val constructorSpec = FunSpec.constructorBuilder()
-                val annotationJvmField = AnnotationSpec.builder(JvmField::class).build()
-                val annotationPrimaryKey = AnnotationSpec.builder(PrimaryKey::class).build()
+                val jvmFieldClassName = JvmField::class.asClassName()
+                val primaryKeyClassName = ClassName("com.mobrun.plugin.api.request_assistant", "PrimaryKey")
+                val annotationJvmField = AnnotationSpec.builder(jvmFieldClassName).build()
+                val annotationPrimaryKey = AnnotationSpec.builder(primaryKeyClassName).build()
 
                 bindData.fields.forEach { field ->
                     val data = field.asModelFieldData()

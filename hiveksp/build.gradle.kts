@@ -48,7 +48,6 @@ java {
 dependencies {
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
-    api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs")))
     implementation(project(":hivecore"))
     implementation(kotlinpoetKsp)
     implementation(kspapi)

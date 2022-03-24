@@ -1,9 +1,15 @@
 package pro.krit.fmpdaoexample.models
 
 import com.google.gson.annotations.SerializedName
+import com.mobrun.plugin.api.request_assistant.PrimaryKey
 
 data class PmEtDataEntity(
     //  type: TEXT, source: {'name': 'SAP', 'type': 'C'}
+    @PrimaryKey
+    @JvmField
+    @SerializedName("LOCAL_ID")
+    var dataId: String? = null,
+
     @JvmField
     @SerializedName("MARKER")
     var marker: String? = null,
