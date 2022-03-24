@@ -14,14 +14,14 @@ version = hiveKspVersion
 sourceSets {
     getByName("main") {
         java.setSrcDirs(srcDirs)
-        java.exclude("com/mobrun/plugin/*")
+        java.exclude("com/mobrun/plugin/BuildConfig.java")
     }
 }
 
 kotlin {
     this.sourceSets {
         getByName("main") {
-            this.kotlin.exclude("com/mobrun/plugin/*")
+            this.kotlin.exclude("com/mobrun/plugin/BuildConfig.java")
         }
     }
 }
@@ -30,7 +30,7 @@ java {
     this.sourceSets {
         getByName("main") {
             java.setSrcDirs(srcDirs)
-            java.exclude("com/mobrun/plugin/*")
+            java.exclude("com/mobrun/plugin/BuildConfig.java")
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11
@@ -45,7 +45,7 @@ dependencies {
     val gson: String by rootProject.extra
     val coroutinesCore: String by rootProject.extra
     val excludes = listOf(
-        "com/mobrun/plugin/*",
+        "com/mobrun/plugin/BuildConfig.java",
         "META-INF",
         "ru/fsight/fmp/*"
     )
