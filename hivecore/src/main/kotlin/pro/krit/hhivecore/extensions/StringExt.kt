@@ -14,9 +14,6 @@
 
 package pro.krit.hhivecore.extensions
 
-import com.google.gson.annotations.SerializedName
-import com.mobrun.plugin.api.request_assistant.CountFields
-import com.mobrun.plugin.api.request_assistant.ParameterField
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -45,6 +42,17 @@ private const val TAG_STRING_FULL_TYPE = "%S"
 
 const val LIST_RETURN_TYPE = "java.util.List"
 const val SUSPEND_QUALIFIER = "kotlin.coroutines.Continuation"
+
+const val ASSISTANT_MODEL_PATH = "com.mobrun.plugin.api.request_assistant"
+const val KOTLIN_JVM_PATH = "kotlin.jvm"
+const val GSON_ANNOTATIONS_PATH = "com.google.gson.annotations"
+const val CLASS_NUMERATED_FIELDS = "NumeratedFields"
+const val CLASS_CUSTOM_PARAMETER = "CustomParameter"
+const val CLASS_JVM_FIELD = "JvmField"
+const val CLASS_PRIMARY_FIELD = "PrimaryKey"
+const val CLASS_COUNT_FIELDS = "CountFields"
+const val CLASS_PARAMETER_FIELD = "ParameterField"
+const val CLASS_SERIALIZED_NAME = "SerializedName"
 
 const val KOTLIN_LIST_NAME = "List"
 const val KOTLIN_STRING_TYPE_NAME = "String"
@@ -198,24 +206,29 @@ fun String.asModelFieldData(): FieldData {
 }
 
 fun String.createSerializedAnnotation(): AnnotationSpec {
-    return AnnotationSpec.builder(SerializedName::class)
+
+    val className = ClassName(GSON_ANNOTATIONS_PATH, CLASS_SERIALIZED_NAME)
+    return AnnotationSpec.builder(className)
         .addMember(TAG_STRING_FULL_TYPE, this)
         .build()
 }
 
 fun createCountFieldsAnnotation(count: Int): AnnotationSpec {
-    return AnnotationSpec.builder(CountFields::class)
+    val className = ClassName(ASSISTANT_MODEL_PATH, CLASS_COUNT_FIELDS)
+    return AnnotationSpec.builder(className)
         .addMember("count = %L", count)
         .build()
 }
 
 fun createParameterFieldAnnotation(position: Int): AnnotationSpec {
-    return AnnotationSpec.builder(ParameterField::class)
+    val className = ClassName(ASSISTANT_MODEL_PATH, CLASS_PARAMETER_FIELD)
+    return AnnotationSpec.builder(className)
         .addMember("position = %L", position)
         .build()
 }
 
 fun createJavaFieldAnnotation(): AnnotationSpec {
-    return AnnotationSpec.builder(JvmField::class)
+    val jvmFieldClassName = ClassName(KOTLIN_JVM_PATH, CLASS_JVM_FIELD)
+    return AnnotationSpec.builder(jvmFieldClassName)
         .build()
 }

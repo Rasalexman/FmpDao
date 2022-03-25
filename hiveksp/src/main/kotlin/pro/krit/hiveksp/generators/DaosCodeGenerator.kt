@@ -45,12 +45,8 @@ class DaosCodeGenerator(
         private const val FIELD_PARAMS_REPLACE = "(params = %s)"
 
         private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
-        private const val JVM_FIELD_PATH = "kotlin.jvm"
-        private const val ASSISTANT_MODEL_PATH = "com.mobrun.plugin.api.request_assistant"
         private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
         private const val MOBRUN_BASE_NAME = "BaseStatus"
-        private const val CLASS_JVM_FIELD = "JvmField"
-        private const val CLASS_PRIMARY_FIELD = "PrimaryKey"
 
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
@@ -102,7 +98,7 @@ class DaosCodeGenerator(
                 }
 
                 val constructorSpec = FunSpec.constructorBuilder()
-                val jvmFieldClassName = ClassName(JVM_FIELD_PATH, CLASS_JVM_FIELD)
+                val jvmFieldClassName = ClassName(KOTLIN_JVM_PATH, CLASS_JVM_FIELD)
                 val primaryKeyClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_PRIMARY_FIELD)
                 val annotationJvmField = AnnotationSpec.builder(jvmFieldClassName).build()
                 val annotationPrimaryKey = AnnotationSpec.builder(primaryKeyClassName).build()

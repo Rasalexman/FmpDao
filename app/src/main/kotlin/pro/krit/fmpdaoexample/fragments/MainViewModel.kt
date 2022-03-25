@@ -7,13 +7,10 @@ import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pro.krit.hhivecore.common.RequestExecuter.isNotBad
-import pro.krit.hhivecore.extensions.*
 import pro.krit.fmpdaoexample.MainActivity
 import pro.krit.fmpdaoexample.daos.IPmDataLocalDao
 import pro.krit.fmpdaoexample.database.DataBaseHolder
 import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
-import pro.krit.fmpdaoexample.database.parseTable
 import pro.krit.fmpdaoexample.fmpresources.Fields
 import pro.krit.fmpdaoexample.models.PmEtDataLocalEntity
 import pro.krit.fmpdaoexample.models.PmType
@@ -22,6 +19,8 @@ import pro.krit.generated.dao.ZfmToroSymptomListStatus
 import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthGrModel
 import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthUserModel
 import pro.krit.generated.request.ZfmPmGetSetRequestParams
+import pro.krit.hhivecore.common.RequestExecuter.isNotBad
+import pro.krit.hhivecore.extensions.*
 import java.util.*
 import kotlin.random.Random
 
