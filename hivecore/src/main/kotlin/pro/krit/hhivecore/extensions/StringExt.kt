@@ -206,7 +206,6 @@ fun String.asModelFieldData(): FieldData {
 }
 
 fun String.createSerializedAnnotation(): AnnotationSpec {
-
     val className = ClassName(GSON_ANNOTATIONS_PATH, CLASS_SERIALIZED_NAME)
     return AnnotationSpec.builder(className)
         .addMember(TAG_STRING_FULL_TYPE, this)
@@ -229,6 +228,12 @@ fun createParameterFieldAnnotation(position: Int): AnnotationSpec {
 
 fun createJavaFieldAnnotation(): AnnotationSpec {
     val jvmFieldClassName = ClassName(KOTLIN_JVM_PATH, CLASS_JVM_FIELD)
+    return AnnotationSpec.builder(jvmFieldClassName)
+        .build()
+}
+
+fun createPrimaryKeyAnnotation(): AnnotationSpec {
+    val jvmFieldClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_PRIMARY_FIELD)
     return AnnotationSpec.builder(jvmFieldClassName)
         .build()
 }

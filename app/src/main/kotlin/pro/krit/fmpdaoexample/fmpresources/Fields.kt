@@ -3,6 +3,7 @@ package pro.krit.fmpdaoexample.fmpresources
 object Fields {
     // Идентификатор справочника
     const val LOCAL_ID = "ID"
+    const val LOCAL_ID_KEY = "LOCAL_ID_primary"
     // Текст кода статуса задания
     const val STAT_TEXT = "STAT_TEXT"
     const val MARKER = "MARKER"

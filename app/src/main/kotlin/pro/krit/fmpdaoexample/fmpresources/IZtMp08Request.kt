@@ -18,9 +18,11 @@ interface IZtMp08Request : IRequest.IBaseRequest { //IRestRequest<ZtMp05RequestR
     @FmpTable(
         name = "ET_DATA",
         fields = [
+            Fields.LOCAL_ID_KEY,
             Fields.RETCODE,
             Fields.ERROR_TEXT
-        ]
+        ],
+        isNumeric = true
     )
     private interface EtData
 }

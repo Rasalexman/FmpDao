@@ -7,6 +7,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.base.IRequest
+import pro.krit.hhivecore.data.FieldData
 import pro.krit.hhivecore.extensions.*
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.common.Params
@@ -142,20 +143,26 @@ class RequestsCodeGenerator(
                     val isNumericModel: Boolean =
                         arguments.getArgumentValue(Params.IS_NUMERIC) ?: false
 
-                    propClassFields.forEachIndexed { index, name ->
+                    var currentIndex = -1
+                    propClassFields.forEachIndexed { _, name ->
+                        val modelData = name.asModelFieldData()
+                        if(!modelData.isPrimaryKey) {
+                            currentIndex++
+                        }
                         addTableModelProperty(
-                            name,
+                            modelData,
                             constructorPropSpec,
                             propClassSpec,
                             null,
                             isNumericModel,
-                            index
+                            currentIndex
                         )
                     }
 
                     propClassSpec.primaryConstructor(constructorPropSpec.build()).apply {
                         if (isNumericModel) {
-                            addAnnotation(createCountFieldsAnnotation(propClassFields.size))
+                            val fullCount = currentIndex + 1
+                            addAnnotation(createCountFieldsAnnotation(fullCount))
                             if (isTableAnnotation) {
                                 val numeratedFieldsClassName =
                                     ClassName(ASSISTANT_MODEL_PATH, CLASS_NUMERATED_FIELDS)
@@ -402,16 +409,17 @@ class RequestsCodeGenerator(
             .addModifiers(KModifier.DATA)
 
         val constructorPropSpec = FunSpec.constructorBuilder()
-        properties.forEach {
-            val modelTypeName: TypeName? = annotationParams[it]
-            addTableModelProperty(it, constructorPropSpec, paramsClassSpec, modelTypeName)
+        properties.forEach { name ->
+            val modelTypeName: TypeName? = annotationParams[name]
+            val modelData = name.asModelFieldData()
+            addTableModelProperty(modelData, constructorPropSpec, paramsClassSpec, modelTypeName)
         }
         paramsClassSpec.primaryConstructor(constructorPropSpec.build())
         return paramsClassSpec
     }
 
     private fun addTableModelProperty(
-        name: String,
+        modelData: FieldData,
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder,
         modelTypeName: TypeName? = null,
@@ -419,7 +427,6 @@ class RequestsCodeGenerator(
         numIndex: Int = -1
     ) {
 
-        val modelData = name.asModelFieldData()
         val propName = modelData.name
         val annotationName = modelData.annotate
 
@@ -433,9 +440,14 @@ class RequestsCodeGenerator(
                 .initializer(propName)
                 .mutable(true)
                 .addAnnotation(annotationSerialize).apply {
-                    if (isNumericModel && numIndex >= 0) {
+                    if (isNumericModel) {
                         addAnnotation(createJavaFieldAnnotation())
-                        addAnnotation(createParameterFieldAnnotation(numIndex))
+                        if(!modelData.isPrimaryKey && numIndex >= 0) {
+                            addAnnotation(createParameterFieldAnnotation(numIndex))
+                        }
+                    }
+                    if(modelData.isPrimaryKey) {
+                        addAnnotation(createPrimaryKeyAnnotation())
                     }
                 }
                 .build()
