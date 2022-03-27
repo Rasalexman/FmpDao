@@ -49,7 +49,7 @@ class FmpSymbolProcessor(
         val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME).toList()
         val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME).toList()
 
-        // Exit from the processor in case nothing is annotated
+        // Exit from the processor in case nothing is annotated as FMPDatabase
         if (!databaseLocalSymbols.iterator().hasNext()) {
             return emptyList()
         }
@@ -63,13 +63,6 @@ class FmpSymbolProcessor(
 
         val kspDaoDataList = mutableListOf<KspData>()
         val kspRequestsDataList = mutableListOf<KspData>()
-        daoSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
-        }
-        daoLocalSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
-        }
-        daosCodeGenerator.processDaos(kspDaoDataList)
 
         restRequestSymbols.filter { it.validate() }.mapNotNullTo(kspRequestsDataList) {
             it.accept(kspAnnotationVisitor, Unit)
@@ -78,6 +71,14 @@ class FmpSymbolProcessor(
             it.accept(kspAnnotationVisitor, Unit)
         }
         requestsCodeGenerator.processRequest(kspRequestsDataList)
+
+        daoSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
+            it.accept(kspAnnotationVisitor, Unit)
+        }
+        daoLocalSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
+            it.accept(kspAnnotationVisitor, Unit)
+        }
+        daosCodeGenerator.processDaos(kspDaoDataList)
 
         val allKspDataList = kspDaoDataList + kspRequestsDataList
         databaseLocalSymbols.filter { it.validate() }.forEach {
