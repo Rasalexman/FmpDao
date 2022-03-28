@@ -1,8 +1,10 @@
 package pro.krit.hiveksp.base
 
+import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.data.TypeData
 import pro.krit.hhivecore.extensions.createFileName
 import pro.krit.hiveksp.common.Params.CREATE_TABLE_ON_INIT
@@ -13,9 +15,11 @@ import pro.krit.hiveksp.common.Params.RESOURCE_NAME
 import pro.krit.hiveksp.common.Params.TABLE_NAME
 import pro.krit.hiveksp.data.KspData
 
+@KotlinPoetKspPreview
 abstract class BaseSymbolVisitor(
-    protected val logger: KSPLogger
-) : BaseKspSymbolVisitor() {
+    logger: KSPLogger,
+    codeGenerator: CodeGenerator
+) : BaseCodeGenerator(logger, codeGenerator) {
 
     protected fun getKspDataFromAnnotation(element: KSDeclaration): KspData {
         val firstAnnotation = element.annotations.firstOrNull()
@@ -50,8 +54,10 @@ abstract class BaseSymbolVisitor(
             isLocal = isLocal,
             isRequest = isRequest,
             isWebRequest = isWebRequest
-        ).also {
-            //logger.warn("----> KSP DATA = $it")
-        }
+        )/*.also {
+            logger.warn("----> KSP DATA = $it")
+        }*/
     }
+
+    abstract fun processSaveKspData(kspData: KspData)
 }

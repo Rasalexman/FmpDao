@@ -22,6 +22,7 @@ interface IMainDatabase : IMainLocalDatabase, IMainRemoteDatabase, IMainRequest,
 interface IMainLocalDatabase {
     fun providePmLocalDao(): IPmDataLocalDao
     fun provideUsersLocalDao(): IUsersLocalDao
+    fun provideZtMp08Dao(): IZtMp08Dao
 }
 
 interface IMainRemoteDatabase {

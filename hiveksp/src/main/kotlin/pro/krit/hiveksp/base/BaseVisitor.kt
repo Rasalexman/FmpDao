@@ -2,8 +2,9 @@ package pro.krit.hiveksp.base
 
 import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSValueArgument
+import com.google.devtools.ksp.symbol.KSVisitorVoid
 
-abstract class BaseVisitor {
+abstract class BaseVisitor : KSVisitorVoid() {
 
     protected fun List<KSAnnotation>.hasAnnotation(name: String): Boolean {
         return findAnnotation(name) != null

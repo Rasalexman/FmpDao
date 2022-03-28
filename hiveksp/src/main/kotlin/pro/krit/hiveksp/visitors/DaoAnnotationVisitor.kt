@@ -1,8 +1,9 @@
-package pro.krit.hiveksp.generators
+package pro.krit.hiveksp.visitors
 
 import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.KSPLogger
+import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -12,18 +13,23 @@ import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.DaoFieldsData
 import pro.krit.hhivecore.extensions.*
 import pro.krit.hhivecore.provider.IFmpDatabase
-import pro.krit.hiveksp.base.BaseCodeGenerator
+import pro.krit.hiveksp.base.BaseSymbolVisitor
+import pro.krit.hiveksp.common.Consts.FIELD_PROVIDER
+import pro.krit.hiveksp.common.Consts.FIELD_RESOURCE_NAME
+import pro.krit.hiveksp.common.Consts.TAG_MEMBER_HALF
+import pro.krit.hiveksp.common.Params.IS_DELTA
+import pro.krit.hiveksp.common.Params.TABLE_NAME
 import pro.krit.hiveksp.data.KspData
 
 @KotlinPoetKspPreview
-class DaosCodeGenerator(
+class DaoAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator
-) : BaseCodeGenerator(logger, codeGenerator) {
+) : BaseSymbolVisitor(logger, codeGenerator) {
+
 
     companion object {
         private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
-
         private const val EXTENSIONS_PATH = "pro.krit.hhivecore.extensions"
 
         private const val INIT_CREATE_TABLE = "createTable"
@@ -31,16 +37,11 @@ class DaosCodeGenerator(
         private const val REQUEST_STATEMENT = "request"
         private const val REQUEST_NAME = "requestWithParams"
 
-        private const val TAG_MEMBER_HALF = "%M("
         private const val FUNC_MEMBER_STATEMENT = "this.%M()"
         private const val FUNC_MEMBER_PARAMS_STATEMENT = "this.%M"
         private const val FUNC_MEMBER_STATEMENT_GENERIC = "this.%M<"
         private const val FUNC_MEMBER_STATEMENT_GENERIC_CLOSE = ">()"
 
-        private const val FIELD_PROVIDER = "fmpDatabase"
-        private const val FIELD_RESOURCE_NAME = "resourceName"
-        private const val FIELD_TABLE = "tableName"
-        private const val FIELD_IS_DELTA = "isDelta"
         private const val FIELD_DAO_FIELDS = "fieldsData"
         private const val FIELD_PARAMS_REPLACE = "(params = %s)"
 
@@ -52,112 +53,117 @@ class DaosCodeGenerator(
         private const val RETURN_STATEMENT = "return"
     }
 
-    fun processDaos(moduleElements: List<KspData>) {
-        moduleElements.forEach { bindData ->
-            val classFileName = bindData.fileName
-            val className = bindData.mainData.className
-            val packageName = bindData.mainData.packName
-            val mainClassName = ClassName(packageName, className)
-            val classBuilders = mutableListOf<TypeSpec.Builder>()
+    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+        //logger.warn("------> class name = ${classDeclaration.simpleName.asString()}")
+        val kspData = getKspDataFromAnnotation(classDeclaration)
+        processSaveKspData(kspData)
+    }
+
+    override fun processSaveKspData(kspData: KspData) {
+        val classFileName = kspData.fileName
+        val className = kspData.mainData.className
+        val packageName = kspData.mainData.packName
+        val mainClassName = ClassName(packageName, className)
+        val classBuilders = mutableListOf<TypeSpec.Builder>()
 
 
-            // generics type array for class type
-            val genericsArray = mutableListOf<String>()
+        // generics type array for class type
+        val genericsArray = mutableListOf<String>()
 
-            val classTypeSpec =
-                TypeSpec.classBuilder(classFileName)
-                    .addSuperinterface(mainClassName)
-                    .addProperties(createProperties())
-            classBuilders.add(classTypeSpec)
+        val classTypeSpec =
+            TypeSpec.classBuilder(classFileName)
+                .addSuperinterface(mainClassName)
+                .addProperties(createProperties())
+        classBuilders.add(classTypeSpec)
 
-            if (bindData.parameters.isNotEmpty()) {
-                val localParams = bindData.parameters
-                val requestFunc = createRequestFunction(localParams)
-                classTypeSpec.addFunction(requestFunc.build())
-            }
-
-            if (bindData.fields.isNotEmpty()) {
-                val fileModelName = className.createFileName(MODEL_POSTFIX)
-                val fileStatusName = className.createFileName(STATUS_POSTFIX)
-
-                val modelClass = ClassName(DAO_PACKAGE_NAME, fileModelName)
-                val statusClass = ClassName(DAO_PACKAGE_NAME, fileStatusName)
-                val statusParentClaas = ClassName(MOBRUN_MODEL_PATH, MOBRUN_SELECTABLE_NAME)
-                val modelTypeSpec = TypeSpec.classBuilder(fileModelName)
-                val statusTypeSpec = TypeSpec.classBuilder(fileStatusName)
-                    .superclass(statusParentClaas.parameterizedBy(modelClass))
-
-                genericsArray.clear()
-                genericsArray.add(modelClass.toString())
-                genericsArray.add(statusClass.toString())
-
-                val baseClassType = if (bindData.isLocal) {
-                    IDao.IFmpLocalDao::class.asClassName()
-                } else {
-                    IDao.IFmpDao::class.asClassName()
-                }
-
-                val constructorSpec = FunSpec.constructorBuilder()
-                val jvmFieldClassName = ClassName(KOTLIN_JVM_PATH, CLASS_JVM_FIELD)
-                val primaryKeyClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_PRIMARY_FIELD)
-                val annotationJvmField = AnnotationSpec.builder(jvmFieldClassName).build()
-                val annotationPrimaryKey = AnnotationSpec.builder(primaryKeyClassName).build()
-
-                bindData.fields.forEach { field ->
-                    val data = field.asModelFieldData()
-                    val annotationSerialize = data.annotate.createSerializedAnnotation()
-
-                    val currentType = data.type.asClassName().copy(nullable = true)
-                    val prop =
-                        PropertySpec.builder(data.name, currentType)
-                            .mutable(true)
-                            .initializer(data.name)
-                            .addAnnotation(annotationJvmField)
-                            .apply {
-                                if (data.isPrimaryKey) {
-                                    addAnnotation(annotationPrimaryKey)
-                                }
-                            }
-                            .addAnnotation(annotationSerialize)
-                            .build()
-
-
-                    constructorSpec.addParameter(
-                        ParameterSpec.builder(data.name, currentType)
-                            .defaultValue(NULL_INITIALIZER)
-                            .build()
-                    )
-                    modelTypeSpec.addProperty(prop)
-                }
-                modelTypeSpec.primaryConstructor(constructorSpec.build())
-                modelTypeSpec.addModifiers(KModifier.DATA)
-                classBuilders.add(modelTypeSpec)
-                classBuilders.add(statusTypeSpec)
-
-                classTypeSpec.addSuperinterface(
-                    baseClassType.parameterizedBy(modelClass, statusClass)
-                )
-            } else {
-                val element = bindData.element
-                val superReference: KSTypeReference? = element.closestClassDeclaration()?.superTypes?.toList()?.firstOrNull()
-                val elementParent = superReference?.element
-                val superInterfaces = elementParent?.run {
-                    typeArguments.map { typeArg ->
-                        typeArg.toTypeName().toString()
-                    }
-                }.orEmpty()
-
-                //logger.warn("------> superInterfaces = $superInterfaces")
-                genericsArray.clear()
-                genericsArray.addAll(superInterfaces)
-            }
-
-            //println("------> genericsArray = $genericsArray")
-            // осноыной конструктор с дженериками
-            classTypeSpec.primaryConstructor(constructorFunSpec(bindData, genericsArray))
-
-            saveFiles(DAO_PACKAGE_NAME, classFileName, builders = classBuilders)
+        if (kspData.parameters.isNotEmpty()) {
+            val localParams = kspData.parameters
+            val requestFunc = createRequestFunction(localParams)
+            classTypeSpec.addFunction(requestFunc.build())
         }
+
+        if (kspData.fields.isNotEmpty()) {
+            val fileModelName = className.createFileName(MODEL_POSTFIX)
+            val fileStatusName = className.createFileName(STATUS_POSTFIX)
+
+            val modelClass = ClassName(DAO_PACKAGE_NAME, fileModelName)
+            val statusClass = ClassName(DAO_PACKAGE_NAME, fileStatusName)
+            val statusParentClaas = ClassName(MOBRUN_MODEL_PATH, MOBRUN_SELECTABLE_NAME)
+            val modelTypeSpec = TypeSpec.classBuilder(fileModelName)
+            val statusTypeSpec = TypeSpec.classBuilder(fileStatusName)
+                .superclass(statusParentClaas.parameterizedBy(modelClass))
+
+            genericsArray.clear()
+            genericsArray.add(modelClass.toString())
+            genericsArray.add(statusClass.toString())
+
+            val baseClassType = if (kspData.isLocal) {
+                IDao.IFmpLocalDao::class.asClassName()
+            } else {
+                IDao.IFmpDao::class.asClassName()
+            }
+
+            val constructorSpec = FunSpec.constructorBuilder()
+            val jvmFieldClassName = ClassName(KOTLIN_JVM_PATH, CLASS_JVM_FIELD)
+            val primaryKeyClassName = ClassName(ASSISTANT_MODEL_PATH, CLASS_PRIMARY_FIELD)
+            val annotationJvmField = AnnotationSpec.builder(jvmFieldClassName).build()
+            val annotationPrimaryKey = AnnotationSpec.builder(primaryKeyClassName).build()
+
+            kspData.fields.forEach { field ->
+                val data = field.asModelFieldData()
+                val annotationSerialize = data.annotate.createSerializedAnnotation()
+
+                val currentType = data.type.asClassName().copy(nullable = true)
+                val prop =
+                    PropertySpec.builder(data.name, currentType)
+                        .mutable(true)
+                        .initializer(data.name)
+                        .addAnnotation(annotationJvmField)
+                        .apply {
+                            if (data.isPrimaryKey) {
+                                addAnnotation(annotationPrimaryKey)
+                            }
+                        }
+                        .addAnnotation(annotationSerialize)
+                        .build()
+
+
+                constructorSpec.addParameter(
+                    ParameterSpec.builder(data.name, currentType)
+                        .defaultValue(NULL_INITIALIZER)
+                        .build()
+                )
+                modelTypeSpec.addProperty(prop)
+            }
+            modelTypeSpec.primaryConstructor(constructorSpec.build())
+            modelTypeSpec.addModifiers(KModifier.DATA)
+            classBuilders.add(modelTypeSpec)
+            classBuilders.add(statusTypeSpec)
+
+            classTypeSpec.addSuperinterface(
+                baseClassType.parameterizedBy(modelClass, statusClass)
+            )
+        } else {
+            val element = kspData.element
+            val superReference: KSTypeReference? =
+                element.closestClassDeclaration()?.superTypes?.toList()?.firstOrNull()
+            val elementParent = superReference?.element
+            val superInterfaces = elementParent?.run {
+                typeArguments.map { typeArg ->
+                    typeArg.toTypeName().toString()
+                }
+            }.orEmpty()
+
+            //logger.warn("------> superInterfaces $className = $superInterfaces")
+            genericsArray.clear()
+            genericsArray.addAll(superInterfaces)
+        }
+
+        //println("------> genericsArray = $genericsArray")
+        // осноыной конструктор с дженериками
+        classTypeSpec.primaryConstructor(constructorFunSpec(kspData, genericsArray))
+
+        saveFiles(DAO_PACKAGE_NAME, classFileName, builders = classBuilders)
     }
 
     // создаем иницилизируешие поля для конструктора а так жу функцию init {  }
@@ -168,11 +174,11 @@ class DaosCodeGenerator(
             }
         }.build()
 
-        val parameterName = ParameterSpec.builder(FIELD_TABLE, String::class)
+        val parameterName = ParameterSpec.builder(TABLE_NAME, String::class)
             .defaultValue("\"${bindData.tableName}\"")
             .build()
 
-        val isCached = ParameterSpec.builder(FIELD_IS_DELTA, Boolean::class)
+        val isCached = ParameterSpec.builder(IS_DELTA, Boolean::class)
             .defaultValue("${bindData.isDelta}")
             .build()
 
@@ -198,10 +204,12 @@ class DaosCodeGenerator(
 
                 if (bindData.createTableOnInit) {
                     val members = mutableListOf<Any>()
-                    members.add(MemberName(
-                        EXTENSIONS_PATH,
-                        INIT_CREATE_TABLE
-                    ))
+                    members.add(
+                        MemberName(
+                            EXTENSIONS_PATH,
+                            INIT_CREATE_TABLE
+                        )
+                    )
                     val initStatement = buildString {
                         if (superTypeGenerics.isNotEmpty()) {
                             append(FUNC_MEMBER_STATEMENT_GENERIC)
@@ -234,13 +242,13 @@ class DaosCodeGenerator(
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        val parameterNameProp = PropertySpec.builder(FIELD_TABLE, String::class)
-            .initializer(FIELD_TABLE)
+        val parameterNameProp = PropertySpec.builder(TABLE_NAME, String::class)
+            .initializer(TABLE_NAME)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
-        val isCachedProp = PropertySpec.builder(FIELD_IS_DELTA, Boolean::class)
-            .initializer(FIELD_IS_DELTA)
+        val isCachedProp = PropertySpec.builder(IS_DELTA, Boolean::class)
+            .initializer(IS_DELTA)
             .addModifiers(KModifier.PUBLIC, KModifier.OVERRIDE)
             .build()
 
@@ -284,4 +292,5 @@ class DaosCodeGenerator(
             MemberName(KOTLIN_COLLECTION_PATH, KOTLIN_MAP_OF_NAME)
         ).returns(returnType)
     }
+
 }

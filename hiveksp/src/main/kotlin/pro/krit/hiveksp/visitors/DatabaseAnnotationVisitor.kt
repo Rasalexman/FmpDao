@@ -1,4 +1,4 @@
-package pro.krit.hiveksp.generators
+package pro.krit.hiveksp.visitors
 
 import com.google.devtools.ksp.closestClassDeclaration
 import com.google.devtools.ksp.getDeclaredFunctions
@@ -11,14 +11,16 @@ import com.google.devtools.ksp.symbol.KSValueArgument
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.extensions.createFileName
-import pro.krit.hiveksp.base.BaseDatabaseVisitor
-import pro.krit.hiveksp.data.KspData
+import pro.krit.hiveksp.base.BaseCodeGenerator
+import pro.krit.hiveksp.common.Consts.FIELD_DEFAULT_HEADERS
+import pro.krit.hiveksp.common.Consts.FIELD_HYPER_HIVE
+import pro.krit.hiveksp.common.Consts.FIELD_PROVIDER
 
 @KotlinPoetKspPreview
-class DatabaseCodeGenerator(
+class DatabaseAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator
-) : BaseDatabaseVisitor(logger, codeGenerator) {
+) : BaseCodeGenerator(logger, codeGenerator) {
 
     companion object {
         private const val ARG_AS_SINGLETON = "asSingleton"
@@ -30,17 +32,15 @@ class DatabaseCodeGenerator(
 
         private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
         private const val FMP_BASE_NAME = "IFmpDatabase"
-
-        private const val FIELD_PROVIDER = "fmpDatabase"
-        private const val FIELD_HYPER_HIVE = "hyperHive"
-        private const val FIELD_DEFAULT_HEADERS = "defaultHeaders"
+        private const val FMP_REST_NAME = "FmpRestRequest"
+        private const val FMP_WEB_NAME = "FmpWebRequest"
 
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
         private const val TAG_CLASS_NAME = "%T"
     }
 
-    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: List<KspData>) {
+    override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
         //logger.warn("---> class name = ${classDeclaration.simpleName.asString()}")
 
         val firstAnnotation = classDeclaration.annotations.firstOrNull()
@@ -63,7 +63,6 @@ class DatabaseCodeGenerator(
         createDatabaseExtendedFunction(
             classTypeSpec,
             classDeclaration,
-            data,
             asDaoProvider
         )
 
@@ -73,7 +72,6 @@ class DatabaseCodeGenerator(
     private fun createDatabaseExtendedFunction(
         classTypeSpec: TypeSpec.Builder,
         element: KSDeclaration,
-        kspList: List<KspData>,
         asProvider: Boolean
     ) {
         val extendedTypeMirrors = element.closestClassDeclaration()?.superTypes?.toList()?.map {
@@ -86,9 +84,9 @@ class DatabaseCodeGenerator(
                     !extElement.simpleName.asString().contains(FMP_BASE_NAME)
                 }
             extendedElements.forEach { extendedElement ->
-                createFunctions(classTypeSpec, extendedElement, kspList, asProvider)
+                createFunctions(classTypeSpec, extendedElement, asProvider)
                 //logger.warn("checkExtendedInterface $extendedElement - extendedElements $functions")
-                createDatabaseExtendedFunction(classTypeSpec, extendedElement, kspList, asProvider)
+                createDatabaseExtendedFunction(classTypeSpec, extendedElement, asProvider)
             }
         }
     }
@@ -96,14 +94,13 @@ class DatabaseCodeGenerator(
     private fun createFunctions(
         classTypeSpec: TypeSpec.Builder,
         element: KSDeclaration,
-        daoList: List<KspData>,
         asProvide: Boolean = false
     ): List<String> {
         val methods: List<KSFunctionDeclaration> =
             element.closestClassDeclaration()?.getDeclaredFunctions()?.toList().orEmpty()
         val allPropNames = mutableListOf<String>()
         //logger.warn("----------------> createFunctions")
-        //logger.warn("------> element = $element | enclosedElements = $methods")
+        //logger.warn("------> element = $element | methods = $methods")
 
         methods.forEach { enclose ->
 
@@ -115,72 +112,69 @@ class DatabaseCodeGenerator(
                 val funcName = enclose.simpleName.asString()
                 val returnedClass = ClassName(returnPack, returnClass)
 
-                val returnElementData = daoList.find { it.mainData.className == returnClass }
-
-                //logger.warn("------> enclose = $enclose | returnElementData = $returnElementData")
-
-                returnElementData?.let {
-                    val instancePackName = if (returnElementData.isRequest) {
-                        REQUEST_PACKAGE_NAME
-                    } else {
-                        DAO_PACKAGE_NAME
-                    }
-                    val returnedClassName = ClassName(instancePackName, it.fileName)
-
-                    //logger.warn("------> funcName = ${funcName} ")
-                    //logger.warn("------> returnedClass = ${it.mainData.className} ")
-
-                    val instanceStatement = if (returnElementData.isRequest) {
-                        buildString {
-                            append("$TAG_CLASS_NAME(")
-                            appendLine()
-                            append("$FIELD_HYPER_HIVE = this.provideHyperHive(),")
-                            appendLine()
-                            append("$FIELD_DEFAULT_HEADERS = this.getDefaultHeaders()")
-                            appendLine()
-                            append(")")
-                        }
-                    } else {
-                        "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
-                    }
-                    val funcSpec = FunSpec.builder(funcName)
-                        .addModifiers(KModifier.OVERRIDE)
-                        .returns(returnedClass).apply {
-                            if (asProvide) {
-                                addStatement(
-                                    "$RETURN_STATEMENT $instanceStatement",
-                                    returnedClassName
-                                )
-                            } else {
-
-                                val propName = funcName.createFileName()
-                                allPropNames.add(propName)
-                                val prop =
-                                    PropertySpec.builder(
-                                        propName,
-                                        returnedClassName.copy(nullable = true)
-                                    )
-                                        .mutable()
-                                        .addModifiers(KModifier.PRIVATE)
-                                        .initializer(NULL_INITIALIZER)
-                                        .build()
-
-                                classTypeSpec.addProperty(prop)
-
-                                val statementIf = "if($propName == $NULL_INITIALIZER) "
-                                val statementCreate = "$propName = $instanceStatement"
-                                val statementReturn = "$RETURN_STATEMENT $propName!!"
-                                beginControlFlow(statementIf)
-                                addStatement(statementCreate, returnedClassName)
-                                endControlFlow()
-                                addStatement(statementReturn)
-                            }
-                        }
-                        .build()
-
-                    //logger.warn("-----> func spec = ${funcSpec}")
-                    classTypeSpec.addFunction(funcSpec)
+                val annotations = returnDeclaration?.annotations?.toList().orEmpty()
+                val restAnnotation = annotations.findAnnotation(FMP_REST_NAME)
+                val webAnnotation = annotations.findAnnotation(FMP_WEB_NAME)
+                val isRequest = restAnnotation != null || webAnnotation != null
+                val instancePackName = if (isRequest) {
+                    REQUEST_PACKAGE_NAME
+                } else {
+                    DAO_PACKAGE_NAME
                 }
+
+                //logger.warn("------> enclose = $enclose")
+                //logger.warn("--------------> | returnClass = $returnClass")
+
+                val returnedClassName = ClassName(instancePackName, returnClass.createFileName())
+                val instanceStatement = if (isRequest) {
+                    buildString {
+                        append("$TAG_CLASS_NAME(")
+                        appendLine()
+                        append("$FIELD_HYPER_HIVE = this.provideHyperHive(),")
+                        appendLine()
+                        append("$FIELD_DEFAULT_HEADERS = this.getDefaultHeaders()")
+                        appendLine()
+                        append(")")
+                    }
+                } else {
+                    "$TAG_CLASS_NAME($FIELD_PROVIDER = this)"
+                }
+                val funcSpec = FunSpec.builder(funcName)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .returns(returnedClass)
+                    .apply {
+                        if (asProvide) {
+                            addStatement(
+                                "$RETURN_STATEMENT $instanceStatement",
+                                returnedClassName
+                            )
+                        } else {
+                            val propName = funcName.createFileName()
+                            allPropNames.add(propName)
+                            val prop =
+                                PropertySpec.builder(
+                                    propName,
+                                    returnedClassName.copy(nullable = true)
+                                )
+                                    .mutable()
+                                    .addModifiers(KModifier.PRIVATE)
+                                    .initializer(NULL_INITIALIZER)
+                                    .build()
+
+                            classTypeSpec.addProperty(prop)
+
+                            val statementIf = "if($propName == $NULL_INITIALIZER) "
+                            val statementCreate = "$propName = $instanceStatement"
+                            val statementReturn = "$RETURN_STATEMENT $propName!!"
+                            beginControlFlow(statementIf)
+                            addStatement(statementCreate, returnedClassName)
+                            endControlFlow()
+                            addStatement(statementReturn)
+                        }
+                    }.build()
+
+                //logger.warn("-----> func spec = ${funcSpec}")
+                classTypeSpec.addFunction(funcSpec)
             }
         }
 

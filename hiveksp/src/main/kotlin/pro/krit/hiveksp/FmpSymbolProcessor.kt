@@ -8,11 +8,10 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.DelicateKotlinPoetApi
 import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
-import pro.krit.hiveksp.data.KspData
-import pro.krit.hiveksp.generators.DaosCodeGenerator
 import pro.krit.hhivecore.annotations.*
-import pro.krit.hiveksp.generators.DatabaseCodeGenerator
-import pro.krit.hiveksp.generators.RequestsCodeGenerator
+import pro.krit.hiveksp.visitors.DatabaseAnnotationVisitor
+import pro.krit.hiveksp.visitors.DaoAnnotationVisitor
+import pro.krit.hiveksp.visitors.RequestAnnotationVisitor
 
 @DelicateKotlinPoetApi("Delicate api. Make sure that you know what you did")
 @KotlinPoetKspPreview
@@ -30,9 +29,8 @@ class FmpSymbolProcessor(
 
     private val logger = environment.logger
     private val codeGenerator = environment.codeGenerator
-    private val daosCodeGenerator = DaosCodeGenerator(logger, codeGenerator)
-    private val requestsCodeGenerator = RequestsCodeGenerator(logger, codeGenerator)
-    private val kspAnnotationVisitor = FmpAnnotationVisitor(logger)
+    private val daoAnnotationVisitor = DaoAnnotationVisitor(logger, codeGenerator)
+    private val requestAnnotationVisitor = RequestAnnotationVisitor(logger, codeGenerator)
 
     private lateinit var intType: KSType
 
@@ -42,52 +40,65 @@ class FmpSymbolProcessor(
         logger.warn("----> FmpSymbolProcessor start")
 
         //----- collect BindSingle annotations
+        val unableRequests = processRequests(resolver)
+        val unableDaos = processDaos(resolver)
+
+        //
+        val unableElements = (unableRequests + unableDaos)
+
         // Getting all symbols that are annotated with @FmpDatabase.
-        val daoSymbols = resolver.getSymbolsWithAnnotation(DAO_ANNOTATION_NAME).toList()
-        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME).toList()
-        val databaseLocalSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME).toList()
-        val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME).toList()
-        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME).toList()
-
+        val databaseSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME).toList()
         // Exit from the processor in case nothing is annotated as FMPDatabase
-        if (!databaseLocalSymbols.iterator().hasNext()) {
-            return emptyList()
+        if (databaseSymbols.isEmpty()) {
+            showFinishTime("database", startTime)
+            return unableElements
         }
 
-        // validate already generated files
-        val unableDaoToProcess = daoSymbols.filterNot { it.validate() }
-        val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }
-        val unableDatabaseToProcess = databaseLocalSymbols.filterNot { it.validate() }
-        val unableRestToProcess = restRequestSymbols.filterNot { it.validate() }
-        val unableWebToProcess = webRequestSymbols.filterNot { it.validate() }
-
-        val kspDaoDataList = mutableListOf<KspData>()
-        val kspRequestsDataList = mutableListOf<KspData>()
-
-        restRequestSymbols.filter { it.validate() }.mapNotNullTo(kspRequestsDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
+        val unableDatabaseToProcess = databaseSymbols.filterNot { it.validate() }
+        databaseSymbols.filter { it.validate() }.forEach {
+            it.accept(DatabaseAnnotationVisitor(logger, codeGenerator), Unit)
         }
-        webRequestSymbols.filter { it.validate() }.mapNotNullTo(kspRequestsDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
+        val allUnableToProcess = unableElements + unableDatabaseToProcess
+        return allUnableToProcess.also {
+            showFinishTime(startTime = startTime)
         }
-        requestsCodeGenerator.processRequest(kspRequestsDataList)
-
-        daoSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
-        }
-        daoLocalSymbols.filter { it.validate() }.mapNotNullTo(kspDaoDataList) {
-            it.accept(kspAnnotationVisitor, Unit)
-        }
-        daosCodeGenerator.processDaos(kspDaoDataList)
-
-        val allKspDataList = kspDaoDataList + kspRequestsDataList
-        databaseLocalSymbols.filter { it.validate() }.forEach {
-            it.accept(DatabaseCodeGenerator(logger, codeGenerator), allKspDataList)
-        }
-        val allUnableToProcess = (unableDaoToProcess + unableLocalDaoToProcess + unableDatabaseToProcess + unableRestToProcess + unableWebToProcess)
-
-        logger.warn("----> FmpSymbolProcessor finished in `${System.currentTimeMillis() - startTime}` ms")
-        return allUnableToProcess
     }
 
+    private fun processDaos(resolver: Resolver): List<KSAnnotated> {
+        //---- FM DAO
+        val daoSymbols = resolver.getSymbolsWithAnnotation(DAO_ANNOTATION_NAME).toList()
+        val unableDaoToProcess = daoSymbols.filterNot { it.validate() }
+        daoSymbols.filter { it.validate() }.forEach {
+            it.accept(daoAnnotationVisitor, Unit)
+        }
+
+        //----- FMP LOCAL DAO
+        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME).toList()
+        val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }
+        daoLocalSymbols.filter { it.validate() }.forEach {
+            it.accept(daoAnnotationVisitor, Unit)
+        }
+
+        return unableDaoToProcess + unableLocalDaoToProcess
+    }
+
+    private fun processRequests(resolver: Resolver): List<KSAnnotated> {
+        val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME).toList()
+        val unableRestToProcess = restRequestSymbols.filterNot { it.validate() }
+        restRequestSymbols.filter { it.validate() }.forEach {
+            it.accept(requestAnnotationVisitor, Unit)
+        }
+
+        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME).toList()
+        val unableWebToProcess = webRequestSymbols.filterNot { it.validate() }
+        webRequestSymbols.filter { it.validate() }.forEach {
+            it.accept(requestAnnotationVisitor, Unit)
+        }
+
+        return unableRestToProcess + unableWebToProcess
+    }
+
+    private fun showFinishTime(key: String = "", startTime: Long) {
+        logger.warn("----> FmpSymbolProcessor $key finished in `${System.currentTimeMillis() - startTime}` ms")
+    }
 }
