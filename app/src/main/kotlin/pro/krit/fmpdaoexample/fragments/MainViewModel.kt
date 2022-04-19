@@ -90,9 +90,9 @@ class MainViewModel : BaseViewModel() {
         processLoading(true)
         val localRbnr = 100
         val allData: List<ZfmToroSymptomListModel> = doAsync {
-            zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus>(
+            zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus> {
                 where = "${Fields.RBNR_Int} = $localRbnr"
-            )
+            }
         }
         println("-----> getSymptoms ${allData.size}")
         processLoading(false)
@@ -143,10 +143,10 @@ class MainViewModel : BaseViewModel() {
         println("----> all count = $allCount")
         val convertedSize = if (allData.isNotEmpty()) {
             //val first = allData.first()
-            val resultList = pmLocalDao.select(
-                where = "${Fields.IS_LOCAL} = 'false'",
-                fields = fields
-            )
+            val resultList = pmLocalDao.select {
+                this.where = "${Fields.IS_LOCAL} = 'false'"
+                this.fields = fields
+            }
             val converted = resultList.mapNotNull { it.convertTo() }
             converted.size
         } else 0

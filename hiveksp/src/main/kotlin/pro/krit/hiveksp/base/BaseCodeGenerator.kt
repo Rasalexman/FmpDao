@@ -26,7 +26,7 @@ abstract class BaseCodeGenerator(
         builders: List<TypeSpec.Builder>
     ) {
         val file = FileSpec.builder(packageName, classFileName)
-            .addComment(FILE_COMMENT)
+            .addFileComment(FILE_COMMENT)
             .apply {
                 builders.forEach { builder ->
                     addType(builder.build())

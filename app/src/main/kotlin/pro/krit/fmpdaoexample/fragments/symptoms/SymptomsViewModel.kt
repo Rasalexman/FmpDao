@@ -60,9 +60,9 @@ class SymptomsViewModel(
 
                 val query = "${Fields.RBNR_Int} = ${user.rbnr}"
                 val items =
-                    zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus>(
+                    zfmToroSymptomList.select<ZfmToroSymptomListModel, ZfmToroSymptomListStatus> {
                         where = query
-                    )
+                    }
                 val converted = convertSymptoms(items, user.symptomCode)
                 emit(converted)
             }

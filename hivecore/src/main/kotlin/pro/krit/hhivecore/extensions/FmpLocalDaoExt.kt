@@ -18,7 +18,7 @@ package pro.krit.hhivecore.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hhivecore.base.IDao
-import pro.krit.hhivecore.common.FlowableConfig
+import pro.krit.hhivecore.common.QueryConfig
 import pro.krit.hhivecore.common.QueryExecuter
 
 /**
@@ -29,8 +29,15 @@ import pro.krit.hhivecore.common.QueryExecuter
  * @return - Flow<List<E>> поток данных из базы данных
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.flowable(
-    builderBlock: FlowableConfig.() -> Unit = {}
-) = DaoInstance.flowable<E, S>(dao = this, config = FlowableConfig().apply(builderBlock))
+    builderBlock: QueryConfig.() -> Unit = {}
+) = DaoInstance.flowable<E, S>(dao = this, config = QueryConfig().apply(builderBlock))
+
+/**
+ * Создает Observable, который эмитит данные при триггере
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.observable(
+    builderBlock: QueryConfig.() -> Unit = {}
+) = DaoInstance.observable<E, S>(dao = this, config = QueryConfig().apply(builderBlock))
 
 /**
  * Простой запрос в таблицу базы данных
@@ -66,12 +73,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
  * @return - [List] с данными, либо пустой список
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.select(
-    where: String = "",
-    limit: Int = 0,
-    offset: Int = 0,
-    orderBy: String = "",
-    fields: List<String>? = null
-): List<E> = DaoInstance.select<E, S>(this, where, limit, offset, orderBy, fields)
+    builderBlock: QueryConfig.() -> Unit = {}
+): List<E> = QueryConfig().apply(builderBlock).run {
+    DaoInstance.select<E, S>(this@select, where, limit, offset, orderBy, fields)
+}
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -84,11 +89,10 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
  * @return - E? с данными, либо пустой список
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectFirst(
-    where: String = "",
-    offset: Int = 0,
-    orderBy: String = "",
-    fields: List<String>? = null
-): E? = select(where, 1, offset, orderBy, fields).firstOrNull()
+    builderBlock: QueryConfig.() -> Unit = {}
+): E? = QueryConfig().apply(builderBlock).run {
+    DaoInstance.select<E, S>(this@selectFirst, where, 1, offset, orderBy, fields)
+}.firstOrNull()
 
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
@@ -102,13 +106,11 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
  * @return - список результатов запроса обернутый в [Result]
  */
 inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.selectResult(
-    where: String = "",
-    limit: Int = 0,
-    offset: Int = 0,
-    orderBy: String = "",
-    fields: List<String>? = null
+    builderBlock: QueryConfig.() -> Unit = {}
 ): Result<List<E>> {
-    return DaoInstance.selectResult<E, S>(this, where, limit, offset, orderBy, fields)
+    return QueryConfig().apply(builderBlock).run {
+        DaoInstance.selectResult<E, S>(this@selectResult, where, limit, offset, orderBy, fields)
+    }
 }
 
 /**

@@ -1,21 +1,23 @@
 package pro.krit.hhivecore.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
+import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import pro.krit.hhivecore.base.IDao
-import pro.krit.hhivecore.common.FlowableConfig
 import pro.krit.hhivecore.common.QueryBuilder
+import pro.krit.hhivecore.common.QueryConfig
 import pro.krit.hhivecore.common.QueryExecuter
+import java.util.concurrent.TimeUnit
 
 object DaoInstance {
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> flowable(
         dao: IDao,
-        config: FlowableConfig
+        config: QueryConfig
     ): Flow<List<E>> {
-        val trigger = dao.getTrigger().run {
-            if(config.isDevastate) this.filter { it.isNotEmpty() }
+        val trigger = dao.getFlowTrigger().run {
+            if (config.isDevastate) this.filter { it.isNotEmpty() }
             else this
         }
         //println("------> onCreate trigger devastate = ${config.isDevastate}")
@@ -29,12 +31,12 @@ object DaoInstance {
                     select<E, S>(dao, where, limit, offset, orderBy, fields)
                 }
                 emit(result)
-                if(config.isDevastate) {
+                if (config.isDevastate) {
                     dao.dropTrigger()
                 }
             }
         }.onStart {
-            val isTriggerEmpty = dao.getTrigger().firstOrNull().isNullOrEmpty()
+            val isTriggerEmpty = dao.getFlowTrigger().firstOrNull().isNullOrEmpty()
             if (config.withStart && isTriggerEmpty) {
                 //println("------> onStart")
                 dao.triggerFlow()
@@ -45,6 +47,34 @@ object DaoInstance {
         }.apply {
             if (config.withDistinct) {
                 distinctUntilChanged()
+            }
+        }
+    }
+
+    inline fun <reified E : Any, reified S : StatusSelectTable<E>> observable(
+        dao: IDao,
+        config: QueryConfig
+    ): Observable<List<E>> {
+        val trigger = dao.getRxTrigger().run {
+            if (config.isDevastate) this.filter { it.isNotEmpty() }
+            else this
+        }
+        val requestDelay = config.emitDelay
+        return trigger.delay(requestDelay, TimeUnit.MILLISECONDS).flatMap { trig ->
+            if(trig.isNotEmpty()) {
+                Observable.fromCallable {
+                    config.run {
+                        select<E, S>(dao, where, limit, offset, orderBy, fields)
+                    }
+                }
+            } else {
+                Observable.empty()
+            }
+        }.doOnSubscribe {
+            val isTriggerEmpty = dao.getRxTrigger().blockingFirst().isEmpty()
+            if (config.withStart && isTriggerEmpty) {
+                //println("------> onStart")
+                dao.triggerRx()
             }
         }
     }

@@ -19,6 +19,7 @@ import com.mobrun.plugin.api.request_assistant.RequestBuilder
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
 import com.mobrun.plugin.models.BaseStatus
 import com.mobrun.plugin.models.StatusSelectTable
+import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import pro.krit.hhivecore.base.IDao
@@ -52,8 +53,12 @@ const val ERROR_CODE_DELETE = 10006
 const val ERROR_CODE_QUERY = 10007
 const val ERROR_CODE_UPDATE = 10008
 
-fun IDao.getTrigger(): Flow<String> {
-    return this.fmpDatabase.getTrigger(this)
+fun IDao.getFlowTrigger(): Flow<String> {
+    return this.fmpDatabase.getFlowTrigger(this)
+}
+
+fun IDao.getRxTrigger(): Subject<String> {
+    return this.fmpDatabase.getRxTrigger(this)
 }
 
 /**
@@ -64,7 +69,7 @@ inline fun <reified E : Any> IDao.initFields() {
 }
 
 fun IDao.dropTrigger() {
-    when(val trigger = this.getTrigger()) {
+    when(val trigger = this.getFlowTrigger()) {
         is MutableSharedFlow -> trigger.tryEmit("")
         is MutableStateFlow -> trigger.tryEmit("")
     }
@@ -88,7 +93,7 @@ fun IDao.flowableCount(
     withDistinct: Boolean = false,
     byField: String? = null
 ): Flow<Int> {
-    val trigger = this.getTrigger()
+    val trigger = this.getFlowTrigger()
     return flow {
         trigger.collect {
             if(emitDelay > 0) {
@@ -143,7 +148,7 @@ fun IDao.count(
 
 ////------ TRIGGERS
 fun IDao.triggerFlow() {
-    val trigger = this.getTrigger()
+    val trigger = this.getFlowTrigger()
     val triggerValue = UUID.randomUUID().toString()
     when(trigger) {
         is MutableSharedFlow -> trigger.tryEmit(triggerValue)
@@ -151,10 +156,17 @@ fun IDao.triggerFlow() {
     }
 }
 
+fun IDao.triggerRx() {
+    val trigger = this.getRxTrigger()
+    val triggerValue = UUID.randomUUID().toString()
+    trigger.onNext(triggerValue)
+}
+
 fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
     val statusName = this.status.name.uppercase()
     if (statusName == "OK") {
         dao.triggerFlow()
+        dao.triggerRx()
     }
 }
 

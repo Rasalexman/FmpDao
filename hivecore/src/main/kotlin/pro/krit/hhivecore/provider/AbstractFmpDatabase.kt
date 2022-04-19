@@ -19,6 +19,8 @@ import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
 import com.mobrun.plugin.api.VersionAPI
+import io.reactivex.rxjava3.subjects.PublishSubject
+import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,7 +44,8 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
     private var savedFmpDbKey: String = DEFAULT_FMP_KEY
 
-    private val triggers: HashMap<String, Flow<String>> = hashMapOf()
+    private val flowTriggers: HashMap<String, Flow<String>> = hashMapOf()
+    private val rxTriggers: HashMap<String, Subject<String>> = hashMapOf()
     private var isSharedTriggers: Boolean = true
 
     override val isDbCreated: Boolean
@@ -63,10 +66,17 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             ?: throw NullPointerException("HyperHiveState instance is not initialized")
     }
 
-    override fun getTrigger(dao: IDao): Flow<String> {
+    override fun getFlowTrigger(dao: IDao): Flow<String> {
         val triggerKey = dao.fullTableName
-        return triggers.getOrPut(triggerKey) {
+        return flowTriggers.getOrPut(triggerKey) {
             createTrigger(triggerKey)
+        }
+    }
+
+    override fun getRxTrigger(dao: IDao): Subject<String> {
+        val triggerKey = dao.fullTableName
+        return rxTriggers.getOrPut(triggerKey) {
+            PublishSubject.create()
         }
     }
 
@@ -166,7 +176,8 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     override fun clearProviders() {
-        triggers.clear()
+        flowTriggers.clear()
+        rxTriggers.clear()
         savedFmpDbKey = DEFAULT_FMP_KEY
         hyperHive = null
         hyperHiveState = null

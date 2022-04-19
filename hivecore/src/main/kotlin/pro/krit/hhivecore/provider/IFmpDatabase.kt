@@ -17,6 +17,7 @@ package pro.krit.hhivecore.provider
 import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
+import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hhivecore.base.IDao
 
@@ -27,7 +28,8 @@ interface IFmpDatabase {
     fun provideHyperHive(): HyperHive
     fun provideHyperHiveState(): HyperHiveState
 
-    fun getTrigger(dao: IDao): Flow<String>
+    fun getFlowTrigger(dao: IDao): Flow<String>
+    fun getRxTrigger(dao: IDao): Subject<String>
 
     fun openDatabase(dbKey: String = "", pathBase: String = ""): DatabaseState
     fun closeDatabase(pathBase: String = ""): DatabaseState

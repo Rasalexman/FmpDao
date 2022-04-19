@@ -12,7 +12,7 @@ package pro.krit.hhivecore.common
  * @property fields - возвращаеммые поля, ессли не заполнен то возвращаются все поля
  * @property isDevastate - тип триггера
  */
-class FlowableConfig {
+class QueryConfig {
     var where: String = ""
     var limit: Int = 0
     var offset: Int = 0
