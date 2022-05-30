@@ -1,5 +1,6 @@
 //------ APP VERSION
-val hhiveVersion = "1.4.16"
+val hhiveVersion = "1.4.17"
+val kotlin_version = "1.6.21"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
 
@@ -9,24 +10,24 @@ extra["buildSdkVersion"] = 31
 extra["toolsVersion"] = "31.0.0"
 extra["apiVersion"] = "1.6"
 extra["jvmVersion"] = "11"
-extra["agpVersion"] = "7.1.3"
-extra["kotlinVersion"] = "1.6.20"
+extra["agpVersion"] = "7.2.1"
+extra["kotlinVersion"] = kotlin_version
 extra["jitpackPath"] = "https://jitpack.io"
 extra["codePath"] = "src/main/kotlin"
 
 //------- LIBS VERSIONS
-val gson = "2.8.9"
-val navigation = "2.5.0-alpha03"
+val gson = "2.9.0"
+val navigation = "2.5.0-rc01"
 val kodi = "1.6.3"
 val leakcanary = "2.8.1"
-val sresult = "1.3.43"
+val sresult = "1.3.45"
 val junit = "4.13.2"
-val coroutines = "1.6.0"
+val coroutines = "1.6.1"
 val core: String = "1.7.0"
 val kotest = "5.0.3"
 val runner = "1.1.0"
 val espresso = "3.1.0"
-val ksp = "1.6.20-1.0.5"
+val ksp = "$kotlin_version-1.0.5"
 val kotlinpoet = "1.11.0"
 val autoService = "1.0.1"
 val rxJava3 = "3.1.4"

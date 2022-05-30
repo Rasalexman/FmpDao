@@ -31,23 +31,36 @@ class FmpSymbolProcessor(
         val startTime = System.currentTimeMillis()
         logger.warn("----> FmpSymbolProcessor start")
 
+        val restSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME)
+        val webSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME)
+        val daoSymbols = resolver.getSymbolsWithAnnotation(DAO_ANNOTATION_NAME)
+        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME)
+        val databaseSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME)
+
+        // Exit from the processor in case nothing is annotated
+        if (!restSymbols.iterator().hasNext() &&
+            !webSymbols.iterator().hasNext() &&
+            !daoSymbols.iterator().hasNext() &&
+            !daoLocalSymbols.iterator().hasNext() &&
+            !databaseSymbols.iterator().hasNext()
+        ) {
+            return emptyList()
+        }
+
         //----- collect BindSingle annotations
-        val unableRequests = processRequests(resolver)
-        val unableDaos = processDaos(resolver)
+        val unableRequests = processRequests(restSymbols, webSymbols)
+        val unableDaos = processDaos(daoSymbols, daoLocalSymbols)
 
         //
         val unableElements = (unableRequests + unableDaos)
 
         // Getting all symbols that are annotated with @FmpDatabase.
-        val databaseSymbols = resolver.getSymbolsWithAnnotation(DATABASE_ANNOTATION_NAME).toList()
-        // Exit from the processor in case nothing is annotated as FMPDatabase
-        if (databaseSymbols.isEmpty()) {
-            showFinishTime("database", startTime)
-            return unableElements
+        val databaseSymbolsList = databaseSymbols.toList()
+        val unableDatabaseToProcess = databaseSymbolsList.filterNot { it.validate() }.also {
+            logger.warn("----> Database unabled: ${it.size}")
         }
 
-        val unableDatabaseToProcess = databaseSymbols.filterNot { it.validate() }
-        databaseSymbols.filter { it.validate() }.forEach {
+        databaseSymbolsList.filter { it.validate() }.forEach {
             it.accept(DatabaseAnnotationVisitor(logger, codeGenerator), Unit)
         }
         val allUnableToProcess = unableElements + unableDatabaseToProcess
@@ -56,38 +69,52 @@ class FmpSymbolProcessor(
         }
     }
 
-    private fun processDaos(resolver: Resolver): List<KSAnnotated> {
+    private fun processDaos(
+        daoSymbols: Sequence<KSAnnotated>,
+        daoLocalSymbols: Sequence<KSAnnotated>
+    ): List<KSAnnotated> {
         //---- FM DAO
-        val daoSymbols = resolver.getSymbolsWithAnnotation(DAO_ANNOTATION_NAME).toList()
-        val unableDaoToProcess = daoSymbols.filterNot { it.validate() }
-        daoSymbols.filter { it.validate() }.forEach {
+        val daoSymbolsList = daoSymbols.toList()
+        val unableDaoToProcess = daoSymbolsList.filterNot { it.validate() }.also {
+            logger.warn("----> unableDaoToProcess: ${it.size}")
+        }
+        daoSymbolsList.filter { it.validate() }.forEach {
             it.accept(DaoAnnotationVisitor(logger, codeGenerator), Unit)
         }
 
         //----- FMP LOCAL DAO
-        val daoLocalSymbols = resolver.getSymbolsWithAnnotation(DAO_LOCAL_ANNOTATION_NAME).toList()
-        val unableLocalDaoToProcess = daoLocalSymbols.filterNot { it.validate() }
-        daoLocalSymbols.filter { it.validate() }.forEach {
+        val daoLocalSymbolsList = daoLocalSymbols.toList()
+        val unableLocalDaoToProcess = daoLocalSymbolsList.filterNot { it.validate() }
+            .also {
+                logger.warn("----> unableLocalDaoToProcess: ${it.size}")
+            }
+        daoLocalSymbolsList.filter { it.validate() }.forEach {
             it.accept(DaoAnnotationVisitor(logger, codeGenerator), Unit)
         }
 
-        return unableDaoToProcess + unableLocalDaoToProcess
+        return (unableDaoToProcess + unableLocalDaoToProcess)
     }
 
-    private fun processRequests(resolver: Resolver): List<KSAnnotated> {
-        val restRequestSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME).toList()
-        val unableRestToProcess = restRequestSymbols.filterNot { it.validate() }
-        restRequestSymbols.filter { it.validate() }.forEach {
+    private fun processRequests(
+        restSymbols: Sequence<KSAnnotated>,
+        webSymbols: Sequence<KSAnnotated>
+    ): List<KSAnnotated> {
+        //
+        val validatedRest = restSymbols.filter { it.validate() }.onEach {
             it.accept(RequestAnnotationVisitor(logger, codeGenerator), Unit)
-        }
+        }.toSet()
+        val unableRestToProcess = restSymbols - validatedRest.toSet()
 
-        val webRequestSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME).toList()
-        val unableWebToProcess = webRequestSymbols.filterNot { it.validate() }
-        webRequestSymbols.filter { it.validate() }.forEach {
+        ///
+        val webValidated = webSymbols.filter { it.validate() }.onEach {
             it.accept(RequestAnnotationVisitor(logger, codeGenerator), Unit)
-        }
+        }.toSet()
 
-        return unableRestToProcess + unableWebToProcess
+        val unableWebToProcess = webSymbols - webValidated
+
+        return (unableRestToProcess + unableWebToProcess).toList().also {
+            logger.warn("----> Request unabled: ${it.size}")
+        }
     }
 
     private fun showFinishTime(key: String = "", startTime: Long) {

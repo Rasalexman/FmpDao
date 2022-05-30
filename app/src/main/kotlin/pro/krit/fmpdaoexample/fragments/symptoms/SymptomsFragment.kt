@@ -30,7 +30,7 @@ class SymptomsFragment : BaseBindingFragment<FragmentSymptomsBinding, SymptomsVi
             itemDecorator = listOf(DividerItemDecoration(
                 requireContext(), DividerItemDecoration.HORIZONTAL
             ))
-            onItemClick = { item, _ ->
+            onItemClick = { item ->
                 viewModel.onSymptomClicked(item)
             }
         }
