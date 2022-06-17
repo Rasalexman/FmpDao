@@ -113,7 +113,7 @@ class MainViewModel : BaseViewModel() {
             val selectedSize = selectLocalDaoAsync()
             if (selectedSize == 0) {
                 val localListToInsert = mutableListOf<PmEtDataLocalEntity>()
-                val randomCount = Random.nextInt(21, 50)
+                val randomCount = Random.nextInt(4100, 8000)
                 repeat(randomCount) {
                     val isLocal = it % 2 == 0
                     val type = if (isLocal) PmType.USER else PmType.ADMIN
@@ -129,8 +129,9 @@ class MainViewModel : BaseViewModel() {
                         )
                     )
                 }
-                val insertAllStatus =
+                val insertAllStatus = doAsync {
                     pmLocalDao.insertOrReplace(localListToInsert, notifyAll = true)
+                }
                 println("-----> insertList of ${localListToInsert.size} = ${insertAllStatus.isOk}")
             }
         }
@@ -151,7 +152,7 @@ class MainViewModel : BaseViewModel() {
             converted.size
         } else 0
 
-        val deleteStatus = pmLocalDao.delete(where = "${Fields.IS_LOCAL} = 'false'")
+        val deleteStatus = pmLocalDao.delete() //where = "${Fields.IS_LOCAL} = 'false'"
 
         println("----> delete status = ${deleteStatus.isNotBad()}")
         println("----> converted count = $convertedSize")
