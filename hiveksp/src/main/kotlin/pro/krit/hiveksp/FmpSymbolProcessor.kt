@@ -29,7 +29,7 @@ class FmpSymbolProcessor(
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val startTime = System.currentTimeMillis()
-        logger.warn("----> FmpSymbolProcessor start")
+        logger.logging("----> FmpSymbolProcessor start")
 
         val restSymbols = resolver.getSymbolsWithAnnotation(REST_ANNOTATION_NAME)
         val webSymbols = resolver.getSymbolsWithAnnotation(WEB_ANNOTATION_NAME)
@@ -57,7 +57,7 @@ class FmpSymbolProcessor(
         // Getting all symbols that are annotated with @FmpDatabase.
         val databaseSymbolsList = databaseSymbols.toList()
         val unableDatabaseToProcess = databaseSymbolsList.filterNot { it.validate() }.also {
-            logger.warn("----> Database unabled: ${it.size}")
+            logger.logging("----> Database unabled: ${it.size}")
         }
 
         databaseSymbolsList.filter { it.validate() }.forEach {
@@ -76,7 +76,7 @@ class FmpSymbolProcessor(
         //---- FM DAO
         val daoSymbolsList = daoSymbols.toList()
         val unableDaoToProcess = daoSymbolsList.filterNot { it.validate() }.also {
-            logger.warn("----> unableDaoToProcess: ${it.size}")
+            logger.logging("----> unableDaoToProcess: ${it.size}")
         }
         daoSymbolsList.filter { it.validate() }.forEach {
             it.accept(DaoAnnotationVisitor(logger, codeGenerator), Unit)
@@ -86,7 +86,7 @@ class FmpSymbolProcessor(
         val daoLocalSymbolsList = daoLocalSymbols.toList()
         val unableLocalDaoToProcess = daoLocalSymbolsList.filterNot { it.validate() }
             .also {
-                logger.warn("----> unableLocalDaoToProcess: ${it.size}")
+                logger.logging("----> unableLocalDaoToProcess: ${it.size}")
             }
         daoLocalSymbolsList.filter { it.validate() }.forEach {
             it.accept(DaoAnnotationVisitor(logger, codeGenerator), Unit)
@@ -113,11 +113,11 @@ class FmpSymbolProcessor(
         val unableWebToProcess = webSymbols - webValidated
 
         return (unableRestToProcess + unableWebToProcess).toList().also {
-            logger.warn("----> Request unabled: ${it.size}")
+            logger.logging("----> Request unabled: ${it.size}")
         }
     }
 
     private fun showFinishTime(key: String = "", startTime: Long) {
-        logger.warn("----> FmpSymbolProcessor $key finished in `${System.currentTimeMillis() - startTime}` ms")
+        logger.logging("----> FmpSymbolProcessor $key finished in `${System.currentTimeMillis() - startTime}` ms")
     }
 }

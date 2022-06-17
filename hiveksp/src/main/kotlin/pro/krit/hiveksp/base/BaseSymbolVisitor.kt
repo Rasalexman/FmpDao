@@ -55,7 +55,7 @@ abstract class BaseSymbolVisitor(
             isRequest = isRequest,
             isWebRequest = isWebRequest
         )/*.also {
-            logger.warn("----> KSP DATA = $it")
+            logger.logging("----> KSP DATA = $it")
         }*/
     }
 

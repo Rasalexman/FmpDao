@@ -54,7 +54,7 @@ class DaoAnnotationVisitor(
     }
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        //logger.warn("------> class name = ${classDeclaration.simpleName.asString()}")
+        //logger.logging("------> class name = ${classDeclaration.simpleName.asString()}")
         val kspData = getKspDataFromAnnotation(classDeclaration)
         processSaveKspData(kspData)
     }
@@ -154,7 +154,7 @@ class DaoAnnotationVisitor(
                 }
             }.orEmpty()
 
-            //logger.warn("------> superInterfaces $className = $superInterfaces")
+            //logger.logging("------> superInterfaces $className = $superInterfaces")
             genericsArray.clear()
             genericsArray.addAll(superInterfaces)
         }
@@ -200,7 +200,7 @@ class DaoAnnotationVisitor(
                     .build()
                 addParameter(isLocalProp)
 
-                //logger.warn("--------> superTypeGenerics = $superTypeGenerics")
+                //logger.logging("--------> superTypeGenerics = $superTypeGenerics")
 
                 if (bindData.createTableOnInit) {
                     val members = mutableListOf<Any>()

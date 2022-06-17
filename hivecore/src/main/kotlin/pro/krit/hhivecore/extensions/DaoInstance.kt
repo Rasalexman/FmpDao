@@ -181,7 +181,7 @@ object DaoInstance {
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
         val query = QueryBuilder.createDeleteQuery(dao, items)
-        return QueryExecuter.executeTransactionStatus(
+        return QueryExecuter.executeStatus(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_DELETE,
@@ -231,7 +231,7 @@ object DaoInstance {
         withoutPrimaryKey: Boolean = false
     ): StatusSelectTable<E> {
         val query = QueryBuilder.createInsertOrReplaceQuery(dao, items, withoutPrimaryKey)
-        return QueryExecuter.executeTransactionStatus<E, S>(
+        return QueryExecuter.executeStatus<E, S>(
             dao = dao,
             query = query,
             errorCode = ERROR_CODE_INSERT,

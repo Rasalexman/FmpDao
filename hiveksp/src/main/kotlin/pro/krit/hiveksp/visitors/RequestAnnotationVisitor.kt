@@ -52,7 +52,7 @@ class RequestAnnotationVisitor(
     }
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        //logger.warn("------> class name = ${classDeclaration.simpleName.asString()}")
+        //logger.logging("------> class name = ${classDeclaration.simpleName.asString()}")
         val kspData = getKspDataFromAnnotation(classDeclaration)
         processSaveKspData(kspData)
     }
@@ -90,11 +90,11 @@ class RequestAnnotationVisitor(
         )
         elementsFiles.add(mainClassTypeSpec)
 
-        //logger.warn("-----> element = $element")
+        //logger.logging("-----> element = $element")
         val elementClass = element.closestClassDeclaration()
         val elementEnclosed = elementClass?.declarations?.toList().orEmpty()
 
-        //logger.warn("-----> elementEnclosed = $elementEnclosed")
+        //logger.logging("-----> elementEnclosed = $elementEnclosed")
         if (elementEnclosed.isNotEmpty()) {
 
             //------ Result models
@@ -114,7 +114,7 @@ class RequestAnnotationVisitor(
 
                 //val annotationName = tableAnnotation?.shortName?.asString() ?: paramAnnotation?.shortName?.asString().orEmpty()
 
-                //logger.warn("-----> annotationName = $annotationName")
+                //logger.logging("-----> annotationName = $annotationName")
 
                 val isTableAnnotation = tableAnnotation != null
                 val isParamAnnotation = paramAnnotation != null
@@ -125,7 +125,7 @@ class RequestAnnotationVisitor(
                 val propClassFields =
                     arguments.getArgumentValue<List<String>>(Params.FIELDS).orEmpty()
 
-                //logger.warn("-----> annotationInnerName = $annotationInnerName")
+                //logger.logging("-----> annotationInnerName = $annotationInnerName")
 
                 // название таблицы
                 val postFixName = if (isTableAnnotation) MODEL_POSTFIX else PARAMS_POSTFIX
@@ -387,7 +387,7 @@ class RequestAnnotationVisitor(
         classTypeSpec: TypeSpec.Builder,
         fieldReturnList: Boolean = false
     ) {
-        //logger.warn("-----> annotation serialized name = $annotationSerializedName")
+        //logger.logging("-----> annotation serialized name = $annotationSerializedName")
 
         val annotationSerialize = annotationSerializedName.createSerializedAnnotation()
         val returnClassName = createListTypeName(parameterClassName, fieldReturnList)
@@ -436,8 +436,8 @@ class RequestAnnotationVisitor(
         val propName = modelData.name
         val annotationName = modelData.annotate
 
-        //logger.warn("-----> propName = $propName")
-        //logger.warn("-----> annotationName = ${annotationName}")
+        //logger.logging("-----> propName = $propName")
+        //logger.logging("-----> annotationName = ${annotationName}")
 
         val annotationSerialize = annotationName.createSerializedAnnotation()
         val type = modelTypeName ?: modelData.type.asTypeName().copy(nullable = true)

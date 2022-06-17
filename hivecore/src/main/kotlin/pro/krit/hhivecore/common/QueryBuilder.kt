@@ -27,8 +27,9 @@ object QueryBuilder {
     private const val SELECT_ALL_MAKER = "*"
     private const val UPDATE_QUERY = "UPDATE %s SET "
 
-    const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION;"
+    const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
     const val END_TRANSACTION_QUERY = "END TRANSACTION;"
+    const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
 
     private const val WHERE = " WHERE "
     private const val LIMIT = " LIMIT "
@@ -162,6 +163,7 @@ object QueryBuilder {
         var prefix = ""
         return buildString {
             if(items.isNotEmpty()) {
+                append(BEGIN_TRANSACTION_QUERY)
                 append(INSERT_OR_REPLACE)
                 append(dao.fullTableName)
                 append(" ")
@@ -173,6 +175,7 @@ object QueryBuilder {
                     prefix = DELIM_MARK
                 }
                 append(FINISH_MARK)
+                append(END_TRANSACTION_QUERY)
             }
         }
     }
@@ -213,6 +216,7 @@ object QueryBuilder {
 
         var prefix = ""
         return buildString {
+            append(BEGIN_TRANSACTION_QUERY)
             if(items.isNotEmpty()) {
                 append(DELETE_QUERY)
                 append(tableName)
@@ -228,6 +232,7 @@ object QueryBuilder {
             }
             append(")")
             append(FINISH_MARK)
+            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 

@@ -101,6 +101,19 @@ object QueryExecuter {
         methodName: String = "executeStatus",
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
+
+        if(query.isEmpty()) {
+            val error = Error()
+            error.code = 1
+            error.description = "Query is empty"
+            val okStatus = StatusSelectTable<E>()
+            okStatus.status = StatusRequest.ERROR
+            okStatus.errors = listOf(error)
+            return okStatus.apply {
+                if(notifyAll) this.triggerDaoIfOk(dao)
+            }
+        }
+
         return try {
             val localDao: IDao = dao
             val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
@@ -124,39 +137,6 @@ object QueryExecuter {
                 method = methodName
             )
         }
-    }
-
-    inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeTransactionStatus(
-        dao: IDao,
-        query: String,
-        errorCode: Int = DEFAULT_ERROR_CODE,
-        methodName: String = "",
-        notifyAll: Boolean = false
-    ): StatusSelectTable<E> {
-
-        if(query.isEmpty()) {
-            val okStatus = StatusSelectTable<E>()
-            okStatus.status = StatusRequest.OK
-            return okStatus.apply {
-                if(notifyAll) this.triggerDaoIfOk(dao)
-            }
-        }
-
-        var status = executeStatus<E, S>(dao, QueryBuilder.BEGIN_TRANSACTION_QUERY)
-        if (status.isOk) {
-            status = executeStatus<E, S>(dao, query, errorCode, methodName)
-        }
-        val endStatus = executeStatus<E, S>(
-            dao,
-            QueryBuilder.END_TRANSACTION_QUERY,
-            errorCode,
-            methodName,
-            notifyAll
-        )
-        if (!endStatus.isOk) {
-            status = endStatus
-        }
-        return status
     }
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> S.checkTableStatus(

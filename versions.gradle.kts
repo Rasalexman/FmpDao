@@ -1,5 +1,5 @@
 //------ APP VERSION
-val hhiveVersion = "1.4.17"
+val hhiveVersion = "1.4.18"
 val kotlin_version = "1.6.21"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
@@ -19,8 +19,8 @@ extra["codePath"] = "src/main/kotlin"
 val gson = "2.9.0"
 val navigation = "2.5.0-rc01"
 val kodi = "1.6.3"
-val leakcanary = "2.8.1"
-val sresult = "1.3.45"
+val leakcanary = "2.9.1"
+val sresult = "1.3.47"
 val junit = "4.13.2"
 val coroutines = "1.6.1"
 val core: String = "1.7.0"

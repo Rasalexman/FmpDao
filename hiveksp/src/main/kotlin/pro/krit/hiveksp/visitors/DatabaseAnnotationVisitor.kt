@@ -41,7 +41,7 @@ class DatabaseAnnotationVisitor(
     }
 
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
-        //logger.warn("---> class name = ${classDeclaration.simpleName.asString()}")
+        //logger.logging("---> class name = ${classDeclaration.simpleName.asString()}")
 
         val firstAnnotation = classDeclaration.annotations.firstOrNull()
         val annotationArgs: List<KSValueArgument> = firstAnnotation?.arguments.orEmpty()
@@ -77,7 +77,7 @@ class DatabaseAnnotationVisitor(
         val extendedTypeMirrors = element.closestClassDeclaration()?.superTypes?.toList()?.map {
             it.resolve().declaration
         }.orEmpty()
-        //logger.warn("-------> extended = ${extendedTypeMirrors}")
+        //logger.logging("-------> extended = ${extendedTypeMirrors}")
         if (extendedTypeMirrors.isNotEmpty()) {
             val extendedElements =
                 extendedTypeMirrors.mapToInterfaceElements().filter { extElement ->
@@ -85,7 +85,7 @@ class DatabaseAnnotationVisitor(
                 }
             extendedElements.forEach { extendedElement ->
                 createFunctions(classTypeSpec, extendedElement, asProvider)
-                //logger.warn("checkExtendedInterface $extendedElement - extendedElements $functions")
+                //logger.logging("checkExtendedInterface $extendedElement - extendedElements $functions")
                 createDatabaseExtendedFunction(classTypeSpec, extendedElement, asProvider)
             }
         }
@@ -99,8 +99,8 @@ class DatabaseAnnotationVisitor(
         val methods: List<KSFunctionDeclaration> =
             element.closestClassDeclaration()?.getDeclaredFunctions()?.toList().orEmpty()
         val allPropNames = mutableListOf<String>()
-        //logger.warn("----------------> createFunctions")
-        //logger.warn("------> element = $element | methods = $methods")
+        //logger.logging("----------------> createFunctions")
+        //logger.logging("------> element = $element | methods = $methods")
 
         methods.forEach { enclose ->
 
@@ -122,8 +122,8 @@ class DatabaseAnnotationVisitor(
                     DAO_PACKAGE_NAME
                 }
 
-                //logger.warn("------> enclose = $enclose")
-                //logger.warn("--------------> | returnClass = $returnClass")
+                //logger.logging("------> enclose = $enclose")
+                //logger.logging("--------------> | returnClass = $returnClass")
 
                 val returnedClassName = ClassName(instancePackName, returnClass.createFileName())
                 val instanceStatement = if (isRequest) {
@@ -173,7 +173,7 @@ class DatabaseAnnotationVisitor(
                         }
                     }.build()
 
-                //logger.warn("-----> func spec = ${funcSpec}")
+                //logger.logging("-----> func spec = ${funcSpec}")
                 classTypeSpec.addFunction(funcSpec)
             }
         }
