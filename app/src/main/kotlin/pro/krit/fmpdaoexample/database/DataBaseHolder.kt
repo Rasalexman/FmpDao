@@ -1,6 +1,7 @@
 package pro.krit.fmpdaoexample.database
 
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import com.google.gson.Gson
@@ -12,20 +13,13 @@ import com.rasalexman.sresult.common.extensions.logg
 import com.rasalexman.sresult.common.extensions.loggE
 import com.rasalexman.sresult.common.extensions.toSuccessResult
 import com.rasalexman.sresult.data.dto.SResult
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import pro.krit.fmpdaoexample.IMainDatabase
 import pro.krit.generated.database.MainDatabaseImpl
 import pro.krit.hhivecore.provider.DatabaseConfig
 import pro.krit.hhivecore.provider.DatabaseState
 import java.util.*
-import kotlin.coroutines.CoroutineContext
 
-object DataBaseHolder : CoroutineScope {
-
-    private val supervisorJob = SupervisorJob()
-    override val coroutineContext: CoroutineContext = Dispatchers.Main + supervisorJob
+object DataBaseHolder {
 
     private val gson: Gson = GsonBuilder().create()
 
@@ -46,7 +40,7 @@ object DataBaseHolder : CoroutineScope {
                 "_" + dbKey +
                 "_" + project + ".sqlite"
 
-        val dbPath = context.getDatabasePath(fmpDbName).path
+        val dbPath = context.getDatabasePath(fmpDbName).toString()
 
         val hyperHiveConfig = DatabaseConfig(
             dbPath = dbPath,
@@ -55,13 +49,17 @@ object DataBaseHolder : CoroutineScope {
             environment = environment,
             project = project,
             retryCount = 6,
-            retryInterval = 10,
-            logLevel = 0,
-            isSharedTrigger = false
+            retryInterval = 10
         )
 
+        val handler = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            Handler.createAsync(Looper.getMainLooper())
+        } else {
+            Handler(Looper.getMainLooper())
+        }
+        val hyperHiveState = HyperHiveState(context).setHandler(handler)
         mainDb = MainDatabaseImpl.initialize(
-            hState = HyperHiveState(context).setHandler(Handler(Looper.getMainLooper())),
+            hState = hyperHiveState,
             config = hyperHiveConfig
         )
         val dbState = mainDb.openDatabase(login)

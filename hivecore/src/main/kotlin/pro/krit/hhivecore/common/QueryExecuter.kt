@@ -103,12 +103,8 @@ object QueryExecuter {
     ): StatusSelectTable<E> {
 
         if(query.isEmpty()) {
-            val error = Error()
-            error.code = 1
-            error.description = "Query is empty"
             val okStatus = StatusSelectTable<E>()
-            okStatus.status = StatusRequest.ERROR
-            okStatus.errors = listOf(error)
+            okStatus.status = StatusRequest.OK
             return okStatus.apply {
                 if(notifyAll) this.triggerDaoIfOk(dao)
             }

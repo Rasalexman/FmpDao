@@ -175,7 +175,7 @@ object QueryBuilder {
                     prefix = DELIM_MARK
                 }
                 append(FINISH_MARK)
-                append(END_TRANSACTION_QUERY)
+                append(COMMIT_TRANSACTION_QUERY)
             }
         }
     }

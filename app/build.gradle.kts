@@ -79,10 +79,6 @@ android {
         }
     }
 
-    kapt {
-        generateStubs = false
-    }
-
     kotlinOptions {
         languageVersion = "1.6"
         apiVersion = "1.6"
@@ -97,13 +93,15 @@ dependencies {
     val junit: String by rootProject.extra
     val leakCanary: String by rootProject.extra
     val runner: String by rootProject.extra
+    val easypermissions: String by rootProject.extra
     val espresso: String by rootProject.extra
 
     implementation(core)
     implementation(coroutinesCore)
     implementation(sresultpresentation)
+    implementation(easypermissions)
 
-    //implementation(project(":hhive"))
+    implementation(project(":hhive"))
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")

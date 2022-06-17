@@ -39,7 +39,7 @@ dependencies {
     api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
     api(gson)
     api(kotlinPoet)
-    compileOnly(rxjava3)
+    implementation(rxjava3)
     compileOnly(coroutinesCore)
 }
 

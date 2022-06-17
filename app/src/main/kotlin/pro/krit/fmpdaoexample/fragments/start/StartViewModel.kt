@@ -17,14 +17,11 @@ class StartViewModel : BaseViewModel() {
 
     fun openDataBase(appContext: Context) = launchUITryCatch {
         showLoading.postValue(View.VISIBLE)
-        val state =
-            doAsync {
-                DataBaseHolder.createAndOpenDatabase(
-                    MainActivity.DEBUG_LOGIN,
-                    "omk",
-                    appContext
-                )
-            }
+        val state = DataBaseHolder.createAndOpenDatabase(
+            MainActivity.DEBUG_LOGIN,
+            "872134",
+            appContext
+        )
         if (state.isOpened) {
             navigationLiveData.value = StartFragmentDirections.actionStartFragmentToMainFragment().toNavigateResult()
         } else {
