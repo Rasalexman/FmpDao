@@ -20,6 +20,7 @@ import com.mobrun.plugin.models.StatusRequest
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.RequestExecuter.isNotBad
+import pro.krit.hhivecore.extensions.fullTableName
 import pro.krit.hhivecore.extensions.getErrorMessage
 import pro.krit.hhivecore.extensions.triggerDaoIfOk
 
@@ -38,8 +39,8 @@ object QueryExecuter {
             val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
             status.result.database.records.orEmpty()
         } catch (e: Throwable) {
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             e.printStackTrace()
-            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             emptyList()
         }
     }
@@ -82,14 +83,14 @@ object QueryExecuter {
                 val result = status.result.database.records.orEmpty()
                 Result.success(result)
             } else {
+                println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
                 val message = status.getErrorMessage()
-                //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
                 Result.failure(IllegalStateException(message))
             }
 
         } catch (e: Throwable) {
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             e.printStackTrace()
-            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             Result.failure(e)
         }
     }
@@ -125,8 +126,8 @@ object QueryExecuter {
                 if(notifyAll) this.triggerDaoIfOk(localDao)
             }
         } catch (e: Throwable) {
+            println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             e.printStackTrace()
-            //println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             createErrorStatus(
                 ex = e,
                 codeType = errorCode,
