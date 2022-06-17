@@ -27,9 +27,8 @@ object QueryBuilder {
     private const val SELECT_ALL_MAKER = "*"
     private const val UPDATE_QUERY = "UPDATE %s SET "
 
-    const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
-    const val END_TRANSACTION_QUERY = "END TRANSACTION;"
-    const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
+    private const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
+    private const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
 
     private const val WHERE = " WHERE "
     private const val LIMIT = " LIMIT "
@@ -216,23 +215,23 @@ object QueryBuilder {
 
         var prefix = ""
         return buildString {
-            append(BEGIN_TRANSACTION_QUERY)
             if(items.isNotEmpty()) {
+                append(BEGIN_TRANSACTION_QUERY)
                 append(DELETE_QUERY)
                 append(tableName)
                 append(WHERE)
                 append("$primaryKeyName IN ")
+                append("(")
+                for (item in items) {
+                    append(prefix)
+                    val keyValue: Any = primaryKeyField[item]
+                    append("'$keyValue'")
+                    prefix = DELIM_MARK
+                }
+                append(")")
+                append(FINISH_MARK)
+                append(COMMIT_TRANSACTION_QUERY)
             }
-            append("(")
-            for (item in items) {
-                append(prefix)
-                val keyValue: Any = primaryKeyField[item]
-                append("'$keyValue'")
-                prefix = DELIM_MARK
-            }
-            append(")")
-            append(FINISH_MARK)
-            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 
