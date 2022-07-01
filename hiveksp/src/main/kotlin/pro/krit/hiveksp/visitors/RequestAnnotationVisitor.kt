@@ -63,9 +63,9 @@ class RequestAnnotationVisitor(
         val mainPackName = kspData.mainData.packName
         val mainClassName = kspData.mainData.className
         val requestInterface = if (kspData.isWebRequest) {
-            IRequest.IRestRequest::class
-        } else {
             IRequest.IWebRequest::class
+        } else {
+            IRequest.IRestRequest::class
         }.asTypeName()
 
         val resourceName = kspData.resourceName
