@@ -1,5 +1,5 @@
 //------ APP VERSION
-val hhiveVersion = "1.4.22"
+val hhiveVersion = "1.4.23"
 val kotlin_version = "1.6.21"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion

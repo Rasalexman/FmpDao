@@ -22,11 +22,14 @@ import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.RequestExecuter.isNotBad
 import pro.krit.hhivecore.extensions.fullTableName
 import pro.krit.hhivecore.extensions.getErrorMessage
+import pro.krit.hhivecore.extensions.initFields
 import pro.krit.hhivecore.extensions.triggerDaoIfOk
 
 object QueryExecuter {
 
     const val DEFAULT_ERROR_CODE = 1001
+    const val ERROR_NO_TABLE_CODE = 1
+    const val ERROR_NO_TABLE = "no such table"
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeQuery(
         dao: IDao,
@@ -103,27 +106,27 @@ object QueryExecuter {
         notifyAll: Boolean = false
     ): StatusSelectTable<E> {
 
-        if(query.isEmpty()) {
+        if (query.isEmpty()) {
             val okStatus = StatusSelectTable<E>()
             okStatus.status = StatusRequest.OK
             return okStatus.apply {
-                if(notifyAll) this.triggerDaoIfOk(dao)
+                if (notifyAll) this.triggerDaoIfOk(dao)
             }
         }
 
-        return try {
+        val errorStatus: StatusSelectTable<E> = try {
             val localDao: IDao = dao
             val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
             val clazz = S::class.java
             val status = hyperHiveDatabaseApi.query(query, clazz).execute()!!
             // check for table creation
             val isOkStatus = status.checkTableStatus(localDao, hyperHiveDatabaseApi)
-            if(isOkStatus) {
+            if (isOkStatus) {
                 status
             } else {
                 hyperHiveDatabaseApi.query(query, clazz).execute()!!
             }.apply {
-                if(notifyAll) this.triggerDaoIfOk(localDao)
+                if (notifyAll) this.triggerDaoIfOk(localDao)
             }
         } catch (e: Throwable) {
             println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
@@ -134,15 +137,21 @@ object QueryExecuter {
                 method = methodName
             )
         }
+        return errorStatus
     }
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> S.checkTableStatus(
         dao: IDao,
         databaseApi: DatabaseAPI
     ): Boolean {
-        return if(!this.isOk && dao.fieldsData != null) {
-            val isTableError = this.errors.firstOrNull()?.code == 1
-            if(isTableError) {
+        return if (!this.isOk && dao.fieldsData != null) {
+            val isTableError = this.errors?.any { error ->
+                        error.code == ERROR_NO_TABLE_CODE ||
+                        error.descriptions.any { it.contains(ERROR_NO_TABLE) } ||
+                        error.description?.contains(ERROR_NO_TABLE) == true
+            } ?: false
+            if (isTableError) {
+                dao.initFields<E>()
                 val clazz = S::class.java
                 val createTableQuery = QueryBuilder.createTableQuery(dao)
                 val createTableStatus = databaseApi.query(createTableQuery, clazz).execute()!!

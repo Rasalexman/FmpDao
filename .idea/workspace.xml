@@ -15,15 +15,15 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/executionHistory/executionHistory.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.bin" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/7.3.3/fileHashes/fileHashes.lock" afterDir="false" />
+    <list default="true" id="5c40dc36-4889-48e8-82db-9d9d258b95d2" name="Default Changelist" comment="version to 1.4.11 &#10;- fix bug with process ksp ParameterField">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/app/FmpDao.app.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/app/FmpDao.app.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/app/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/hivecore/src/main/kotlin/pro/krit/hhivecore/common/QueryExecuter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/hivecore/src/main/kotlin/pro/krit/hhivecore/common/QueryExecuter.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/versions.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/versions.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -66,15 +66,15 @@
         <option value="Kotlin Sealed Interface" />
         <option value="Kotlin Sealed Class" />
         <option value="Kotlin Enum" />
-        <option value="Kotlin Interface" />
         <option value="Kotlin Annotation" />
         <option value="navigationResourceFile" />
         <option value="layoutResourceFile" />
         <option value="layoutResourceFile_vertical" />
-        <option value="Kotlin Data Class" />
         <option value="Kotlin File" />
-        <option value="Kotlin Class" />
         <option value="Kotlin Object" />
+        <option value="Kotlin Interface" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin Data Class" />
       </list>
     </option>
   </component>
@@ -109,6 +109,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="RunOnceActivity.cidr.known.project.marker" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="SHOW_ALL_PROCESSES" value="true" />
     <property name="android-custom-view/Users/alexander/.gradle/caches/modules-2/files-2.1/androidx.appcompat/appcompat/1.2.0/13e8ff89631c2e101eb6bddd12c2fb4bbd74b15d/appcompat-1.2.0-sources.jar!/androidx/appcompat/widget/Toolbar.java_SELECTED" value="Toolbar" />
     <property name="android.project.structure.last.selected" value="SDK Location" />
@@ -116,7 +117,7 @@
     <property name="android.sdk.path" value="$PROJECT_DIR$/../Library/Android/sdk" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="com.intellij.openapi.externalSystem.service.settings.ExternalSystemGroupConfigurable" value="ALL" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/gradle/wrapper" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/hivecore/src/main/kotlin/pro/krit/hhivecore/extensions" />
     <property name="project.structure.last.edited" value="SDK Location" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -129,11 +130,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/hivecore/src/main/kotlin/pro/krit/hhivecore/extensions" />
+      <recent name="$PROJECT_DIR$/hiveprocessor" />
+      <recent name="$PROJECT_DIR$/hiveksp" />
       <recent name="$PROJECT_DIR$/gradle/wrapper" />
       <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/hiveksp/libs" />
-      <recent name="$PROJECT_DIR$/hiveksp/src/main/resources/META-INF" />
-      <recent name="$PROJECT_DIR$/hiveksp" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/hiveprocessor/backups" />
@@ -141,11 +142,11 @@
       <recent name="$PROJECT_DIR$/hiveprocessor/src/main/kotlin" />
     </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
+      <recent name="pro.krit.hiveksp.visitors" />
       <recent name="pro.krit.hivesymbolprocessor" />
       <recent name="pro.krit.fmpdaoexample.fragments.users" />
       <recent name="pro.krit.fmpdaoexample.statuses" />
       <recent name="pro.krit.fmpdaoexample.models" />
-      <recent name="pro.krit.fmpdaoexample.fmpresources" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="" />
@@ -197,8 +198,6 @@
       <option name="MODE" value="default_activity" />
       <option name="CLEAR_LOGCAT" value="false" />
       <option name="SHOW_LOGCAT_AUTOMATICALLY" value="false" />
-      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
-      <option name="FORCE_STOP_RUNNING_APP" value="true" />
       <option name="INSPECTION_WITHOUT_ACTIVITY_RESTART" value="false" />
       <option name="TARGET_SELECTION_MODE" value="DEVICE_AND_SNAPSHOT_COMBO_BOX" />
       <option name="SELECTED_CLOUD_MATRIX_CONFIGURATION_ID" value="-1" />
@@ -313,167 +312,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1622325960385</updated>
-    </task>
-    <task id="LOCAL-00050" summary="release 1.3.9&#10;- params with list">
-      <created>1624310646565</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1624310646566</updated>
-    </task>
-    <task id="LOCAL-00051" summary="release 1.3.10&#10;- params with list">
-      <created>1628618577240</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1628618577243</updated>
-    </task>
-    <task id="LOCAL-00052" summary="release 1.3.10&#10;- params with list">
-      <created>1628619547198</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1628619547198</updated>
-    </task>
-    <task id="LOCAL-00053" summary="release 1.3.12&#10;- add FmpParam.kt for create custom request params">
-      <created>1628768031654</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1628768031654</updated>
-    </task>
-    <task id="LOCAL-00054" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
-      <created>1634647913295</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1634647913296</updated>
-    </task>
-    <task id="LOCAL-00055" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
-      <created>1634651651018</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1634651651019</updated>
-    </task>
-    <task id="LOCAL-00056" summary="release 1.3.13&#10;- add FmpParam.kt for create custom request params">
-      <created>1634652865411</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1634652865411</updated>
-    </task>
-    <task id="LOCAL-00057" summary="release 1.3.14&#10;- added numerated fields model generation">
-      <created>1635435681207</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1635435681208</updated>
-    </task>
-    <task id="LOCAL-00058" summary="release 1.3.16&#10;- added numerated fields model generation">
-      <created>1635923084426</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1635923084426</updated>
-    </task>
-    <task id="LOCAL-00059" summary="release 1.3.22&#10;- added offset and orderBy in select requests">
-      <created>1637159168284</created>
-      <option name="number" value="00059" />
-      <option name="presentableId" value="LOCAL-00059" />
-      <option name="project" value="LOCAL" />
-      <updated>1637159168284</updated>
-    </task>
-    <task id="LOCAL-00060" summary="release 1.3.22&#10;- added documentation">
-      <created>1637161305691</created>
-      <option name="number" value="00060" />
-      <option name="presentableId" value="LOCAL-00060" />
-      <option name="project" value="LOCAL" />
-      <updated>1637161305691</updated>
-    </task>
-    <task id="LOCAL-00061" summary="release 1.3.23&#10;- update kotlin version&#10;- update logs printing">
-      <created>1637166255536</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1637166255536</updated>
-    </task>
-    <task id="LOCAL-00062" summary="release 1.3.24&#10;- added `update` function to FmpLocalDaoExt.kt&#10;- added `query` function to FmpLocalDaoExt.kt&#10;- fully migrate to java 11">
-      <created>1637269667734</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1637269667735</updated>
-    </task>
-    <task id="LOCAL-00063" summary="release 1.3.25&#10;- added scalar parameters to fmpRequest.tableListStatus">
-      <created>1638187125983</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1638187125983</updated>
-    </task>
-    <task id="LOCAL-00064" summary="release">
-      <created>1638257128216</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1638257128216</updated>
-    </task>
-    <task id="LOCAL-00065" summary="map list of string in entity">
-      <created>1639047176116</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1639047176117</updated>
-    </task>
-    <task id="LOCAL-00066" summary="release 1.3.27&#10;- added numerated fields model generation">
-      <created>1640004791205</created>
-      <option name="number" value="00066" />
-      <option name="presentableId" value="LOCAL-00066" />
-      <option name="project" value="LOCAL" />
-      <updated>1640004791205</updated>
-    </task>
-    <task id="LOCAL-00067" summary="release 1.3.27&#10;- фиксы багов">
-      <created>1640005666241</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1640005666242</updated>
-    </task>
-    <task id="LOCAL-00068" summary="release 1.3.28&#10;- return replay for trigger">
-      <created>1640245243230</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1640245243230</updated>
-    </task>
-    <task id="LOCAL-00069" summary="release 1.3.34&#10;- глобальный рефакторинг&#10;- капт работает в изолированной среде&#10;- версия Котлин 1.6.10&#10;- минимальная версия понижена до 19">
-      <created>1642362493791</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1642362493791</updated>
-    </task>
-    <task id="LOCAL-00070" summary="release 1.3.35&#10;- проверка на создание таблицы в базе данных после выполнения запроса">
-      <created>1642365699054</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1642365699055</updated>
-    </task>
-    <task id="LOCAL-00071" summary="release 1.3.36&#10;- aggregating annotation process">
-      <created>1642450537750</created>
-      <option name="number" value="00071" />
-      <option name="presentableId" value="LOCAL-00071" />
-      <option name="project" value="LOCAL" />
-      <updated>1642450537751</updated>
-    </task>
-    <task id="LOCAL-00072" summary="release 1.3.36">
-      <created>1642451241976</created>
-      <option name="number" value="00072" />
-      <option name="presentableId" value="LOCAL-00072" />
-      <option name="project" value="LOCAL" />
-      <updated>1642451241976</updated>
     </task>
     <task id="LOCAL-00073" summary="release 1.3.37&#10;- правильный порядок запросов инициализации фмп slug">
       <created>1642544997626</created>
@@ -657,7 +495,168 @@
       <option name="project" value="LOCAL" />
       <updated>1647280475605</updated>
     </task>
-    <option name="localTasksCounter" value="99" />
+    <task id="LOCAL-00099" summary="version to 1.4.3 rename core project package to hivecore">
+      <created>1648127432869</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1648127432869</updated>
+    </task>
+    <task id="LOCAL-00100" summary="version to 1.4.3 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648128865271</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1648128865271</updated>
+    </task>
+    <task id="LOCAL-00101" summary="version to 1.4.4 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648132365160</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1648132365161</updated>
+    </task>
+    <task id="LOCAL-00102" summary="version to 1.4.5 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648134130136</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1648134130136</updated>
+    </task>
+    <task id="LOCAL-00103" summary="version to 1.4.6 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648134912432</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1648134912432</updated>
+    </task>
+    <task id="LOCAL-00104" summary="version to 1.4.7 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648136615095</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1648136615095</updated>
+    </task>
+    <task id="LOCAL-00105" summary="version to 1.4.8 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648137734047</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1648137734047</updated>
+    </task>
+    <task id="LOCAL-00106" summary="version to 1.4.9 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648137949789</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1648137949789</updated>
+    </task>
+    <task id="LOCAL-00107" summary="version to 1.4.10 rename core project package to hivecore and added selectFirst for local and remote dao">
+      <created>1648139722706</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1648139722707</updated>
+    </task>
+    <task id="LOCAL-00108" summary="version to 1.4.11 &#10;- fix bug with process ksp ParameterField&#10;- added ext to `StatusRawDataListTable.parseTable`">
+      <created>1648237727552</created>
+      <option name="number" value="00108" />
+      <option name="presentableId" value="LOCAL-00108" />
+      <option name="project" value="LOCAL" />
+      <updated>1648237727552</updated>
+    </task>
+    <task id="LOCAL-00109" summary="version to 1.4.12 &#10;- added PrimaryKey annotation to generated request model">
+      <created>1648414412508</created>
+      <option name="number" value="00109" />
+      <option name="presentableId" value="LOCAL-00109" />
+      <option name="project" value="LOCAL" />
+      <updated>1648414412509</updated>
+    </task>
+    <task id="LOCAL-00110" summary="version to 1.4.13 &#10;- change the order of annotation processing. The first is going requests then daos and finally database">
+      <created>1648416049079</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1648416049079</updated>
+    </task>
+    <task id="LOCAL-00111" summary="version to 1.4.14&#10;- refactoring processor">
+      <created>1648427225761</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1648427225761</updated>
+    </task>
+    <task id="LOCAL-00112" summary="version to 1.4.14 &#10;- refactor ksp processor&#10;- remove unused files&#10;- make cross generated code works together">
+      <created>1648427490027</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1648427490027</updated>
+    </task>
+    <task id="LOCAL-00113" summary="version to 1.4.15 &#10;- add selectFirst to FieldsDao">
+      <created>1648474205484</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1648474205485</updated>
+    </task>
+    <task id="LOCAL-00114" summary="version to 1.4.16 &#10;- added RxJava support with `fun observable` for all IDao ext&#10;- update kotlin version to 1.6.20&#10;- update ksp version to &quot;1.6.20-1.0.5&quot;&#10;- refactor function to apply builderQuery&#10;- rename FlowableConfig to QueryConfig">
+      <created>1650390000593</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1650390000593</updated>
+    </task>
+    <task id="LOCAL-00115" summary="version to 1.4.17 &#10;- refactor all build processes with ksp">
+      <created>1653899025968</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1653899025969</updated>
+    </task>
+    <task id="LOCAL-00116" summary="version to 1.4.18 &#10;- удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT">
+      <created>1655457508437</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1655457508438</updated>
+    </task>
+    <task id="LOCAL-00117" summary="version to 1.4.18&#10;- удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT">
+      <created>1655464260705</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1655464260705</updated>
+    </task>
+    <task id="LOCAL-00118" summary="version to 1.4.19&#10;&#10;удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT, добавил rxJava3 в корбибилотеку">
+      <created>1655466532663</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1655466532663</updated>
+    </task>
+    <task id="LOCAL-00119" summary="version to 1.4.21 &#10;- change query delete with transaction">
+      <created>1655468772234</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1655468772234</updated>
+    </task>
+    <task id="LOCAL-00120" summary="version to 1.4.21 &#10;- добавил вывод в трейс ошибок и транзакцию на удаление пустого поля">
+      <created>1655468961541</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1655468961541</updated>
+    </task>
+    <task id="LOCAL-00121" summary="version to 1.4.22 &#10;- fix bug with base request interface">
+      <created>1656660706163</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1656660706163</updated>
+    </task>
+    <option name="localTasksCounter" value="122" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -673,32 +672,32 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="release 1.3.37&#10;- правильный порядок запросов инициализации фмп slug" />
-    <MESSAGE value="release 1.3.38&#10;- поправлен баг с интовыми значениями при выборке из локальной ДБ&#10;- убраны лишние логи на println&#10;- добавлен метод для вызова триггерного флоу DaoInstance.kt `flowableTriggered` и замененм во всех расширениях&#10;- вынесен метод ссоздания таблиц для всех дао" />
-    <MESSAGE value="- добавлена возможноссть запросов по конкретным полям модели ДБ&#10;- рефактор кода&#10;- убраны обязательные статусы из reified типов" />
-    <MESSAGE value="- добавлена возможноссть запросов по конкретным полям модели ДБ&#10;- рефактор кода&#10;- убраны обязательные reified статусы из запросов к БД" />
-    <MESSAGE value="release 1.3.38&#10;- полностью переработанная модель подписки на flow" />
-    <MESSAGE value="release 1.3.38&#10;- удалил не нужные принты" />
-    <MESSAGE value="release 1.3.41&#10;- добавлена полная очистка всех провайдеров базы данных через метод `clearProviders`" />
-    <MESSAGE value="release 1.3.42&#10;- проверка на создание таблицы в базе данных после выполнения запроса" />
-    <MESSAGE value="release 1.3.42&#10;- обновил сборку jar с ресурсами" />
-    <MESSAGE value="logs" />
-    <MESSAGE value="release 1.3.44&#10;- добавил конфигурацию для запросов flowable" />
-    <MESSAGE value="release 1.3.44&#10;- убрал логи" />
-    <MESSAGE value="- начал переписывать на ксп" />
-    <MESSAGE value="промежуточный коммит с градл скриптом" />
-    <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2" />
-    <MESSAGE value="release 1.3.45&#10;- избавился от buildSrc &#10;- обновил AGP на 7.1.2&#10;- добавил конфиг по умолчанию для flowable" />
-    <MESSAGE value="- начал писать ksp processor" />
-    <MESSAGE value="- added gradlew" />
-    <MESSAGE value="- update settings" />
-    <MESSAGE value="- rebuild project" />
-    <MESSAGE value="release version 1.4.0" />
-    <MESSAGE value="added gradle build" />
-    <MESSAGE value="idea and buildgr" />
     <MESSAGE value="downgrade version to 1.3.48" />
     <MESSAGE value="version to 1.3.49" />
-    <option name="LAST_COMMIT_MESSAGE" value="version to 1.3.49" />
+    <MESSAGE value="version to 1.4.3 rename core project package to hivecore" />
+    <MESSAGE value="version to 1.4.3 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.4 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.5 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.6 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.7 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.8 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.9 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.10 rename core project package to hivecore and added selectFirst for local and remote dao" />
+    <MESSAGE value="version to 1.4.11 &#10;- fix bug with process ksp ParameterField&#10;- added ext to `StatusRawDataListTable.parseTable`" />
+    <MESSAGE value="version to 1.4.12 &#10;- added PrimaryKey annotation to generated request model" />
+    <MESSAGE value="version to 1.4.13 &#10;- change the order of annotation processing. The first is going requests then daos and finally database" />
+    <MESSAGE value="version to 1.4.14&#10;- refactoring processor" />
+    <MESSAGE value="version to 1.4.14 &#10;- refactor ksp processor&#10;- remove unused files&#10;- make cross generated code works together" />
+    <MESSAGE value="version to 1.4.15 &#10;- add selectFirst to FieldsDao" />
+    <MESSAGE value="version to 1.4.16 &#10;- added RxJava support with `fun observable` for all IDao ext&#10;- update kotlin version to 1.6.20&#10;- update ksp version to &quot;1.6.20-1.0.5&quot;&#10;- refactor function to apply builderQuery&#10;- rename FlowableConfig to QueryConfig" />
+    <MESSAGE value="version to 1.4.17 &#10;- refactor all build processes with ksp" />
+    <MESSAGE value="version to 1.4.18 &#10;- удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT" />
+    <MESSAGE value="version to 1.4.18&#10;- удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT" />
+    <MESSAGE value="version to 1.4.19&#10;&#10;удалил вызов запроса на добавление данных и удаление через транзакции и добавил транзакции в тело запроса. Так же изменил END_TRANSACTION на COMMIT, добавил rxJava3 в корбибилотеку" />
+    <MESSAGE value="version to 1.4.21 &#10;- change query delete with transaction" />
+    <MESSAGE value="version to 1.4.21 &#10;- добавил вывод в трейс ошибок и транзакцию на удаление пустого поля" />
+    <MESSAGE value="version to 1.4.22 &#10;- fix bug with base request interface" />
+    <option name="LAST_COMMIT_MESSAGE" value="version to 1.4.22 &#10;- fix bug with base request interface" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
