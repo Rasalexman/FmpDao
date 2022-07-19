@@ -19,6 +19,7 @@ import com.mobrun.plugin.api.DatabaseAPI
 import com.mobrun.plugin.api.HyperHive
 import com.mobrun.plugin.api.HyperHiveState
 import com.mobrun.plugin.api.VersionAPI
+import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.channels.BufferOverflow
@@ -76,7 +77,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     override fun getRxTrigger(dao: IDao): Subject<String> {
         val triggerKey = dao.fullTableName
         return rxTriggers.getOrPut(triggerKey) {
-            PublishSubject.create()
+            createRxTrigger(triggerKey)
         }
     }
 
@@ -91,6 +92,16 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             trigger
         } else {
             MutableStateFlow(tableName)
+        }
+    }
+
+    private fun createRxTrigger(tableName: String): Subject<String> {
+        return if(isSharedTriggers) {
+            val sub = PublishSubject.create<String>()
+            sub.onNext(tableName)
+            sub
+        } else {
+            BehaviorSubject.createDefault(tableName)
         }
     }
 
