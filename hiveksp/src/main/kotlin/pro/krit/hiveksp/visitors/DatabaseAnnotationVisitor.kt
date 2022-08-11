@@ -9,14 +9,12 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSValueArgument
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.extensions.createFileName
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.common.Consts.FIELD_DEFAULT_HEADERS
 import pro.krit.hiveksp.common.Consts.FIELD_HYPER_HIVE
 import pro.krit.hiveksp.common.Consts.FIELD_PROVIDER
 
-@KotlinPoetKspPreview
 class DatabaseAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator

@@ -5,11 +5,9 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.writeTo
 import java.io.IOException
 
-@KotlinPoetKspPreview
 abstract class BaseCodeGenerator(
     protected val logger: KSPLogger,
     private val codeGenerator: CodeGenerator

@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.base.IRequest
 import pro.krit.hhivecore.data.FieldData
 import pro.krit.hhivecore.extensions.*
@@ -18,7 +17,6 @@ import pro.krit.hiveksp.common.Consts.TAG_MEMBER_HALF
 import pro.krit.hiveksp.common.Params
 import pro.krit.hiveksp.data.KspData
 
-@KotlinPoetKspPreview
 class RequestAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator

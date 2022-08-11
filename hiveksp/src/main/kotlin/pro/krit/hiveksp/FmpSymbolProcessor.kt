@@ -5,13 +5,11 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.validate
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import pro.krit.hhivecore.annotations.*
 import pro.krit.hiveksp.visitors.DaoAnnotationVisitor
 import pro.krit.hiveksp.visitors.DatabaseAnnotationVisitor
 import pro.krit.hiveksp.visitors.RequestAnnotationVisitor
 
-@KotlinPoetKspPreview
 class FmpSymbolProcessor(
     environment: SymbolProcessorEnvironment
 ) : SymbolProcessor {

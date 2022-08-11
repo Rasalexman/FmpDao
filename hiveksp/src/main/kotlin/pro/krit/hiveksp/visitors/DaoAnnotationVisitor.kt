@@ -7,7 +7,6 @@ import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSTypeReference
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.ksp.KotlinPoetKspPreview
 import com.squareup.kotlinpoet.ksp.toTypeName
 import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.DaoFieldsData
@@ -21,7 +20,6 @@ import pro.krit.hiveksp.common.Params.IS_DELTA
 import pro.krit.hiveksp.common.Params.TABLE_NAME
 import pro.krit.hiveksp.data.KspData
 
-@KotlinPoetKspPreview
 class DaoAnnotationVisitor(
     logger: KSPLogger,
     codeGenerator: CodeGenerator
