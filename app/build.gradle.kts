@@ -4,8 +4,11 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
-    id("com.google.devtools.ksp") version "1.6.21-1.0.5"
+    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
 }
+
+val kotlinApiVersion: String by extra
+val jvmVersion: String by extra
 
 android {
     val buildSdkVersion: Int by extra
@@ -80,8 +83,8 @@ android {
     }
 
     kotlinOptions {
-        languageVersion = "1.6"
-        apiVersion = "1.6"
+        languageVersion = kotlinApiVersion
+        apiVersion = kotlinApiVersion
         jvmTarget = "11"
     }
 }

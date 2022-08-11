@@ -141,8 +141,12 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
  *
  * @return - статус запроса [StatusRawDataListTable]
  */
-fun IRequest.tableListStatus(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): StatusRawDataListTable {
-    val params = RequestBuilder.createTableParams(requestData, scalarParameters)
+fun IRequest.tableListStatus(
+    requestData: List<CustomParameter>? = null,
+    scalarParameters: ScalarMap? = null,
+    getArgs: Map<String, String>? = null
+): StatusRawDataListTable {
+    val params = RequestBuilder.createTableParams(requestData, scalarParameters, getArgs)
     //println("------> Start tableListStatus '${this.resourceName}' with params: ${params.data}")
     return RequestExecuter.executeBaseTableStatus(
         this,

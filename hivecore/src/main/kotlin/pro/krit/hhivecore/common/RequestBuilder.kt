@@ -59,7 +59,11 @@ object RequestBuilder {
         }
     }
 
-    fun createTableParams(requestData: List<CustomParameter>? = null, scalarParameters: ScalarMap? = null): TableCallParams {
+    fun createTableParams(
+        requestData: List<CustomParameter>? = null,
+        scalarParameters: ScalarMap? = null,
+        getArgs: Map<String, String>? = null
+    ): TableCallParams {
         val requestBuilder =
             com.mobrun.plugin.api.request_assistant.RequestBuilder<CustomParameter, ScalarParameter<Any>>()
 
@@ -75,6 +79,9 @@ object RequestBuilder {
 
         val tableCallParams = TableCallParams()
         tableCallParams.data = queryParams
+        if(!getArgs.isNullOrEmpty()) {
+            tableCallParams.args = getArgs
+        }
         return tableCallParams
     }
 
