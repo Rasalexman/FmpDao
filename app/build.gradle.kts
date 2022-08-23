@@ -104,7 +104,7 @@ dependencies {
     implementation(sresultpresentation)
     implementation(easypermissions)
 
-    implementation(project(":hhive"))
+    //implementation(project(":hhive"))
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")

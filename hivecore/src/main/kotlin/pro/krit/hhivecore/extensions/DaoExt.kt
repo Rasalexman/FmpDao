@@ -68,6 +68,9 @@ inline fun <reified E : Any> IDao.initFields() {
     FieldsBuilder.initFields(this, E::class.java.fields)
 }
 
+/**
+ * сбрасываем триггер для обновления данных в таблицах
+ */
 fun IDao.dropTrigger() {
     when(val trigger = this.getFlowTrigger()) {
         is MutableSharedFlow -> trigger.tryEmit("")

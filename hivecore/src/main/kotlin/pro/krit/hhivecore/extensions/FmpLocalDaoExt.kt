@@ -18,6 +18,7 @@ package pro.krit.hhivecore.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
 import pro.krit.hhivecore.base.IDao
+import pro.krit.hhivecore.common.QueryBuilder
 import pro.krit.hhivecore.common.QueryConfig
 import pro.krit.hhivecore.common.QueryExecuter
 
@@ -64,11 +65,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
  *
- * @param where - тело запроса для SELECT
- * @param limit - лимитированное количество данных
- * @param offset - отступ в получении данных
- * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
- * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
+ * @param builderBlock - конструктор тела запроса [QueryConfig]
  *
  * @return - [List] с данными, либо пустой список
  */
@@ -81,10 +78,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
  *
- * @param where - тело запроса для SELECT
- * @param offset - отступ в получении данных
- * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
- * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
+ * @param builderBlock - конструктор тела запроса [QueryConfig]
  *
  * @return - E? с данными, либо пустой список
  */
@@ -97,11 +91,7 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
 /**
  * Создает SQL-запрос на поиск данных в таблице справочника, и возвращает [Result]
  *
- * @param where - тело запроса для SELECT
- * @param limit - лимитированное количество данных
- * @param offset - отступ в получении данных
- * @param orderBy - сортировка результатов запроса, необходимо так же указывать ASC|DESC
- * @param fields - возвращаеммые поля, если не заполнен то возвращаются все поля
+ * @param builderBlock - конструктор тела запроса [QueryConfig]
  *
  * @return - список результатов запроса обернутый в [Result]
  */
@@ -205,4 +195,16 @@ inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao
     notifyAll: Boolean = false
 ): StatusSelectTable<E> {
     return DaoInstance.insertOrReplace<E, S>(this, items, notifyAll)
+}
+
+/**
+ * Запрос на добавление поля в таблицу
+ */
+inline fun <reified E : Any, reified S : StatusSelectTable<E>> IDao.IFmpLocalDao<E, S>.addColumn(columnName: String): StatusSelectTable<E> {
+    val addColumnQuery = QueryBuilder.alterTableQueryAddColumn(this, columnName)
+    val addColumnStatus = QueryExecuter.executeStatus<E, S>(
+        dao = this,
+        query = addColumnQuery
+    )
+    return addColumnStatus
 }
