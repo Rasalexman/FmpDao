@@ -109,6 +109,7 @@ object QueryBuilder {
             }
             append(")")
             append(FINISH_MARK)
+            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 
@@ -118,7 +119,8 @@ object QueryBuilder {
             append(alterTableAddQuery)
             append(columnName)
             append(TEXT_FIELD_TYPE)
-            append(";")
+            append(FINISH_MARK)
+            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 
