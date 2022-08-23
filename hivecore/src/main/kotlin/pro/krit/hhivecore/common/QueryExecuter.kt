@@ -30,6 +30,7 @@ object QueryExecuter {
     const val DEFAULT_ERROR_CODE = 1001
     const val ERROR_NO_TABLE_CODE = 1
     const val ERROR_NO_TABLE = "no such table"
+    const val ERROR_NO_COLUMN = "has no column named"
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeQuery(
         dao: IDao,
@@ -147,15 +148,38 @@ object QueryExecuter {
         return if (!this.isOk && dao.fieldsData != null) {
             val isTableError = this.errors?.any { error ->
                         error.code == ERROR_NO_TABLE_CODE ||
-                        error.descriptions.any { it.contains(ERROR_NO_TABLE) } ||
-                        error.description?.contains(ERROR_NO_TABLE) == true
+                        error.descriptions.any {
+                            it.contains(ERROR_NO_TABLE, true)
+                        } || error.description?.contains(ERROR_NO_TABLE, true) == true
             } ?: false
+            val statusErrors = this.errors.orEmpty()
+            val isColumnError = statusErrors.firstOrNull { error ->
+                error.code == ERROR_NO_TABLE_CODE ||
+                        error.descriptions.any {
+                            it.contains(ERROR_NO_COLUMN, true)
+                        } || error.description?.contains(ERROR_NO_COLUMN, true) == true
+            }
             if (isTableError) {
                 dao.initFields<E>()
                 val clazz = S::class.java
                 val createTableQuery = QueryBuilder.createTableQuery(dao)
                 val createTableStatus = databaseApi.query(createTableQuery, clazz).execute()!!
                 createTableStatus.isOk
+            } else if(isColumnError != null) {
+                dao.initFields<E>()
+                val errorWithColumn = isColumnError
+                    .descriptions
+                    .find { it.contains(ERROR_NO_COLUMN, true) }
+                    ?: isColumnError.description
+                val erasedColumnName = errorWithColumn.split(ERROR_NO_COLUMN).lastOrNull().orEmpty().trim()
+                if(erasedColumnName.isNotEmpty()) {
+                    val clazz = S::class.java
+                    val alterTableQuery = QueryBuilder.alterTableQueryAddColumn(dao, erasedColumnName)
+                    val alterTableStatus = databaseApi.query(alterTableQuery, clazz).execute()!!
+                    alterTableStatus.isOk
+                } else {
+                    true
+                }
             } else {
                 true
             }

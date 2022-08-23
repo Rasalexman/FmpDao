@@ -26,6 +26,7 @@ object QueryBuilder {
     const val DELETE_QUERY = "DELETE FROM "
     private const val SELECT_ALL_MAKER = "*"
     private const val UPDATE_QUERY = "UPDATE %s SET "
+    private const val ALTER_TABLE_ADD_QUERY = "ALTER TABLE %s ADD "
 
     private const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
     private const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
@@ -108,6 +109,16 @@ object QueryBuilder {
             }
             append(")")
             append(FINISH_MARK)
+        }
+    }
+
+    fun alterTableQueryAddColumn(dao: IDao, columnName: String): String {
+        val alterTableAddQuery = ALTER_TABLE_ADD_QUERY.format(dao.fullTableName)
+        return buildString {
+            append(alterTableAddQuery)
+            append(columnName)
+            append(TEXT_FIELD_TYPE)
+            append(";")
         }
     }
 
