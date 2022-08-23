@@ -146,15 +146,17 @@ object QueryExecuter {
         databaseApi: DatabaseAPI
     ): Boolean {
         return if (!this.isOk && dao.fieldsData != null) {
-            val isTableError = this.errors?.any { error ->
-                        error.code == ERROR_NO_TABLE_CODE ||
+            val statusErrors = this.errors.orEmpty()
+
+            val isTableError = statusErrors.any { error ->
+                        error.code == ERROR_NO_TABLE_CODE &&
                         error.descriptions.any {
                             it.contains(ERROR_NO_TABLE, true)
                         } || error.description?.contains(ERROR_NO_TABLE, true) == true
-            } ?: false
-            val statusErrors = this.errors.orEmpty()
-            val isColumnError = statusErrors.firstOrNull { error ->
-                error.code == ERROR_NO_TABLE_CODE ||
+            }
+
+            val columnError = statusErrors.firstOrNull { error ->
+                error.code == ERROR_NO_TABLE_CODE &&
                         error.descriptions.any {
                             it.contains(ERROR_NO_COLUMN, true)
                         } || error.description?.contains(ERROR_NO_COLUMN, true) == true
@@ -164,19 +166,19 @@ object QueryExecuter {
                 val clazz = S::class.java
                 val createTableQuery = QueryBuilder.createTableQuery(dao)
                 val createTableStatus = databaseApi.query(createTableQuery, clazz).execute()!!
-                createTableStatus.isOk
-            } else if(isColumnError != null) {
+                !createTableStatus.isOk
+            } else if(columnError != null) {
                 dao.initFields<E>()
-                val errorWithColumn = isColumnError
+                val errorWithColumn = columnError
                     .descriptions
                     .find { it.contains(ERROR_NO_COLUMN, true) }
-                    ?: isColumnError.description
+                    ?: columnError.description
                 val erasedColumnName = errorWithColumn.split(ERROR_NO_COLUMN).lastOrNull().orEmpty().trim()
                 if(erasedColumnName.isNotEmpty()) {
                     val clazz = S::class.java
                     val alterTableQuery = QueryBuilder.alterTableQueryAddColumn(dao, erasedColumnName)
                     val alterTableStatus = databaseApi.query(alterTableQuery, clazz).execute()!!
-                    alterTableStatus.isOk
+                    !alterTableStatus.isOk
                 } else {
                     true
                 }
