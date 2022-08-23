@@ -28,8 +28,8 @@ object QueryBuilder {
     private const val UPDATE_QUERY = "UPDATE %s SET "
     private const val ALTER_TABLE_ADD_QUERY = "ALTER TABLE %s ADD "
 
-    private const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
-    private const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
+    //private const val BEGIN_TRANSACTION_QUERY = "BEGIN TRANSACTION; "
+    //private const val COMMIT_TRANSACTION_QUERY = "COMMIT; "
 
     private const val WHERE = " WHERE "
     private const val LIMIT = " LIMIT "
@@ -109,7 +109,6 @@ object QueryBuilder {
             }
             append(")")
             append(FINISH_MARK)
-            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 
@@ -120,7 +119,6 @@ object QueryBuilder {
             append(columnName)
             append(TEXT_FIELD_TYPE)
             append(FINISH_MARK)
-            append(COMMIT_TRANSACTION_QUERY)
         }
     }
 
@@ -175,7 +173,7 @@ object QueryBuilder {
         var prefix = ""
         return buildString {
             if(items.isNotEmpty()) {
-                append(BEGIN_TRANSACTION_QUERY)
+                //append(BEGIN_TRANSACTION_QUERY)
                 append(INSERT_OR_REPLACE)
                 append(dao.fullTableName)
                 append(" ")
@@ -187,7 +185,7 @@ object QueryBuilder {
                     prefix = DELIM_MARK
                 }
                 append(FINISH_MARK)
-                append(COMMIT_TRANSACTION_QUERY)
+                //append(COMMIT_TRANSACTION_QUERY)
             }
         }
     }
@@ -229,7 +227,7 @@ object QueryBuilder {
         var prefix = ""
         return buildString {
             if(items.isNotEmpty()) {
-                append(BEGIN_TRANSACTION_QUERY)
+                //append(BEGIN_TRANSACTION_QUERY)
                 append(DELETE_QUERY)
                 append(tableName)
                 append(WHERE)
@@ -243,7 +241,7 @@ object QueryBuilder {
                 }
                 append(")")
                 append(FINISH_MARK)
-                append(COMMIT_TRANSACTION_QUERY)
+                //append(COMMIT_TRANSACTION_QUERY)
             }
         }
     }
