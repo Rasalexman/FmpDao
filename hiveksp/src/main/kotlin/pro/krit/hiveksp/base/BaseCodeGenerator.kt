@@ -1,6 +1,7 @@
 package pro.krit.hiveksp.base
 
 import com.google.devtools.ksp.processing.CodeGenerator
+import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.TypeSpec
@@ -31,8 +32,8 @@ abstract class BaseCodeGenerator(
             }
             .build()
         try {
-            file.writeTo(codeGenerator = codeGenerator, aggregating = false)
-            //file.writeTo(codeGenerator = codeGenerator, dependencies = Dependencies.ALL_FILES)
+            //file.writeTo(codeGenerator = codeGenerator, aggregating = false)
+            file.writeTo(codeGenerator = codeGenerator, dependencies = Dependencies.ALL_FILES)
         } catch (e: IOException) {
             val message = java.lang.String.format("Unable to write file: %s", e.message)
             logger.error(message)
