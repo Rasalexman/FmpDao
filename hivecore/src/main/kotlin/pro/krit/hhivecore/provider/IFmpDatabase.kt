@@ -20,11 +20,24 @@ import com.mobrun.plugin.api.HyperHiveState
 import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hhivecore.base.IDao
+import ru.fsight.fmp.FMP
+import ru.fsight.fmp.FMPDatabase
 
 interface IFmpDatabase {
     val isDbCreated: Boolean
     val databasePath: String
+
+
     val databaseApi: DatabaseAPI
+
+    /**
+     * Представляет собой локальную базу данных. Используется SQLite.
+     * Все операции записи синхронизируются на данном объекте,
+     * поэтому не создавайте более одного объекта на один файл базы данных.
+     */
+    val fmpDatabaseApi: FMPDatabase
+
+    fun provideFmp(): FMP
     fun provideHyperHive(): HyperHive
     fun provideHyperHiveState(): HyperHiveState
 

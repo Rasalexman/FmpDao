@@ -16,6 +16,7 @@ java {
         getByName("main") {
             java.setSrcDirs(srcDirs)
             java.exclude("com/mobrun/plugin/BuildConfig.java")
+            java.exclude("ru/fsight/fmp/*")
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11

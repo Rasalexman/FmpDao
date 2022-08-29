@@ -28,6 +28,8 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.extensions.fullTableName
+import ru.fsight.fmp.FMP
+import ru.fsight.fmp.FMPDatabase
 import java.io.File
 
 /**
@@ -35,13 +37,18 @@ import java.io.File
  */
 abstract class AbstractFmpDatabase : IFmpDatabase {
 
+    //----NEW API
+    private var fmp: FMP? = null
+    private var fmpDatabase: FMPDatabase? = null
+
+    //--- OLD API
     private var hyperHive: HyperHive? = null
     private var hyperHiveState: HyperHiveState? = null
 
     private var requestHeaders: Map<String, String>? = null
 
     override val databasePath: String
-        get() = hyperHiveState?.dbPathDefault.orEmpty()
+        get() = fmpDatabaseApi.path
 
     private var savedFmpDbKey: String = DEFAULT_FMP_KEY
 
@@ -57,6 +64,13 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
     override val databaseApi: DatabaseAPI
         get() = provideHyperHive().databaseAPI
+
+    override val fmpDatabaseApi: FMPDatabase
+        get() = fmpDatabase ?: throw NullPointerException("FMPDatabase instance is not initialized")
+
+    override fun provideFmp(): FMP {
+        return fmp ?: throw NullPointerException("FMP instance is not initialized")
+    }
 
     override fun provideHyperHive(): HyperHive {
         return hyperHive ?: throw NullPointerException("HyperHive instance is not initialized")
@@ -111,6 +125,26 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             savedFmpDbKey = config.dbKey
         }
         isSharedTriggers = config.isSharedTrigger
+
+        fmp = FMP.Builder()             // Создать конструктор FMP.
+            .api(FMP.API_V1)                     // Указать версию API сервера.
+            .certCheck(config.certCheck)                    // Выключить проверку TLS сертификата сервера.
+            .cert(config.certPath)           // Указать путь к самоподписному сертификату сервера.
+            .deviceID(config.deviceId)                 // Указать ID устройства.
+            .environment(config.environment)          // Среда на сервере.
+            .headers(config.headers.orEmpty()) // Указать кастомные хедеры для каждого HTTP запроса.
+            .address(config.serverAddress)             // Адрес сервера платформы.
+            .project(config.project)                  // Проект внутри среды.
+            .retryCount(config.retryCount)                      // Повторять неудачные HTTP запросы 10 раз.
+            .retryInterval(config.retryInterval)                    // Повторять неудачные HTTP запросы каждые 6 секунд.
+            .storage(config.storage)                    // Директория, где фреймворк будет хранить файлы.
+            .build()
+
+        // путь к базе данных
+        val databasePath: String = config.dbPath.takeIf { it.isNotEmpty() } ?: "${config.storage}/${config.dbKey}.db"
+
+        // вызывается только один раз при инициализации ФМП
+        fmpDatabase = provideFmp().database.path(databasePath).build()
 
         hyperHiveState = hState
             .setApiVersion(VersionAPI.V_1)

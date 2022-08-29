@@ -23,13 +23,18 @@ data class DatabaseConfig(
     val serverAddress: String,
     val environment: String,
     val project: String,
-    val dbKey: String = "",
-    val dbPath: String = "",
+    val dbKey: String,                          // Название базы данных
+    val dbPath: String = "",                    // Полный путь к базе данных с названием, если не указан береться 'storage/dbKey.db'
     val projectVersion: String = "app",
     val retryCount: Int = 5,
     val retryInterval: Int = 10,
     val isLoggingEnabled: Boolean = true,
     val logLevel: Int = LoggingAPI.Type.LOGCAT.type,
     val logOutputType: LoggingAPI.Type = LoggingAPI.Type.LOGCAT,
-    val isSharedTrigger: Boolean = false
+    val isSharedTrigger: Boolean = false,
+    val deviceId: String,
+    val storage: String,                        // Директория, где фреймворк будет хранить файлы.
+    val certCheck: Boolean = false,             // Выключить проверку TLS сертификата сервера.
+    val certPath: String = "",                  // Указать путь к самоподписному сертификату сервера.
+    val headers: Map<String, String>? = null,   // Указать кастомные хедеры для каждого HTTP запроса.
 )
