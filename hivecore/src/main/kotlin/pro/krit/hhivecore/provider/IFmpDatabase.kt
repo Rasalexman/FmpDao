@@ -46,7 +46,7 @@ interface IFmpDatabase {
     fun getFlowTrigger(dao: IDao): Flow<String>
     fun getRxTrigger(dao: IDao): Subject<String>
 
-    fun openDatabase(): DatabaseState
+    fun openDatabase(dbKey: String): DatabaseState
     fun closeDatabase(): DatabaseState
     fun closeAndClearProviders(): DatabaseState
 

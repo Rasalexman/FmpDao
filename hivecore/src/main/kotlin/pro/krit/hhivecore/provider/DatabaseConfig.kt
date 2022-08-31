@@ -14,8 +14,6 @@
 
 package pro.krit.hhivecore.provider
 
-import com.mobrun.plugin.api.LoggingAPI
-
 /**
  * Config for create [AbstractFmpDatabase] instance
  */
@@ -23,7 +21,6 @@ data class DatabaseConfig(
     val serverAddress: String,
     val environment: String,
     val project: String,
-    val dbKey: String,                          // Название базы данных
     val projectVersion: String = "app",
     val retryCount: Int = 5,
     val retryInterval: Int = 10,

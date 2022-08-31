@@ -31,7 +31,7 @@ object DataBaseHolder {
                 "_" + project
 
         val device_id: String = Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)
-        val storage:   String = context.filesDir.absolutePath
+        val storage: String = context.filesDir.absolutePath
         val headers = mapOf(
             "X-SUP-DOMAIN" to "DM-MAIN",
             "Content-Type" to "application/json",
@@ -41,7 +41,6 @@ object DataBaseHolder {
         )
 
         val hyperHiveConfig = DatabaseConfig(
-            dbKey = fmpDbName,
             serverAddress = serverAddress,
             environment = environment,
             project = project,
@@ -56,7 +55,7 @@ object DataBaseHolder {
         mainDb = MainDatabaseImpl.initialize(
             config = hyperHiveConfig
         )
-        val dbState = mainDb.openDatabase()
+        val dbState = mainDb.openDatabase(fmpDbName)
         return dbState.also {
             isDbOpened = it.isOpened
         }
