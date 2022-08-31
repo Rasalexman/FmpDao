@@ -35,8 +35,7 @@ java {
     this.sourceSets {
         getByName("main") {
             java.setSrcDirs(srcDirs)
-            java.exclude("ru/fsight/fmp/*")
-            java.exclude("ru/fsight/fmp/doc/*")
+            java.exclude("ru/fsight/fmp")
             java.exclude("ru/fsight/fmp/BuildConfig")
         }
     }

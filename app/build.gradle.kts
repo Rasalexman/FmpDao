@@ -48,7 +48,7 @@ android {
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
-        this.resources.excludes.add("ru/fsight/fmp/*")
+        this.resources.excludes.add("ru/fsight/fmp")
         this.resources.excludes.add("ru/fsight/fmp/BuildConfig")
 
         //this.resources.excludes.add("com/mobrun/plugin/*")
@@ -61,6 +61,8 @@ android {
             // Fail eagerly on version conflict (includes transitive dependencies),
             // e.g., multiple different versions of the same dependency (group and name are equal).
             //failOnVersionConflict()
+            this.disableDependencyVerification()
+            this.failOnVersionConflict()
 
             // Prefer modules that are part of this build (multi-project or composite build) over external modules.
             preferProjectModules()
@@ -123,8 +125,12 @@ dependencies {
     }
     kapt(project(":hiveprocessor"))*/
 
-    implementation(project(":hivecore"))
-    ksp(project(":hiveksp"))
+    implementation(project(":hivecore")) {
+        exclude(group="ru.fsight", module="fmp")
+    }
+    ksp(project(":hiveksp")) {
+        exclude(group="ru.fsight.fmp", module="fmp")
+    }
 
     debugImplementation(leakCanary)
     testImplementation(junit)

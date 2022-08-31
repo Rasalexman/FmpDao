@@ -36,13 +36,13 @@ dependencies {
     val excludes = listOf(
         "com/mobrun/plugin/BuildConfig",
         "ru/fsight/fmp/BuildConfig",
-        "ru/fsight/fmp",
+        "ru/fsight/fmp/*",
         "ru/fsight/fmp/doc/sample",
         "META-INF"
     )
 
     compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "fmp", "exclude" to excludes)))
-    implementation(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
+    api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
     api(gson)
     api(kotlinPoet)
     implementation(rxjava3)
