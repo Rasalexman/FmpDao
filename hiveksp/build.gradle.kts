@@ -36,6 +36,7 @@ java {
         getByName("main") {
             java.setSrcDirs(srcDirs)
             java.exclude("ru/fsight/fmp/*")
+            java.exclude("ru/fsight/fmp/doc/*")
             java.exclude("ru/fsight/fmp/BuildConfig")
         }
     }
@@ -51,7 +52,7 @@ dependencies {
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
     implementation(project(":hivecore")) {
-        exclude(group = "ru.fsight.fmp")
+        exclude(group = "ru.fsight", module="fmp")
     }
     implementation(kotlinpoetKsp)
     implementation(kspapi)

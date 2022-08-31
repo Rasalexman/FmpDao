@@ -1,6 +1,6 @@
 package pro.krit.hhivecore.extensions
 
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import io.reactivex.rxjava3.core.Observable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*

@@ -16,7 +16,7 @@ package pro.krit.hhivecore.request
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import com.mobrun.plugin.models.BaseStatus
+import pro.krit.hhivecore.base.status.BaseStatus
 
 open class ObjectRawStatus<T> : BaseStatus() {
     @Expose

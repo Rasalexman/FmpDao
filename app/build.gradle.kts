@@ -116,7 +116,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
     // sqlcipher
-    implementation("net.zetetic:android-database-sqlcipher:4.5.1")
+    implementation("net.zetetic:android-database-sqlcipher:4.5.2")
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")

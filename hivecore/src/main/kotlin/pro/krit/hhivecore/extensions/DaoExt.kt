@@ -17,8 +17,8 @@ package pro.krit.hhivecore.extensions
 import com.mobrun.plugin.api.request_assistant.CustomParameter
 import com.mobrun.plugin.api.request_assistant.RequestBuilder
 import com.mobrun.plugin.api.request_assistant.ScalarParameter
-import com.mobrun.plugin.models.BaseStatus
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.BaseStatus
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -169,7 +169,7 @@ fun IDao.triggerRx() {
 }
 
 fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
-    val statusName = this.status.name.uppercase()
+    val statusName = this.status?.name.orEmpty().uppercase()
     if (statusName == "OK") {
         dao.triggerFlow()
         dao.triggerRx()
@@ -181,8 +181,8 @@ fun <E : Any> StatusSelectTable<E>.triggerDaoIfOk(dao: IDao) {
 fun IDao.request(
     params: ScalarMap? = null
 ): BaseStatus {
-    val request = requestBuilder(params)
-    return request.streamCallAuto()?.execute() ?: BaseStatus()
+    //val request = requestBuilder(params)
+    return BaseStatus()
 }
 
 fun IDao.requestBuilder(

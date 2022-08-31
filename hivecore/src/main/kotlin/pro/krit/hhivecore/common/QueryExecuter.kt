@@ -17,9 +17,9 @@ package pro.krit.hhivecore.common
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.mobrun.plugin.models.Error
-import com.mobrun.plugin.models.StatusRequest
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.Error
+import pro.krit.hhivecore.base.status.StatusRequest
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.RequestExecuter.isNotBad
 import pro.krit.hhivecore.extensions.fullTableName
@@ -217,7 +217,7 @@ object QueryExecuter {
         error.code = codeType
         error.description = ex.message ?: "$method HyperHive Error with $ex"
         return StatusSelectTable<E>().apply {
-            val currentErrors = errors ?: ArrayList()
+            val currentErrors = errors
             currentErrors.add(error)
             errors = currentErrors
         }

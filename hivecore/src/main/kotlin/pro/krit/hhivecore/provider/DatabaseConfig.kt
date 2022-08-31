@@ -28,8 +28,6 @@ data class DatabaseConfig(
     val retryCount: Int = 5,
     val retryInterval: Int = 10,
     val isLoggingEnabled: Boolean = true,
-    val logLevel: Int = LoggingAPI.Type.LOGCAT.type,
-    val logOutputType: LoggingAPI.Type = LoggingAPI.Type.LOGCAT,
     val isSharedTrigger: Boolean = false,
     val deviceId: String,
     val storage: String,                        // Директория, где фреймворк будет хранить файлы.

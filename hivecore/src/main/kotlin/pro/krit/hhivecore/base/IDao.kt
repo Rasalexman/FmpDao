@@ -14,7 +14,7 @@
 
 package pro.krit.hhivecore.base
 
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import pro.krit.hhivecore.common.DaoFieldsData
 import pro.krit.hhivecore.provider.IFmpDatabase
 

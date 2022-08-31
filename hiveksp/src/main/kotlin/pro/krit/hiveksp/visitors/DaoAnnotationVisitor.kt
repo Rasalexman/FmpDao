@@ -43,7 +43,7 @@ class DaoAnnotationVisitor(
         private const val FIELD_DAO_FIELDS = "fieldsData"
         private const val FIELD_PARAMS_REPLACE = "(params = %s)"
 
-        private const val MOBRUN_MODEL_PATH = "com.mobrun.plugin.models"
+        private const val MOBRUN_MODEL_PATH = "pro.krit.hhivecore.base.status"
         private const val MOBRUN_SELECTABLE_NAME = "StatusSelectTable"
         private const val MOBRUN_BASE_NAME = "BaseStatus"
 

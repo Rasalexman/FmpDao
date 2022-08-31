@@ -2,8 +2,8 @@ package pro.krit.hhivecore.extensions
 
 import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.RequestAdapter
-import com.mobrun.plugin.models.StatusRawDataListTable
-import com.mobrun.plugin.models.TableRawData
+import pro.krit.hhivecore.base.status.StatusRawDataListTable
+import pro.krit.hhivecore.base.status.TableRawData
 
 inline fun <reified T : NumeratedFields> StatusRawDataListTable.parseTable(tableName: String): List<T> {
     return result?.raw?.find { it.name == tableName }.parseValues()

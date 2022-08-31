@@ -20,7 +20,7 @@ package pro.krit.hhivecore.annotations
  * [pro.krit.hhivecore.base.IDao.IFmpDao] with marks two generics:
  * <p>
  * 1) The first generic is database table structure model with serialized annotations
- * 2) Fmp Status class extended from [com.mobrun.plugin.models.StatusSelectTable] to tell the hyperHive databaseApi
+ * 2) Fmp Status class extended from [pro.krit.hhivecore.base.status.StatusSelectTable] to tell the hyperHive databaseApi
  * which kind of data should be converted from SQL statement
  * </p>
  *

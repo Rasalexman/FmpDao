@@ -15,8 +15,8 @@
 package pro.krit.hhivecore.extensions
 
 import com.mobrun.plugin.api.request_assistant.CustomParameter
-import com.mobrun.plugin.models.BaseStatus
-import com.mobrun.plugin.models.StatusRawDataListTable
+import pro.krit.hhivecore.base.status.BaseStatus
+import pro.krit.hhivecore.base.status.StatusRawDataListTable
 import pro.krit.hhivecore.base.IRequest
 import pro.krit.hhivecore.base.RawStatus
 import pro.krit.hhivecore.common.RequestBuilder

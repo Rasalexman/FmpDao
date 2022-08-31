@@ -20,9 +20,9 @@ import com.google.gson.reflect.TypeToken
 import com.mobrun.plugin.api.callparams.RequestCallParams
 import com.mobrun.plugin.api.callparams.TableCallParams
 import com.mobrun.plugin.api.callparams.WebCallParams
-import com.mobrun.plugin.models.BaseStatus
-import com.mobrun.plugin.models.Error
-import com.mobrun.plugin.models.StatusRawDataListTable
+import pro.krit.hhivecore.base.status.BaseStatus
+import pro.krit.hhivecore.base.status.Error
+import pro.krit.hhivecore.base.status.StatusRawDataListTable
 import pro.krit.hhivecore.base.IRequest
 import pro.krit.hhivecore.base.RawStatus
 import pro.krit.hhivecore.errors.RequestException

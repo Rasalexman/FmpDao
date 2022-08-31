@@ -45,9 +45,7 @@ object FieldsBuilder {
                 continue
             }
 
-            val primaryKeyAnnotation = field.getAnnotation(
-                PrimaryKey::class.java
-            )
+            val primaryKeyAnnotation = field.getAnnotation(PrimaryKey::class.java)
             var isPrimary = false
             if (primaryKeyAnnotation != null) {
                 if (localPrimaryKey != null) {

@@ -1,6 +1,6 @@
 package pro.krit.fmpdaoexample.daos
 
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import pro.krit.fmpdaoexample.models.UserEntity
 import pro.krit.hhivecore.annotations.FmpLocalDao
 import pro.krit.hhivecore.base.IDao

@@ -1,7 +1,7 @@
 package pro.krit.fmpdaoexample.models
 
-import com.mobrun.plugin.models.BaseStatus
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.BaseStatus
+import pro.krit.hhivecore.base.status.StatusSelectTable
 
 class TableNameEntity : BaseStatus() {
     val request: TableNameRequest? = null

@@ -16,7 +16,7 @@
 
 package pro.krit.hhivecore.extensions
 
-import com.mobrun.plugin.models.StatusSelectTable
+import pro.krit.hhivecore.base.status.StatusSelectTable
 import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.common.QueryBuilder
 import pro.krit.hhivecore.common.QueryConfig
