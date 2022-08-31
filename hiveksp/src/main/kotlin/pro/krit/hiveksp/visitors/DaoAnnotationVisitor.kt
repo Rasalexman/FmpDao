@@ -193,9 +193,7 @@ class DaoAnnotationVisitor(
                 val isLocalProp = ParameterSpec.builder(
                     FIELD_DAO_FIELDS,
                     DaoFieldsData::class.asClassName().copy(nullable = true)
-                )
-                    .defaultValue(NULL_INITIALIZER)
-                    .build()
+                ).defaultValue(NULL_INITIALIZER).build()
                 addParameter(isLocalProp)
 
                 //logger.logging("--------> superTypeGenerics = $superTypeGenerics")

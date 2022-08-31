@@ -27,6 +27,9 @@ import pro.krit.hhivecore.common.FieldsBuilder
 import pro.krit.hhivecore.common.LimitedScalarParameter
 import pro.krit.hhivecore.common.QueryBuilder
 import pro.krit.hhivecore.common.QueryExecuter
+import ru.fsight.fmp.FMPResource
+import ru.fsight.fmp.FMPTransaction
+import ru.fsight.fmp.model.fmp.FMPResult
 import java.util.*
 
 typealias Parameter = String
@@ -185,13 +188,33 @@ fun IDao.request(
 fun IDao.requestBuilder(
     params: ScalarMap? = null
 ): RequestBuilder<CustomParameter, ScalarParameter<*>> {
-    val hyperHive = fmpDatabase.provideHyperHive()
+    //val hyperHive = fmpDatabase.provideHyperHive()
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
-        RequestBuilder(hyperHive, resourceName, isDelta)
+        RequestBuilder()//hyperHive, resourceName, isDelta)
     if (params?.isNotEmpty() == true) {
         params.forEach {
             builder.addScalar(LimitedScalarParameter(name = it.key, value = it.value))
         }
     }
     return builder
+}
+
+fun IDao.download(
+    params: String = "",
+    isFiltered: Boolean = false,
+    isCachedByParams: Boolean = false,
+    transaction: FMPTransaction? = null,
+    filters: List<FMPResource.Filter> = emptyList()
+): FMPResult<Boolean> {
+    val fmp = this.fmpDatabase.provideFmp()
+    val request = fmp.resource
+        .name(this.resourceName)
+        .delta(isDelta)
+        .params(params)
+        .cacheByParams(isCachedByParams)
+        .filter(isFiltered)
+        .build()
+    val result = request.download(transaction, filters)
+    fmp.log.info("Download resource name = $resourceName | result = ${result.result} | error = ${result.error}")
+    return result
 }

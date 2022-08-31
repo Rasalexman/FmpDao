@@ -40,23 +40,6 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.request(
     return resultStatus?.result?.raw
 }
 
-/*
-suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestAsync(
-    requestData: Any? = null
-): S? {
-    val currentRequest = this
-    return withContext(Dispatchers.IO) {
-        val params = withContext(Dispatchers.Default) {
-            RequestBuilder.createParams(
-                currentRequest,
-                requestData
-            )
-        }
-        RequestExecuter.executeStatus<S, T>(currentRequest, params)?.result?.raw
-    }
-}
-*/
-
 /**
  * Простой запрос данных для FMP
  *
@@ -73,19 +56,6 @@ inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatus(
     //println("------> Finish requestStatus '${this.resourceName}' with status: ${resultStatus.raw}")
     return resultStatus
 }
-
-/*suspend inline fun <reified S : Any, reified T : RawStatus<S>> IRequest.requestStatusAsync(
-    requestData: Any? = null
-): BaseStatus {
-    val currentRequest = this
-    return withContext(Dispatchers.IO) {
-        val params = RequestBuilder.createParams(
-            currentRequest,
-            requestData
-        )
-        RequestExecuter.executeBaseStatus(currentRequest, params, T::class.java)
-    }
-}*/
 
 /**
  * Простой запрос данных для FMP

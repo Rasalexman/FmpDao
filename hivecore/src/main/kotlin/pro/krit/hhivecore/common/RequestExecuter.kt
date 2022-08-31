@@ -38,12 +38,12 @@ object RequestExecuter {
         request: IRequest,
         params: Any? = null
     ): String {
-        val requestApi = request.hyperHive.requestAPI
+        //val requestApi = request.hyperHive.requestAPI
         val resourceName = request.resourceName
         return when (params) {
-            is WebCallParams -> requestApi.web(resourceName, params).execute()
-            is RequestCallParams -> requestApi.request(resourceName, params).execute()
-            else -> requestApi.web(resourceName).execute()
+            is WebCallParams -> ""//requestApi.web(resourceName, params).execute()
+            is RequestCallParams -> ""//requestApi.request(resourceName, params).execute()
+            else -> ""//requestApi.web(resourceName).execute()
         }
     }
 
@@ -52,12 +52,12 @@ object RequestExecuter {
         params: Any? = null,
         clazz: Class<T>
     ): T {
-        val requestApi = request.hyperHive.requestAPI
+       // val requestApi = request.hyperHive.requestAPI
         val resourceName = request.resourceName
         return when (params) {
-            is WebCallParams -> requestApi.web(resourceName, params, clazz).execute()
-            is RequestCallParams -> requestApi.request(resourceName, params, clazz).execute()
-            else -> requestApi.web(resourceName, WebCallParams(), clazz).execute()
+            is WebCallParams -> clazz.newInstance()//requestApi.web(resourceName, params, clazz).execute()
+            is RequestCallParams -> clazz.newInstance()//requestApi.request(resourceName, params, clazz).execute()
+            else -> clazz.newInstance()//requestApi.web(resourceName, WebCallParams(), clazz).execute()
         }
     }
 
@@ -65,9 +65,9 @@ object RequestExecuter {
         request: IRequest,
         params: TableCallParams? = null
     ): StatusRawDataListTable {
-        val requestApi = request.hyperHive.requestAPI
+        //val requestApi = request.hyperHive.requestAPI
         val resourceName = request.resourceName
-        return requestApi.table(resourceName, params, StatusRawDataListTable::class.java).execute()
+        return StatusRawDataListTable() //requestApi.table(resourceName, params, StatusRawDataListTable::class.java).execute()
     }
 
     inline fun <reified S : Any, reified T : RawStatus<S>> executeStatus(

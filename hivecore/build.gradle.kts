@@ -15,8 +15,10 @@ java {
     this.sourceSets {
         getByName("main") {
             java.setSrcDirs(srcDirs)
-            java.exclude("com/mobrun/plugin/BuildConfig.java")
-            java.exclude("ru/fsight/fmp/*")
+            java.exclude("META-INF")
+            java.exclude("com/mobrun/plugin/BuildConfig")
+            java.exclude("ru/fsight/fmp/BuildConfig")
+            java.exclude("ru/fsight/fmp/model")
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11
@@ -32,11 +34,13 @@ dependencies {
     val coroutinesCore: String by rootProject.extra
     val rxjava3: String by rootProject.extra
     val excludes = listOf(
-        "com/mobrun/plugin/BuildConfig.java",
-        "META-INF",
-        "ru/fsight/fmp/*"
+        "com/mobrun/plugin/BuildConfig",
+        "ru/fsight/fmp/BuildConfig",
+        "ru/fsight/fmp",
+        "META-INF"
     )
 
+    compileOnly(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "fmp", "exclude" to excludes)))
     api(fileTree(mapOf("include" to listOf("*.jar"), "dir" to "libs", "exclude" to excludes)))
     api(gson)
     api(kotlinPoet)

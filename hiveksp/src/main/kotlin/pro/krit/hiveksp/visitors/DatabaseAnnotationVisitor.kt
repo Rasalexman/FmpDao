@@ -12,7 +12,7 @@ import com.squareup.kotlinpoet.*
 import pro.krit.hhivecore.extensions.createFileName
 import pro.krit.hiveksp.base.BaseCodeGenerator
 import pro.krit.hiveksp.common.Consts.FIELD_DEFAULT_HEADERS
-import pro.krit.hiveksp.common.Consts.FIELD_HYPER_HIVE
+import pro.krit.hiveksp.common.Consts.FIELD_FMP
 import pro.krit.hiveksp.common.Consts.FIELD_PROVIDER
 
 class DatabaseAnnotationVisitor(
@@ -32,6 +32,9 @@ class DatabaseAnnotationVisitor(
         private const val FMP_BASE_NAME = "IFmpDatabase"
         private const val FMP_REST_NAME = "FmpRestRequest"
         private const val FMP_WEB_NAME = "FmpWebRequest"
+
+        private const val FUNC_PROVIDE_FMP = "this.provideFmp()"
+        private const val FUNC_DEFAULT_HEADERS = "this.getDefaultHeaders()"
 
         private const val NULL_INITIALIZER = "null"
         private const val RETURN_STATEMENT = "return"
@@ -128,9 +131,9 @@ class DatabaseAnnotationVisitor(
                     buildString {
                         append("$TAG_CLASS_NAME(")
                         appendLine()
-                        append("$FIELD_HYPER_HIVE = this.provideHyperHive(),")
+                        append("$FIELD_FMP = $FUNC_PROVIDE_FMP,")
                         appendLine()
-                        append("$FIELD_DEFAULT_HEADERS = this.getDefaultHeaders()")
+                        append("$FIELD_DEFAULT_HEADERS = $FUNC_DEFAULT_HEADERS")
                         appendLine()
                         append(")")
                     }

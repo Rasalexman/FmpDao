@@ -1,5 +1,5 @@
 //------ APP VERSION
-val hhiveVersion = "1.4.33"
+val hhiveVersion = "2.0.1"
 val kotlin_version = "1.7.10"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
@@ -9,7 +9,7 @@ extra["minSdkVersion"] = 18
 extra["buildSdkVersion"] = 31
 extra["kotlinApiVersion"] = "1.7"
 extra["jvmVersion"] = "11"
-extra["agpVersion"] = "7.2.1"
+extra["agpVersion"] = "7.2.2"
 extra["kotlinVersion"] = kotlin_version
 extra["jitpackPath"] = "https://jitpack.io"
 extra["codePath"] = "src/main/kotlin"
@@ -39,6 +39,7 @@ extra["gson"] = "com.google.code.gson:gson:$gson"
 extra["leakCanary"] = "com.squareup.leakcanary:leakcanary-android:$leakcanary"
 extra["sresultpresentation"] = "com.github.Rasalexman.SResult:sresultpresentation:$sresult"
 extra["coroutinesCore"] = "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines"
+extra["coroutinesAndroid"] = "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines"
 extra["core"] = "androidx.core:core-ktx:$core"
 extra["kodi"] = "com.github.Rasalexman.KODI:kodi:$kodi"
 extra["rxjava3"] = "io.reactivex.rxjava3:rxjava:$rxJava3"

@@ -14,13 +14,13 @@
 
 package pro.krit.hhivecore.base
 
-import com.mobrun.plugin.api.HyperHive
 import pro.krit.hhivecore.request.ObjectRawStatus
+import ru.fsight.fmp.FMP
 
 typealias RawStatus<S> = ObjectRawStatus<S>
 
 sealed interface IRequest {
-    val hyperHive: HyperHive
+    val fmp: FMP
     var defaultHeaders: Map<String, String>?
     val resourceName: String
 

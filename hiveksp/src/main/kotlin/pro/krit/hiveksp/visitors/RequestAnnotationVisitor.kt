@@ -11,7 +11,7 @@ import pro.krit.hhivecore.data.FieldData
 import pro.krit.hhivecore.extensions.*
 import pro.krit.hiveksp.base.BaseSymbolVisitor
 import pro.krit.hiveksp.common.Consts.FIELD_DEFAULT_HEADERS
-import pro.krit.hiveksp.common.Consts.FIELD_HYPER_HIVE
+import pro.krit.hiveksp.common.Consts.FIELD_FMP
 import pro.krit.hiveksp.common.Consts.FIELD_RESOURCE_NAME
 import pro.krit.hiveksp.common.Consts.TAG_MEMBER_HALF
 import pro.krit.hiveksp.common.Params
@@ -30,10 +30,10 @@ class RequestAnnotationVisitor(
 
         private const val TAG_MEMBER_FULL = "%M()"
 
-        private const val API_MODEL_PATH = "com.mobrun.plugin.api"
+        private const val API_FMP_PATH = "ru.fsight.fmp"
         private const val OBJ_RAW_STATUS_PATH = "pro.krit.hhivecore.request"
         private const val CLASS_OBJ_RAW_STATUS = "ObjectRawStatus"
-        private const val CLASS_HYPER_HIVE = "HyperHive"
+        private const val CLASS_FMP = "FMP"
         private const val FIELD_PARAMS = "params"
         private const val FIELD_PARAMS_GET = "params.getOrNull(%s).orEmpty()"
 
@@ -240,13 +240,11 @@ class RequestAnnotationVisitor(
         constructorSpec: FunSpec.Builder,
         classTypeSpec: TypeSpec.Builder
     ) {
-        val classType = ClassName(API_MODEL_PATH, CLASS_HYPER_HIVE)
-        val hyperHivePropName = FIELD_HYPER_HIVE
-        val propHyperSpec =
-            PropertySpec.builder(hyperHivePropName, classType, KModifier.PUBLIC, KModifier.OVERRIDE)
-                .initializer(hyperHivePropName)
-                .build()
-        val paramHyperSpec = ParameterSpec.builder(hyperHivePropName, classType)
+        val fmpClassType = ClassName(API_FMP_PATH, CLASS_FMP)
+        val propFmpSpec = PropertySpec.builder(FIELD_FMP, fmpClassType, KModifier.PUBLIC, KModifier.OVERRIDE)
+            .initializer(FIELD_FMP)
+            .build()
+        val paramFmpSpec = ParameterSpec.builder(FIELD_FMP, fmpClassType)
             .build()
 
         val stringTypeName = String::class.asTypeName()
@@ -311,11 +309,11 @@ class RequestAnnotationVisitor(
             .addKdoc(commentOfParams)
             .build()
 
-        constructorSpec.addParameter(paramHyperSpec)
+        constructorSpec.addParameter(paramFmpSpec)
         constructorSpec.addParameter(paramHeadersSpec)
         constructorSpec.addParameter(paramResourceSpec)
 
-        classTypeSpec.addProperty(propHyperSpec)
+        classTypeSpec.addProperty(propFmpSpec)
         classTypeSpec.addProperty(propHeadersSpec)
         classTypeSpec.addProperty(propResourceSpec)
 

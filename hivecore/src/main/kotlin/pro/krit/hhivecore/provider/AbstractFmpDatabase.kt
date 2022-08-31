@@ -14,11 +14,6 @@
 
 package pro.krit.hhivecore.provider
 
-import com.google.gson.GsonBuilder
-import com.mobrun.plugin.api.DatabaseAPI
-import com.mobrun.plugin.api.HyperHive
-import com.mobrun.plugin.api.HyperHiveState
-import com.mobrun.plugin.api.VersionAPI
 import io.reactivex.rxjava3.subjects.BehaviorSubject
 import io.reactivex.rxjava3.subjects.PublishSubject
 import io.reactivex.rxjava3.subjects.Subject
@@ -30,6 +25,8 @@ import pro.krit.hhivecore.base.IDao
 import pro.krit.hhivecore.extensions.fullTableName
 import ru.fsight.fmp.FMP
 import ru.fsight.fmp.FMPDatabase
+import ru.fsight.fmp.FMPUser
+import ru.fsight.fmp.model.fmp.FMPResult
 import java.io.File
 
 /**
@@ -40,10 +37,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     //----NEW API
     private var fmp: FMP? = null
     private var fmpDatabase: FMPDatabase? = null
-
-    //--- OLD API
-    private var hyperHive: HyperHive? = null
-    private var hyperHiveState: HyperHiveState? = null
+    private var currentFmpUser: FMPUser? = null
 
     private var requestHeaders: Map<String, String>? = null
 
@@ -62,9 +56,6 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             return file.exists()
         }
 
-    override val databaseApi: DatabaseAPI
-        get() = provideHyperHive().databaseAPI
-
     override val fmpDatabaseApi: FMPDatabase
         get() = fmpDatabase ?: throw NullPointerException("FMPDatabase instance is not initialized")
 
@@ -72,13 +63,8 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return fmp ?: throw NullPointerException("FMP instance is not initialized")
     }
 
-    override fun provideHyperHive(): HyperHive {
-        return hyperHive ?: throw NullPointerException("HyperHive instance is not initialized")
-    }
-
-    override fun provideHyperHiveState(): HyperHiveState {
-        return hyperHiveState
-            ?: throw NullPointerException("HyperHiveState instance is not initialized")
+    override fun provideUser(): FMPUser {
+        return currentFmpUser ?: throw NullPointerException("FmpUser is authorized")
     }
 
     override fun getFlowTrigger(dao: IDao): Flow<String> {
@@ -119,14 +105,21 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         }
     }
 
+    override fun auth(login: String, password: String): Pair<FMPUser, FMPResult<Boolean>> {
+        val fmpUser: FMPUser = provideFmp().user.username(login).password(password).build()
+        this.currentFmpUser = fmpUser
+        val authResult = fmpUser.auth()
+        return fmpUser to authResult
+    }
+
     @Suppress("UNCHECKED_CAST")
-    fun <T : AbstractFmpDatabase> initialize(hState: HyperHiveState, config: DatabaseConfig): T {
+    fun <T : AbstractFmpDatabase> initialize(config: DatabaseConfig): T {
         if(config.dbKey.isNotEmpty()) {
             savedFmpDbKey = config.dbKey
         }
         isSharedTriggers = config.isSharedTrigger
 
-        fmp = FMP.Builder()             // Создать конструктор FMP.
+        this.fmp = FMP.Builder()             // Создать конструктор FMP.
             .api(FMP.API_V1)                     // Указать версию API сервера.
             .certCheck(config.certCheck)                    // Выключить проверку TLS сертификата сервера.
             .cert(config.certPath)           // Указать путь к самоподписному сертификату сервера.
@@ -138,27 +131,22 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .retryCount(config.retryCount)                      // Повторять неудачные HTTP запросы 10 раз.
             .retryInterval(config.retryInterval)                    // Повторять неудачные HTTP запросы каждые 6 секунд.
             .storage(config.storage)                    // Директория, где фреймворк будет хранить файлы.
+            .debugNoEncryption(config.disableEncryption)            // True отключает шифрование. По умолчанию false - шифрование активно.
             .build()
 
         // путь к базе данных
-        val databasePath: String = config.dbPath.takeIf { it.isNotEmpty() } ?: "${config.storage}/${config.dbKey}.db"
+        val databasePath = "${config.storage}/${config.dbKey}.sqlite"
+        // устанавлиаваем хедеры для запросов
+        config.headers?.let(::setDefaultHeaders)
 
         // вызывается только один раз при инициализации ФМП
-        fmpDatabase = provideFmp().database.path(databasePath).build()
+        try {
+            val databaseBuilder = provideFmp().database
+            fmpDatabase = databaseBuilder.path(databasePath).build()
+        } catch (e: Exception) {
+            provideFmp().log.error("ERROR build localDatabase: ${e.message}")
+        }
 
-        hyperHiveState = hState
-            .setApiVersion(VersionAPI.V_1)
-            .setEnvironmentSlug(config.environment)
-            .setProjectSlug(config.project)
-            .setDbPathDefault(config.dbPath)
-            .setVersionProject(config.projectVersion)
-            .setDefaultRetryCount(config.retryCount)
-            .setDefaultRetryIntervalSec(config.retryInterval)
-            .setGsonForParcelPacker(GsonBuilder().excludeFieldsWithoutExposeAnnotation().create())
-            .setHostWithSchema(config.serverAddress)
-            .apply {
-                hyperHive = buildHyperHive().setupLogs(config)
-            }
         return this as T
     }
 
@@ -170,25 +158,25 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return this.requestHeaders
     }
 
-    override fun openDatabase(dbKey: String, pathBase: String): DatabaseState {
+    override fun openDatabase(): DatabaseState {
         var isClosed = false
-        var isOpened = tryToOpenDatabase(dbKey, pathBase)
+        var isOpened = tryToOpenDatabase()
         if (!isOpened) {
-            isClosed = tryToCloseDatabase(pathBase)
-            isOpened = tryToOpenDatabase(dbKey, pathBase)
+            isClosed = tryToCloseDatabase()
+            isOpened = tryToOpenDatabase()
         }
         return DatabaseState(isOpened = isOpened, isClosed = isClosed)
     }
 
-    override fun closeDatabase(pathBase: String): DatabaseState {
-        val isClosed = tryToCloseDatabase(pathBase)
+    override fun closeDatabase(): DatabaseState {
+        val isClosed = tryToCloseDatabase()
         return DatabaseState(isOpened = false, isClosed = isClosed)
     }
 
-    override fun closeAndClearProviders(pathBase: String): DatabaseState {
-        var isClosed = tryToCloseDatabase(pathBase)
+    override fun closeAndClearProviders(): DatabaseState {
+        var isClosed = tryToCloseDatabase()
         if (!isClosed) {
-            isClosed = tryToCloseDatabase(pathBase)
+            isClosed = tryToCloseDatabase()
         }
         if(isClosed) {
             clearProviders()
@@ -196,24 +184,22 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         return DatabaseState(isOpened = false, isClosed = isClosed)
     }
 
-    private fun tryToOpenDatabase(fmpKey: String = "", pathBase: String = ""): Boolean {
-        val currentKey = fmpKey.takeIf { it.isNotEmpty() } ?: savedFmpDbKey
-        val key = generateKey(currentKey)
-        val hyperHiveDatabaseApi = databaseApi
-        return if (pathBase.isNotEmpty()) {
-            hyperHiveDatabaseApi.openBase(pathBase, key)
-        } else {
-            hyperHiveDatabaseApi.openDefaultBase(key)
+    private fun tryToOpenDatabase(): Boolean {
+        val fmpDatabaseInstance = fmpDatabaseApi
+        val openResult = fmpDatabaseInstance.open()
+        if(!openResult.status) {
+            provideFmp().log.error("tryToOpenDatabase error: ${openResult.error}")
         }
+        return openResult.result
     }
 
-    private fun tryToCloseDatabase(pathBase: String = ""): Boolean {
-        val hyperHiveDatabaseApi = databaseApi
-        return if (pathBase.isNotEmpty()) {
-            hyperHiveDatabaseApi.closeBase(pathBase)
-        } else {
-            hyperHiveDatabaseApi.closeDefaultBase()
+    private fun tryToCloseDatabase(): Boolean {
+        val fmpDatabaseInstance = fmpDatabaseApi
+        val closeResult = fmpDatabaseInstance.close()
+        if(!closeResult.status) {
+            provideFmp().log.error("tryToCloseDatabase error: ${closeResult.error}")
         }
+        return closeResult.result
     }
 
     private fun generateKey(login: String): String {
@@ -224,16 +210,16 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
         flowTriggers.clear()
         rxTriggers.clear()
         savedFmpDbKey = DEFAULT_FMP_KEY
-        hyperHive = null
-        hyperHiveState = null
+        fmp = null
+        fmpDatabase = null
     }
 
-    private fun HyperHive.setupLogs(config: DatabaseConfig): HyperHive {
-        this.loggingAPI.setLogEnabled(config.isLoggingEnabled)
-        this.loggingAPI.setLogLevel(config.logLevel)
-        //this.loggingAPI.setLogOutputType(config.logOutputType)
-        return this
-    }
+//    private fun HyperHive.setupLogs(config: DatabaseConfig): HyperHive {
+//        this.loggingAPI.setLogEnabled(config.isLoggingEnabled)
+//        this.loggingAPI.setLogLevel(config.logLevel)
+//        //this.loggingAPI.setLogOutputType(config.logOutputType)
+//        return this
+//    }
 
     companion object {
         private const val DEFAULT_FMP_KEY = "default"

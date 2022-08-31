@@ -43,7 +43,7 @@ class MainViewModel : BaseViewModel() {
         processLoading(true)
         val result = doAsync {
             DataBaseHolder.authUser(
-                MainActivity.DEBUG_LOGIN,
+                MainActivity.DEBUG_LOGIN.uppercase(),
                 MainActivity.DEBUG_PASSWORD
             )
         }
@@ -81,9 +81,9 @@ class MainViewModel : BaseViewModel() {
     }
 
     private suspend fun loadSymptoms() = doAsync {
-        val request = DataBaseHolder.mainDb.provideIZfmToroSymptomList().requestBuilder()
-        val status = request.streamCallAuto().execute()
-        println("-----> loadSymptoms ${status.isNotBad()}")
+        val request = DataBaseHolder.mainDb.provideIZfmToroSymptomList().download()
+        val status = request.status
+        println("-----> loadSymptoms ${status}")
     }
 
     fun getSymptoms() = launchUITryCatch {

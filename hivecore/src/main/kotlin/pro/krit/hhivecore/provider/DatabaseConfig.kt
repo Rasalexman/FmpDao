@@ -24,7 +24,6 @@ data class DatabaseConfig(
     val environment: String,
     val project: String,
     val dbKey: String,                          // Название базы данных
-    val dbPath: String = "",                    // Полный путь к базе данных с названием, если не указан береться 'storage/dbKey.db'
     val projectVersion: String = "app",
     val retryCount: Int = 5,
     val retryInterval: Int = 10,
@@ -37,4 +36,5 @@ data class DatabaseConfig(
     val certCheck: Boolean = false,             // Выключить проверку TLS сертификата сервера.
     val certPath: String = "",                  // Указать путь к самоподписному сертификату сервера.
     val headers: Map<String, String>? = null,   // Указать кастомные хедеры для каждого HTTP запроса.
+    val disableEncryption: Boolean = false      // True отключает шифрование. По умолчанию false - шифрование активно.
 )

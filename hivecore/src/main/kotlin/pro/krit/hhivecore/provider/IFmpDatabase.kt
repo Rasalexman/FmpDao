@@ -14,21 +14,17 @@
 
 package pro.krit.hhivecore.provider
 
-import com.mobrun.plugin.api.DatabaseAPI
-import com.mobrun.plugin.api.HyperHive
-import com.mobrun.plugin.api.HyperHiveState
 import io.reactivex.rxjava3.subjects.Subject
 import kotlinx.coroutines.flow.Flow
 import pro.krit.hhivecore.base.IDao
 import ru.fsight.fmp.FMP
 import ru.fsight.fmp.FMPDatabase
+import ru.fsight.fmp.FMPUser
+import ru.fsight.fmp.model.fmp.FMPResult
 
 interface IFmpDatabase {
     val isDbCreated: Boolean
     val databasePath: String
-
-
-    val databaseApi: DatabaseAPI
 
     /**
      * Представляет собой локальную базу данных. Используется SQLite.
@@ -37,16 +33,24 @@ interface IFmpDatabase {
      */
     val fmpDatabaseApi: FMPDatabase
 
+    /**
+     *
+     */
     fun provideFmp(): FMP
-    fun provideHyperHive(): HyperHive
-    fun provideHyperHiveState(): HyperHiveState
+
+    /**
+     *
+     */
+    fun provideUser(): FMPUser
 
     fun getFlowTrigger(dao: IDao): Flow<String>
     fun getRxTrigger(dao: IDao): Subject<String>
 
-    fun openDatabase(dbKey: String = "", pathBase: String = ""): DatabaseState
-    fun closeDatabase(pathBase: String = ""): DatabaseState
-    fun closeAndClearProviders(pathBase: String = ""): DatabaseState
+    fun openDatabase(): DatabaseState
+    fun closeDatabase(): DatabaseState
+    fun closeAndClearProviders(): DatabaseState
+
+    fun auth(login: String, password: String): Pair<FMPUser, FMPResult<Boolean>>
 
     fun setDefaultHeaders(headers: Map<String, String>?)
     fun getDefaultHeaders(): Map<String, String>?

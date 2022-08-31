@@ -35,6 +35,8 @@ java {
     this.sourceSets {
         getByName("main") {
             java.setSrcDirs(srcDirs)
+            java.exclude("ru/fsight/fmp/*")
+            java.exclude("ru/fsight/fmp/BuildConfig")
         }
     }
     sourceCompatibility = JavaVersion.VERSION_11
@@ -48,7 +50,9 @@ java {
 dependencies {
     val kotlinpoetKsp: String by rootProject.extra
     val kspapi: String by rootProject.extra
-    implementation(project(":hivecore"))
+    implementation(project(":hivecore")) {
+        exclude(group = "ru.fsight.fmp")
+    }
     implementation(kotlinpoetKsp)
     implementation(kspapi)
 }

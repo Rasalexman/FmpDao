@@ -9,8 +9,8 @@ import timber.log.Timber
 class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
     companion object {
-        const val DEBUG_LOGIN = "35069"
-        const val DEBUG_PASSWORD = "35069"
+        const val DEBUG_LOGIN = "T_PM_KR14_SO"
+        const val DEBUG_PASSWORD = "init_0000"
     }
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {

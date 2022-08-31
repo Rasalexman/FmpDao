@@ -4,11 +4,9 @@ import android.content.Context
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import com.rasalexman.sresult.common.extensions.alertResult
-import com.rasalexman.sresult.common.extensions.doAsync
 import com.rasalexman.sresult.common.extensions.toNavigateResult
 import com.rasalexman.sresultpresentation.extensions.launchUITryCatch
 import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
-import pro.krit.fmpdaoexample.MainActivity
 import pro.krit.fmpdaoexample.database.DataBaseHolder
 
 class StartViewModel : BaseViewModel() {
@@ -18,7 +16,6 @@ class StartViewModel : BaseViewModel() {
     fun openDataBase(appContext: Context) = launchUITryCatch {
         showLoading.postValue(View.VISIBLE)
         val state = DataBaseHolder.createAndOpenDatabase(
-            MainActivity.DEBUG_LOGIN,
             "872134",
             appContext
         )

@@ -14,7 +14,9 @@
 
 package pro.krit.hhivecore.common
 
-import com.mobrun.plugin.api.DatabaseAPI
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.mobrun.plugin.models.Error
 import com.mobrun.plugin.models.StatusRequest
 import com.mobrun.plugin.models.StatusSelectTable
@@ -32,6 +34,10 @@ object QueryExecuter {
     const val ERROR_NO_TABLE = "no such table"
     const val ERROR_NO_COLUMN = "has no column named"
 
+    val gson: Gson by lazy {
+        GsonBuilder().create()
+    }
+
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> executeQuery(
         dao: IDao,
         query: String,
@@ -40,8 +46,20 @@ object QueryExecuter {
         notifyAll: Boolean = false
     ): List<E> {
         return try {
-            val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
-            status.result.database.records.orEmpty()
+            val database = dao.fmpDatabase.fmpDatabaseApi
+            val selectResult = database.select(query)
+
+            if(selectResult.status) {
+                val typeToken = object : TypeToken<E>() {}.type
+                val result = selectResult.result
+                result.map {
+                    gson.fromJson<E>(it.toString(), typeToken)
+                }
+            } else {
+                emptyList<E>()
+            }
+//            val status = executeStatus<E, S>(dao, query, errorCode, methodName, notifyAll)
+//            status.result.database.records.orEmpty()
         } catch (e: Throwable) {
             println("[ERROR]: ${dao.fullTableName} ERROR WITH QUERY $query")
             e.printStackTrace()
@@ -117,15 +135,15 @@ object QueryExecuter {
 
         val errorStatus: StatusSelectTable<E> = try {
             val localDao: IDao = dao
-            val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
+            //val hyperHiveDatabaseApi = localDao.fmpDatabase.databaseApi
             val clazz = S::class.java
-            val status = hyperHiveDatabaseApi.query(query, clazz).execute()!!
+            val status = StatusSelectTable<E>() // hyperHiveDatabaseApi.query(query, clazz).execute()!!
             // check for table creation
-            val isOkStatus = status.checkTableStatus(localDao, hyperHiveDatabaseApi)
+            val isOkStatus = status.checkTableStatus(localDao)
             if (isOkStatus) {
                 status
             } else {
-                hyperHiveDatabaseApi.query(query, clazz).execute()!!
+                StatusSelectTable<E>()//hyperHiveDatabaseApi.query(query, clazz).execute()!!
             }.apply {
                 if (notifyAll) this.triggerDaoIfOk(localDao)
             }
@@ -143,7 +161,7 @@ object QueryExecuter {
 
     inline fun <reified E : Any, reified S : StatusSelectTable<E>> S.checkTableStatus(
         dao: IDao,
-        databaseApi: DatabaseAPI
+        //databaseApi: DatabaseAPI
     ): Boolean {
         return if (!this.isOk && dao.fieldsData != null) {
             val statusErrors = this.errors.orEmpty()
@@ -165,7 +183,7 @@ object QueryExecuter {
                 dao.initFields<E>()
                 val clazz = S::class.java
                 val createTableQuery = QueryBuilder.createTableQuery(dao)
-                val createTableStatus = databaseApi.query(createTableQuery, clazz).execute()!!
+                val createTableStatus = StatusSelectTable<E>() //databaseApi.query(createTableQuery, clazz).execute()!!
                 !createTableStatus.isOk
             } else if(columnError != null) {
                 dao.initFields<E>()
@@ -177,7 +195,7 @@ object QueryExecuter {
                 if(erasedColumnName.isNotEmpty()) {
                     val clazz = S::class.java
                     val alterTableQuery = QueryBuilder.alterTableQueryAddColumn(dao, erasedColumnName)
-                    val alterTableStatus = databaseApi.query(alterTableQuery, clazz).execute()!!
+                    val alterTableStatus = StatusSelectTable<E>()//databaseApi.query(alterTableQuery, clazz).execute()!!
                     !alterTableStatus.isOk
                 } else {
                     true

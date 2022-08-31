@@ -44,9 +44,13 @@ android {
     }
 
     packagingOptions {
+        this.resources.excludes.add("META-INF")
         this.resources.excludes.add("META-INF/notice.txt")
         this.resources.excludes.add("META-INF/plugin_release.kotlin_module")
         this.resources.excludes.add("META-INF/gradle/incremental.annotation.processors")
+        this.resources.excludes.add("ru/fsight/fmp/*")
+        this.resources.excludes.add("ru/fsight/fmp/BuildConfig")
+
         //this.resources.excludes.add("com/mobrun/plugin/*")
     }
 
@@ -61,6 +65,8 @@ android {
             // Prefer modules that are part of this build (multi-project or composite build) over external modules.
             preferProjectModules()
         }
+
+
     }
 
     sourceSets {
@@ -92,6 +98,7 @@ android {
 dependencies {
     val core: String by rootProject.extra
     val coroutinesCore: String by rootProject.extra
+    val coroutinesAndroid: String by rootProject.extra
     val sresultpresentation: String by rootProject.extra
     val junit: String by rootProject.extra
     val leakCanary: String by rootProject.extra
@@ -99,21 +106,24 @@ dependencies {
     val easypermissions: String by rootProject.extra
     val espresso: String by rootProject.extra
 
+    implementation(files("libs/fmp.aar"))
     implementation(core)
     implementation(coroutinesCore)
+    implementation(coroutinesAndroid)
     implementation(sresultpresentation)
     implementation(easypermissions)
+    // json
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
 
-    //implementation(project(":hhive"))
+    // sqlcipher
+    implementation("net.zetetic:android-database-sqlcipher:4.5.1")
 
 /*    implementation(project(":hiveprocessor")) {
         exclude(group = "com.mobrun", module = "plugin")
     }
     kapt(project(":hiveprocessor"))*/
 
-    implementation(project(":hivecore")) {
-        exclude(group = "com.mobrun.plugin")
-    }
+    implementation(project(":hivecore"))
     ksp(project(":hiveksp"))
 
     debugImplementation(leakCanary)
