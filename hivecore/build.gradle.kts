@@ -5,11 +5,11 @@ plugins {
 }
 
 val codePath: String by rootProject.extra
-val hiveKspVersion: String by rootProject.extra
+val hhiveVersion: String by rootProject.extra
 
 val srcDirs = listOf(codePath)
 group = "pro.krit.hivecore"
-version = hiveKspVersion
+version = hhiveVersion
 
 java {
     this.sourceSets {
@@ -56,7 +56,7 @@ publishing {
             // You can then customize attributes of the publication as shown below.
             groupId = "pro.krit.hivecore"
             artifactId = "hivecore"
-            version = hiveKspVersion
+            version = hhiveVersion
 
             artifact(tasks["sourcesJar"])
             artifact(tasks["javadocJar"])
