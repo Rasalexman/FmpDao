@@ -46,7 +46,7 @@ object QueryExecuter {
         notifyAll: Boolean = false
     ): List<E> {
         return try {
-            val database = dao.fmpDatabase.fmpDatabaseApi
+            val database = dao.fmpDatabase.provideFmpDatabase()
             val selectResult = database.select(query)
 
             if(selectResult.status) {

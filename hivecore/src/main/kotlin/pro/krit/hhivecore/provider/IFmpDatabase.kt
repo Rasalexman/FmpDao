@@ -27,13 +27,6 @@ interface IFmpDatabase {
     val databasePath: String
 
     /**
-     * Представляет собой локальную базу данных. Используется SQLite.
-     * Все операции записи синхронизируются на данном объекте,
-     * поэтому не создавайте более одного объекта на один файл базы данных.
-     */
-    val fmpDatabaseApi: FMPDatabase
-
-    /**
      *
      */
     fun provideFmp(): FMP
@@ -42,6 +35,13 @@ interface IFmpDatabase {
      *
      */
     fun provideUser(): FMPUser
+
+    /**
+     * Представляет собой локальную базу данных. Используется SQLite.
+     * Все операции записи синхронизируются на данном объекте,
+     * поэтому не создавайте более одного объекта на один файл базы данных.
+     */
+    fun provideFmpDatabase(): FMPDatabase
 
     fun getFlowTrigger(dao: IDao): Flow<String>
     fun getRxTrigger(dao: IDao): Subject<String>

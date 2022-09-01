@@ -43,7 +43,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     private var requestHeaders: Map<String, String>? = null
 
     override val databasePath: String
-        get() = fmpDatabaseApi.path
+        get() = provideFmpDatabase().path
 
     private val flowTriggers: HashMap<String, Flow<String>> = hashMapOf()
     private val rxTriggers: HashMap<String, Subject<String>> = hashMapOf()
@@ -55,15 +55,16 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             return file.exists()
         }
 
-    override val fmpDatabaseApi: FMPDatabase
-        get() = fmpDatabase ?: throw NullPointerException("FMPDatabase instance is not initialized. Call 'openDatabase' method first")
-
     override fun provideFmp(): FMP {
         return fmp ?: throw NullPointerException("FMP instance is not initialized. Call 'initialize' method first")
     }
 
     override fun provideUser(): FMPUser {
         return currentFmpUser ?: throw NullPointerException("FmpUser is not authorized. Call 'auth' method first")
+    }
+
+    override fun provideFmpDatabase(): FMPDatabase {
+        return fmpDatabase ?: throw NullPointerException("FMPDatabase instance is not initialized. Call 'openDatabase' method first")
     }
 
     override fun getFlowTrigger(dao: IDao): Flow<String> {
@@ -117,8 +118,12 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
 
         this.fmp = FMP.Builder()             // Создать конструктор FMP.
             .api(FMP.API_V1)                     // Указать версию API сервера.
-            .certCheck(config.certCheck)                    // Выключить проверку TLS сертификата сервера.
-            .cert(config.certPath)           // Указать путь к самоподписному сертификату сервера.
+            .apply {
+                if(config.certCheck && config.certPath.isNotEmpty()) {
+                    certCheck(config.certCheck)                    // Выключить проверку TLS сертификата сервера.
+                    cert(config.certPath)           // Указать путь к самоподписному сертификату сервера.
+                }
+            }
             .deviceID(config.deviceId)                 // Указать ID устройства.
             .environment(config.environment)          // Среда на сервере.
             .headers(config.headers.orEmpty()) // Указать кастомные хедеры для каждого HTTP запроса.
@@ -127,7 +132,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .retryCount(config.retryCount)                      // Повторять неудачные HTTP запросы 10 раз.
             .retryInterval(config.retryInterval)                    // Повторять неудачные HTTP запросы каждые 6 секунд.
             .storage(config.storage)                                // Директория, где фреймворк будет хранить файлы.
-            .debugNoEncryption(config.disableEncryption)            // True отключает шифрование. По умолчанию false - шифрование активно.
+            //.debugNoEncryption(config.disableEncryption)            // True отключает шифрование. По умолчанию false - шифрование активно.
             .build()
 
         // обязательно записываем путь к локальному хранилищу
@@ -196,7 +201,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     private fun tryToOpenDatabase(): Boolean {
-        val fmpDatabaseInstance = fmpDatabaseApi
+        val fmpDatabaseInstance = provideFmpDatabase()
         val openResult = fmpDatabaseInstance.open()
         if(!openResult.status) {
             provideFmp().log.error("tryToOpenDatabase error: ${openResult.error}")
@@ -205,7 +210,7 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     }
 
     private fun tryToCloseDatabase(): Boolean {
-        val fmpDatabaseInstance = fmpDatabaseApi
+        val fmpDatabaseInstance = provideFmpDatabase()
         val closeResult = fmpDatabaseInstance.close()
         if(!closeResult.status) {
             provideFmp().log.error("tryToCloseDatabase error: ${closeResult.error}")
