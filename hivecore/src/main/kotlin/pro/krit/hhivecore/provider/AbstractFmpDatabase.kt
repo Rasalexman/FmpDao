@@ -177,8 +177,11 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
     private fun createFmpDatabase(dbKey: String): Boolean {
         var isCreated = true
         if(fmpDatabase == null) {
+            val fmpUser = currentFmpUser ?: provideFmp().user.username(dbKey).build().also {
+                currentFmpUser = it
+            }
             // путь к базе данных береться только из локального кэша юзера
-            val databasePath = "${provideUser().cache}/${dbKey}.db"
+            val databasePath = "${fmpUser.cache}/${dbKey}.db"
             // вызывается только один раз при инициализации ФМП
             try {
                 val databaseBuilder = provideFmp().database
