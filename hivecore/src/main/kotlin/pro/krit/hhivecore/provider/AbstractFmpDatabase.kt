@@ -120,15 +120,15 @@ abstract class AbstractFmpDatabase : IFmpDatabase {
             .api(FMP.API_V1)                     // Указать версию API сервера.
             .apply {
                 if(config.certCheck && config.certPath.isNotEmpty()) {
-                    certCheck(config.certCheck)                    // Выключить проверку TLS сертификата сервера.
-                    cert(config.certPath)           // Указать путь к самоподписному сертификату сервера.
+                    certCheck(config.certCheck)                 // Выключить проверку TLS сертификата сервера.
+                    cert(config.certPath)                       // Указать путь к самоподписному сертификату сервера.
                 }
             }
-            .deviceID(config.deviceId)                 // Указать ID устройства.
-            .environment(config.environment)          // Среда на сервере.
-            .headers(config.headers.orEmpty()) // Указать кастомные хедеры для каждого HTTP запроса.
-            .address(config.serverAddress)             // Адрес сервера платформы.
-            .project(config.project)                  // Проект внутри среды.
+            .deviceID(config.deviceId)                  // Указать ID устройства.
+            .environment(config.environment)            // Среда на сервере.
+            .headers(config.headers.orEmpty())          // Указать кастомные хедеры для каждого HTTP запроса.
+            .address(config.serverAddress)              // Адрес сервера платформы.
+            .project(config.project)                    // Проект внутри среды.
             .retryCount(config.retryCount)                      // Повторять неудачные HTTP запросы 10 раз.
             .retryInterval(config.retryInterval)                    // Повторять неудачные HTTP запросы каждые 6 секунд.
             .storage(config.storage)                                // Директория, где фреймворк будет хранить файлы.
