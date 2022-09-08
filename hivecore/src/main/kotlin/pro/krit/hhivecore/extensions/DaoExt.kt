@@ -183,7 +183,8 @@ fun IDao.request(
 }
 
 fun IDao.requestBuilder(
-    params: ScalarMap? = null
+    params: ScalarMap? = null,
+    requestData: List<CustomParameter>? = null
 ): RequestBuilder<CustomParameter, ScalarParameter<*>> {
     val hyperHive = fmpDatabase.provideHyperHive()
     val builder: RequestBuilder<CustomParameter, ScalarParameter<*>> =
@@ -192,6 +193,9 @@ fun IDao.requestBuilder(
         params.forEach {
             builder.addScalar(LimitedScalarParameter(name = it.key, value = it.value))
         }
+    }
+    if(!requestData.isNullOrEmpty()) {
+        builder.addTableItems(requestData)
     }
     return builder
 }
