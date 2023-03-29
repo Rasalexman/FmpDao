@@ -141,7 +141,7 @@ fun IRequest.requestListStatus(requestData: Any? = null): StatusRawDataListTable
  *
  * @return - статус запроса [StatusRawDataListTable]
  */
-fun IRequest.tableListStatus(
+suspend fun IRequest.tableListStatus(
     requestData: List<CustomParameter>? = null,
     scalarParameters: ScalarMap? = null,
     getArgs: Map<String, String>? = null

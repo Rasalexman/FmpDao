@@ -27,6 +27,13 @@ import pro.krit.hhivecore.base.IRequest
 import pro.krit.hhivecore.base.RawStatus
 import pro.krit.hhivecore.errors.RequestException
 import pro.krit.hhivecore.request.ObjectRawStatus
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.io.InterruptedIOException
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import com.mobrun.plugin.api.Call
+import com.mobrun.plugin.api.Callback
+
 
 object RequestExecuter {
 
@@ -61,13 +68,36 @@ object RequestExecuter {
         }
     }
 
-    fun executeBaseTableStatus(
+    suspend fun executeBaseTableStatus(
         request: IRequest,
         params: TableCallParams? = null
     ): StatusRawDataListTable {
         val requestApi = request.hyperHive.requestAPI
         val resourceName = request.resourceName
-        return requestApi.table(resourceName, params, StatusRawDataListTable::class.java).execute()
+        return requestApi.table(
+            resourceName,
+            params,
+            StatusRawDataListTable::class.java
+        ).awaitResponse()
+    }
+
+    suspend fun <T> Call<T>.awaitResponse(): T = suspendCancellableCoroutine { continuation ->
+        val responseCallback = object :
+            Callback<T> {
+            override fun onResponse(call: Call<T>, response: T) {
+                continuation.resume(response)
+            }
+
+            override fun onFailure(call: Call<T>, e: Throwable) {
+                if (e is InterruptedIOException) {
+                    continuation.cancel(e)
+                } else {
+                    continuation.resumeWithException(e)
+                }
+            }
+        }
+        enqueue(responseCallback)
+        continuation.invokeOnCancellation { cancel() }
     }
 
     inline fun <reified S : Any, reified T : RawStatus<S>> executeStatus(
