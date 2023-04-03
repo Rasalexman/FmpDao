@@ -6,9 +6,10 @@ plugins {
 
 val codePath: String by rootProject.extra
 val hiveKspVersion: String by rootProject.extra
+val packageName = "com.rasalexman.hivecore"
 
 val srcDirs = listOf(codePath)
-group = "pro.krit.hivecore"
+group = packageName
 version = hiveKspVersion
 
 java {
@@ -49,7 +50,7 @@ publishing {
         create<MavenPublication>("hivecore") {
             from(components["kotlin"])
             // You can then customize attributes of the publication as shown below.
-            groupId = "pro.krit.hivecore"
+            groupId = packageName
             artifactId = "hivecore"
             version = hiveKspVersion
 

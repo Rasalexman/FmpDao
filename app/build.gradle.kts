@@ -4,7 +4,7 @@ plugins {
     id("kotlin-parcelize")
     id("androidx.navigation.safeargs.kotlin")
     kotlin("kapt")
-    id("com.google.devtools.ksp") version "1.7.10-1.0.6"
+    id("com.google.devtools.ksp") version "1.7.21-1.0.8"
 }
 
 val kotlinApiVersion: String by extra
@@ -18,11 +18,10 @@ android {
 
     compileSdk = buildSdkVersion
     defaultConfig {
-        applicationId = "pro.krit.fmpdaoexample"
+        applicationId = "com.rasalexman.fmpdaoexample"
         minSdk = minSdkVersion
         targetSdk = buildSdkVersion
-        version = "1.0.2"
-        multiDexEnabled = true
+        version = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

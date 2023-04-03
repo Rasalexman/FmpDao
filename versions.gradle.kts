@@ -1,15 +1,15 @@
 //------ APP VERSION
 val hhiveVersion = "1.4.34"
-val kotlin_version = "1.7.10"
+val kotlin_version = "1.7.21"
 extra["hhiveVersion"] = hhiveVersion
 extra["hiveKspVersion"] = hhiveVersion
 
 //------ CONFIG DATA
 extra["minSdkVersion"] = 18
-extra["buildSdkVersion"] = 31
+extra["buildSdkVersion"] = 33
 extra["kotlinApiVersion"] = "1.7"
 extra["jvmVersion"] = "11"
-extra["agpVersion"] = "7.2.1"
+extra["agpVersion"] = "7.4.0"
 extra["kotlinVersion"] = kotlin_version
 extra["jitpackPath"] = "https://jitpack.io"
 extra["codePath"] = "src/main/kotlin"
@@ -27,7 +27,7 @@ val core: String = "1.8.0"
 val kotest = "5.0.3"
 val runner = "1.1.0"
 val espresso = "3.1.0"
-val ksp = "$kotlin_version-1.0.6"
+val ksp = "$kotlin_version-1.0.8"
 val kotlinpoet = "1.12.0"
 val autoService = "1.0.1"
 val rxJava3 = "3.1.4"
