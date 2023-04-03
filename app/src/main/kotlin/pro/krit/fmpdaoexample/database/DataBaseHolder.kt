@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.database
+package com.rasalexman.fmpdaoexample.database
 
 import android.content.Context
 import android.os.Build
@@ -13,10 +13,10 @@ import com.rasalexman.sresult.common.extensions.logg
 import com.rasalexman.sresult.common.extensions.loggE
 import com.rasalexman.sresult.common.extensions.toSuccessResult
 import com.rasalexman.sresult.data.dto.SResult
-import pro.krit.fmpdaoexample.IMainDatabase
-import pro.krit.generated.database.MainDatabaseImpl
-import pro.krit.hhivecore.provider.DatabaseConfig
-import pro.krit.hhivecore.provider.DatabaseState
+import com.rasalexman.fmpdaoexample.IMainDatabase
+import com.rasalexman.generated.database.MainDatabaseImpl
+import com.rasalexman.hhivecore.provider.DatabaseConfig
+import com.rasalexman.hhivecore.provider.DatabaseState
 import java.util.*
 
 object DataBaseHolder {

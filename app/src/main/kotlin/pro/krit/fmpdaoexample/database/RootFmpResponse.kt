@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.database
+package com.rasalexman.fmpdaoexample.database
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName

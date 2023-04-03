@@ -6,7 +6,7 @@
 
         <variable
             name="vm"
-            type="pro.krit.fmpdaoexample.fragments.MainViewModel" />
+            type="com.rasalexman.fmpdaoexample.fragments.MainViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

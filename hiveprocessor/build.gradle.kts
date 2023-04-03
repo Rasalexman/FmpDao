@@ -9,7 +9,7 @@ val codePath: String by rootProject.extra
 val hhiveVersion: String by rootProject.extra
 val srcDirs = listOf(codePath)
 
-group = "pro.krit.hiveprocessor"
+group = "com.rasalexman.hiveprocessor"
 version = hhiveVersion
 
 sourceSets {
@@ -50,7 +50,7 @@ publishing {
         create<MavenPublication>("hiveprocessor") {
             from(components["kotlin"])
             // You can then customize attributes of the publication as shown below.
-            groupId = "pro.krit.hiveprocessor"
+            groupId = "com.rasalexman.hiveprocessor"
             artifactId = "hiveprocessor"
             version = hhiveVersion
 

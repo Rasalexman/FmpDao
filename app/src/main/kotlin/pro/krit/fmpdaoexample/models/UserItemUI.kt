@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.models
+package com.rasalexman.fmpdaoexample.models
 
 import android.os.Parcelable
 import kotlinx.parcelize.Parcelize

@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/startFragment"
-        android:name="pro.krit.fmpdaoexample.fragments.start.StartFragment"
+        android:name="com.rasalexman.fmpdaoexample.fragments.start.StartFragment"
         android:label="StartFragment">
         <action
             android:id="@+id/action_startFragment_to_mainFragment"
@@ -15,7 +15,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="pro.krit.fmpdaoexample.fragments.MainFragment"
+        android:name="com.rasalexman.fmpdaoexample.fragments.MainFragment"
         android:label="MainFragment">
         <action
             android:id="@+id/action_mainFragment_to_usersFragment"
@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/usersFragment"
-        android:name="pro.krit.fmpdaoexample.fragments.users.UsersFragment"
+        android:name="com.rasalexman.fmpdaoexample.fragments.users.UsersFragment"
         android:label="UsersFragment">
         <action
             android:id="@+id/action_usersFragment_to_symptomsFragment"
@@ -33,12 +33,12 @@
 
     <fragment
         android:id="@+id/symptomsFragment"
-        android:name="pro.krit.fmpdaoexample.fragments.symptoms.SymptomsFragment"
+        android:name="com.rasalexman.fmpdaoexample.fragments.symptoms.SymptomsFragment"
         android:label="SymptomsFragment" >
 
         <argument
             android:name="user"
-            app:argType="pro.krit.fmpdaoexample.models.UserItemUI"
+            app:argType="com.rasalexman.fmpdaoexample.models.UserItemUI"
             app:nullable="false"/>
     </fragment>
 

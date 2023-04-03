@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments
+package com.rasalexman.fmpdaoexample.fragments
 
 import androidx.lifecycle.MutableLiveData
 import com.rasalexman.sresult.common.extensions.*
@@ -7,20 +7,20 @@ import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import pro.krit.fmpdaoexample.MainActivity
-import pro.krit.fmpdaoexample.daos.IPmDataLocalDao
-import pro.krit.fmpdaoexample.database.DataBaseHolder
-import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
-import pro.krit.fmpdaoexample.fmpresources.Fields
-import pro.krit.fmpdaoexample.models.PmEtDataLocalEntity
-import pro.krit.fmpdaoexample.models.PmType
-import pro.krit.generated.dao.ZfmToroSymptomListModel
-import pro.krit.generated.dao.ZfmToroSymptomListStatus
-import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthGrModel
-import pro.krit.generated.request.ZfmPmGetSetRequestEtAuthUserModel
-import pro.krit.generated.request.ZfmPmGetSetRequestParams
-import pro.krit.hhivecore.common.RequestExecuter.isNotBad
-import pro.krit.hhivecore.extensions.*
+import com.rasalexman.fmpdaoexample.MainActivity
+import com.rasalexman.fmpdaoexample.daos.IPmDataLocalDao
+import com.rasalexman.fmpdaoexample.database.DataBaseHolder
+import com.rasalexman.fmpdaoexample.database.IZfmToroSymptomList
+import com.rasalexman.fmpdaoexample.fmpresources.Fields
+import com.rasalexman.fmpdaoexample.models.PmEtDataLocalEntity
+import com.rasalexman.fmpdaoexample.models.PmType
+import com.rasalexman.generated.dao.ZfmToroSymptomListModel
+import com.rasalexman.generated.dao.ZfmToroSymptomListStatus
+import com.rasalexman.generated.request.ZfmPmGetSetRequestEtAuthGrModel
+import com.rasalexman.generated.request.ZfmPmGetSetRequestEtAuthUserModel
+import com.rasalexman.generated.request.ZfmPmGetSetRequestParams
+import com.rasalexman.hhivecore.common.RequestExecuter.isNotBad
+import com.rasalexman.hhivecore.extensions.*
 import java.util.*
 import kotlin.random.Random
 

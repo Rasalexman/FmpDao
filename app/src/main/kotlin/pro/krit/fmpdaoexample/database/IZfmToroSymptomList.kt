@@ -1,8 +1,8 @@
-package pro.krit.fmpdaoexample.database
+package com.rasalexman.fmpdaoexample.database
 
-import pro.krit.fmpdaoexample.fmpresources.Fields
-import pro.krit.hhivecore.annotations.FmpDao
-import pro.krit.hhivecore.base.IDao
+import com.rasalexman.fmpdaoexample.fmpresources.Fields
+import com.rasalexman.hhivecore.annotations.FmpDao
+import com.rasalexman.hhivecore.base.IDao
 
 // Перечень симптомов
 @FmpDao(

@@ -1,7 +1,7 @@
-package pro.krit.fmpdaoexample.fmpresources
+package com.rasalexman.fmpdaoexample.fmpresources
 
-import pro.krit.hhivecore.annotations.FmpDao
-import pro.krit.hhivecore.base.IDao
+import com.rasalexman.hhivecore.annotations.FmpDao
+import com.rasalexman.hhivecore.base.IDao
 
 //Загрузка справочника значений для выпадающих списков
 @FmpDao(

@@ -1,6 +1,6 @@
-package pro.krit.fmpdaoexample.statuses
+package com.rasalexman.fmpdaoexample.statuses
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.fmpdaoexample.models.PmEtDataEntity
+import com.rasalexman.fmpdaoexample.models.PmEtDataEntity
 
 class PmStatus : StatusSelectTable<PmEtDataEntity>()

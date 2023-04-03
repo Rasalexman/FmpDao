@@ -12,7 +12,7 @@
 // WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH
 // THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-package pro.krit.hiveprocessor
+package com.rasalexman.hiveprocessor
 
 import com.google.auto.service.AutoService
 import com.mobrun.plugin.api.HyperHive
@@ -21,15 +21,15 @@ import com.mobrun.plugin.api.request_assistant.NumeratedFields
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import pro.krit.hhivecore.base.IDao
-import pro.krit.hhivecore.base.IRequest
-import pro.krit.hhivecore.common.DaoFieldsData
-import pro.krit.hhivecore.data.BindData
-import pro.krit.hhivecore.data.TypeData
-import pro.krit.hhivecore.annotations.*
-import pro.krit.hhivecore.extensions.*
-import pro.krit.hhivecore.provider.IFmpDatabase
-import pro.krit.hhivecore.request.ObjectRawStatus
+import com.rasalexman.hhivecore.base.IDao
+import com.rasalexman.hhivecore.base.IRequest
+import com.rasalexman.hhivecore.common.DaoFieldsData
+import com.rasalexman.hhivecore.data.BindData
+import com.rasalexman.hhivecore.data.TypeData
+import com.rasalexman.hhivecore.annotations.*
+import com.rasalexman.hhivecore.extensions.*
+import com.rasalexman.hhivecore.provider.IFmpDatabase
+import com.rasalexman.hhivecore.request.ObjectRawStatus
 import java.io.IOException
 import java.util.*
 import javax.annotation.processing.*
@@ -49,12 +49,12 @@ class FmpProcessor : AbstractProcessor() {
 
         private const val FMP_DATABASE_NAME = "FmpDatabase"
 
-        private const val DAO_PACKAGE_NAME = "pro.krit.generated.dao"
-        private const val DATABASE_PACKAGE_NAME = "pro.krit.generated.database"
-        private const val REQUEST_PACKAGE_NAME = "pro.krit.generated.request"
+        private const val DAO_PACKAGE_NAME = "com.rasalexman.generated.dao"
+        private const val DATABASE_PACKAGE_NAME = "com.rasalexman.generated.database"
+        private const val REQUEST_PACKAGE_NAME = "com.rasalexman.generated.request"
 
-        private const val EXTENSIONS_PATH = "pro.krit.hhivecore.extensions"
-        private const val QUERY_EXECUTER_PATH = "pro.krit.hhivecore.common"
+        private const val EXTENSIONS_PATH = "com.rasalexman.hhivecore.extensions"
+        private const val QUERY_EXECUTER_PATH = "com.rasalexman.hhivecore.common"
         private const val QUERY_EXECUTER_NAME = "QueryExecuter"
 
         private const val BASE_FMP_DATABASE_NAME = "AbstractFmpDatabase"
@@ -756,7 +756,7 @@ class FmpProcessor : AbstractProcessor() {
 
         if (!checkExtendedInterface(element, annotationName)) {
             throw IllegalStateException(
-                "$annotationType with $realAnnotationName annotation should implement pro.krit.hhivecore.IDao.I${annotationName}" +
+                "$annotationType with $realAnnotationName annotation should implement com.rasalexman.hhivecore.IDao.I${annotationName}" +
                         " or have annotation parameter 'fields' to be correctly processed"
             )
         }

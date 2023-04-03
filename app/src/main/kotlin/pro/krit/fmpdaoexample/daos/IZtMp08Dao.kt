@@ -1,10 +1,10 @@
-package pro.krit.fmpdaoexample.daos
+package com.rasalexman.fmpdaoexample.daos
 
 import com.mobrun.plugin.models.StatusSelectTable
-import pro.krit.fmpdaoexample.models.ZtMp08Entity
-import pro.krit.generated.request.ZtMp08RequestEtDataModel
-import pro.krit.hhivecore.annotations.FmpLocalDao
-import pro.krit.hhivecore.base.IDao
+import com.rasalexman.fmpdaoexample.models.ZtMp08Entity
+import com.rasalexman.generated.request.ZtMp08RequestEtDataModel
+import com.rasalexman.hhivecore.annotations.FmpLocalDao
+import com.rasalexman.hhivecore.base.IDao
 
 @FmpLocalDao(
     resourceName = "zs_mp_08",

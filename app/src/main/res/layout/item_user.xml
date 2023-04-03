@@ -5,7 +5,7 @@
     <data>
         <variable
             name="item"
-            type="pro.krit.fmpdaoexample.models.UserItemUI" />
+            type="com.rasalexman.fmpdaoexample.models.UserItemUI" />
     </data>
 
     <LinearLayout

@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments.start
+package com.rasalexman.fmpdaoexample.fragments.start
 
 import android.Manifest
 import android.os.Bundle
@@ -9,8 +9,8 @@ import com.rasalexman.sresultpresentation.databinding.BaseBindingFragment
 import com.vmadalin.easypermissions.EasyPermissions
 import com.vmadalin.easypermissions.dialogs.SettingsDialog
 import com.vmadalin.easypermissions.models.PermissionRequest
-import pro.krit.fmpdaoexample.R
-import pro.krit.fmpdaoexample.databinding.FragmentStartBinding
+import com.rasalexman.fmpdaoexample.R
+import com.rasalexman.fmpdaoexample.databinding.FragmentStartBinding
 
 class StartFragment : BaseBindingFragment<FragmentStartBinding, StartViewModel>(), EasyPermissions.PermissionCallbacks {
     override val layoutId: Int

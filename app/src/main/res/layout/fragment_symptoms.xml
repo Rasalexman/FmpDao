@@ -5,7 +5,7 @@
     <data>
         <variable
             name="vm"
-            type="pro.krit.fmpdaoexample.fragments.symptoms.SymptomsViewModel" />
+            type="com.rasalexman.fmpdaoexample.fragments.symptoms.SymptomsViewModel" />
         <variable
             name="rvConfig"
             type="com.rasalexman.easyrecyclerbinding.DataBindingRecyclerViewConfig" />

@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments.users
+package com.rasalexman.fmpdaoexample.fragments.users
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,15 +12,15 @@ import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
-import pro.krit.hhivecore.extensions.count
-import pro.krit.hhivecore.extensions.flowable
-import pro.krit.hhivecore.extensions.insertOrReplace
-import pro.krit.fmpdaoexample.daos.IUsersLocalDao
-import pro.krit.fmpdaoexample.database.DataBaseHolder
-import pro.krit.fmpdaoexample.fmpresources.Fields
-import pro.krit.fmpdaoexample.models.PmType
-import pro.krit.fmpdaoexample.models.UserEntity
-import pro.krit.fmpdaoexample.models.UserItemUI
+import com.rasalexman.hhivecore.extensions.count
+import com.rasalexman.hhivecore.extensions.flowable
+import com.rasalexman.hhivecore.extensions.insertOrReplace
+import com.rasalexman.fmpdaoexample.daos.IUsersLocalDao
+import com.rasalexman.fmpdaoexample.database.DataBaseHolder
+import com.rasalexman.fmpdaoexample.fmpresources.Fields
+import com.rasalexman.fmpdaoexample.models.PmType
+import com.rasalexman.fmpdaoexample.models.UserEntity
+import com.rasalexman.fmpdaoexample.models.UserItemUI
 import java.util.*
 import kotlin.random.Random
 

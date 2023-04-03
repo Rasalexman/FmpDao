@@ -1,8 +1,8 @@
-package pro.krit.fmpdaoexample.fmpresources
+package com.rasalexman.fmpdaoexample.fmpresources
 
-import pro.krit.hhivecore.annotations.FmpRestRequest
-import pro.krit.hhivecore.annotations.FmpTable
-import pro.krit.hhivecore.base.IRequest
+import com.rasalexman.hhivecore.annotations.FmpRestRequest
+import com.rasalexman.hhivecore.annotations.FmpTable
+import com.rasalexman.hhivecore.base.IRequest
 
 //Получение настроек пользователя
 @FmpRestRequest(

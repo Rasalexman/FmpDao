@@ -1,9 +1,9 @@
-package pro.krit.fmpdaoexample.fragments
+package com.rasalexman.fmpdaoexample.fragments
 
 import androidx.fragment.app.viewModels
 import com.rasalexman.sresultpresentation.databinding.BaseBindingFragment
-import pro.krit.fmpdaoexample.R
-import pro.krit.fmpdaoexample.databinding.FragmentMainBinding
+import com.rasalexman.fmpdaoexample.R
+import com.rasalexman.fmpdaoexample.databinding.FragmentMainBinding
 
 class MainFragment : BaseBindingFragment<FragmentMainBinding, MainViewModel>() {
 

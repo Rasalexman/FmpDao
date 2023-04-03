@@ -1,12 +1,12 @@
-package pro.krit.fmpdaoexample
+package com.rasalexman.fmpdaoexample
 
-import pro.krit.fmpdaoexample.daos.*
-import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
-import pro.krit.fmpdaoexample.fmpresources.*
-import pro.krit.hhivecore.annotations.FmpDatabase
-import pro.krit.hhivecore.provider.AbstractFmpDatabase
-import pro.krit.hhivecore.provider.IFmpDatabase
-import pro.krit.fmpdaoexample.database.ISymptomList
+import com.rasalexman.fmpdaoexample.daos.*
+import com.rasalexman.fmpdaoexample.database.IZfmToroSymptomList
+import com.rasalexman.fmpdaoexample.fmpresources.*
+import com.rasalexman.hhivecore.annotations.FmpDatabase
+import com.rasalexman.hhivecore.provider.AbstractFmpDatabase
+import com.rasalexman.hhivecore.provider.IFmpDatabase
+import com.rasalexman.fmpdaoexample.database.ISymptomList
 
 @FmpDatabase(asDaoProvider = false)
 abstract class MainDatabase : AbstractFmpDatabase(), IMainDatabase {

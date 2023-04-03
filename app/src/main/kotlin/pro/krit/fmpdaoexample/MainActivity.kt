@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample
+package com.rasalexman.fmpdaoexample
 
 import android.os.Bundle
 import android.os.PersistableBundle

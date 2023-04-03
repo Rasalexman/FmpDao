@@ -1,9 +1,9 @@
-package pro.krit.fmpdaoexample.daos
+package com.rasalexman.fmpdaoexample.daos
 
-import pro.krit.hhivecore.annotations.FmpDao
-import pro.krit.hhivecore.base.IDao
-import pro.krit.fmpdaoexample.models.PmEtDataEntity
-import pro.krit.fmpdaoexample.statuses.PmStatus
+import com.rasalexman.hhivecore.annotations.FmpDao
+import com.rasalexman.hhivecore.base.IDao
+import com.rasalexman.fmpdaoexample.models.PmEtDataEntity
+import com.rasalexman.fmpdaoexample.statuses.PmStatus
 
 @FmpDao(
     resourceName = "ZSR_TORO_PM_DATA",

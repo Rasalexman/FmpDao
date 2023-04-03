@@ -1,15 +1,15 @@
-package pro.krit.fmpdaoexample.models
+package com.rasalexman.fmpdaoexample.models
 
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.rasalexman.sresult.common.extensions.orZero
 import com.rasalexman.sresult.models.IConvertableTo
-import pro.krit.fmpdaoexample.fmpresources.Fields.AUART
-import pro.krit.fmpdaoexample.fmpresources.Fields.IS_LOCAL
-import pro.krit.fmpdaoexample.fmpresources.Fields.LOCAL_ID
-import pro.krit.fmpdaoexample.fmpresources.Fields.MARKER
-import pro.krit.fmpdaoexample.fmpresources.Fields.TASK_NUM
-import pro.krit.fmpdaoexample.fmpresources.Fields.TYPE
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.AUART
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.IS_LOCAL
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.LOCAL_ID
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.MARKER
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.TASK_NUM
+import com.rasalexman.fmpdaoexample.fmpresources.Fields.TYPE
 
 data class PmEtDataLocalEntity(
     @JvmField

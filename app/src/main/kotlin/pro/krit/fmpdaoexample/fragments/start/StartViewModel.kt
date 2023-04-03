@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments.start
+package com.rasalexman.fmpdaoexample.fragments.start
 
 import android.content.Context
 import android.view.View
@@ -8,8 +8,8 @@ import com.rasalexman.sresult.common.extensions.doAsync
 import com.rasalexman.sresult.common.extensions.toNavigateResult
 import com.rasalexman.sresultpresentation.extensions.launchUITryCatch
 import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
-import pro.krit.fmpdaoexample.MainActivity
-import pro.krit.fmpdaoexample.database.DataBaseHolder
+import com.rasalexman.fmpdaoexample.MainActivity
+import com.rasalexman.fmpdaoexample.database.DataBaseHolder
 
 class StartViewModel : BaseViewModel() {
 

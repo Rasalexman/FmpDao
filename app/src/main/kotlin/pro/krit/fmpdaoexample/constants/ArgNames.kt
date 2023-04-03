@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.constants
+package com.rasalexman.fmpdaoexample.constants
 
 object ArgNames {
     const val SELECTED_USER = "user"

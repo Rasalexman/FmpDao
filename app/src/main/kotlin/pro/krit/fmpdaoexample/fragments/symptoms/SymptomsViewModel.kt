@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments.symptoms
+package com.rasalexman.fmpdaoexample.fragments.symptoms
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,20 +12,20 @@ import com.rasalexman.sresultpresentation.extensions.launchUITryCatch
 import com.rasalexman.sresultpresentation.extensions.mutableMap
 import com.rasalexman.sresultpresentation.viewModels.BaseViewModel
 import kotlinx.coroutines.Dispatchers
-import pro.krit.fmpdaoexample.constants.ArgNames.SELECTED_SYMPTOM
-import pro.krit.fmpdaoexample.constants.ArgNames.SELECTED_USER
-import pro.krit.fmpdaoexample.daos.IUsersLocalDao
-import pro.krit.fmpdaoexample.database.DataBaseHolder
-import pro.krit.fmpdaoexample.database.IZfmToroSymptomList
-import pro.krit.fmpdaoexample.fmpresources.Fields
-import pro.krit.fmpdaoexample.models.SymptomItemUI
-import pro.krit.fmpdaoexample.models.UserItemUI
-import pro.krit.generated.dao.ZfmToroSymptomListModel
-import pro.krit.generated.dao.ZfmToroSymptomListStatus
-import pro.krit.hhivecore.extensions.createTable
-import pro.krit.hhivecore.extensions.insertOrReplace
-import pro.krit.hhivecore.extensions.select
-import pro.krit.hhivecore.extensions.update
+import com.rasalexman.fmpdaoexample.constants.ArgNames.SELECTED_SYMPTOM
+import com.rasalexman.fmpdaoexample.constants.ArgNames.SELECTED_USER
+import com.rasalexman.fmpdaoexample.daos.IUsersLocalDao
+import com.rasalexman.fmpdaoexample.database.DataBaseHolder
+import com.rasalexman.fmpdaoexample.database.IZfmToroSymptomList
+import com.rasalexman.fmpdaoexample.fmpresources.Fields
+import com.rasalexman.fmpdaoexample.models.SymptomItemUI
+import com.rasalexman.fmpdaoexample.models.UserItemUI
+import com.rasalexman.generated.dao.ZfmToroSymptomListModel
+import com.rasalexman.generated.dao.ZfmToroSymptomListStatus
+import com.rasalexman.hhivecore.extensions.createTable
+import com.rasalexman.hhivecore.extensions.insertOrReplace
+import com.rasalexman.hhivecore.extensions.select
+import com.rasalexman.hhivecore.extensions.update
 import kotlin.random.Random
 
 class SymptomsViewModel(

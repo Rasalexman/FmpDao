@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fmpresources
+package com.rasalexman.fmpdaoexample.fmpresources
 
 object Fields {
     // Идентификатор справочника

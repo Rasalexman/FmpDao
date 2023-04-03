@@ -1,11 +1,11 @@
-package pro.krit.fmpdaoexample.models
+package com.rasalexman.fmpdaoexample.models
 
 import com.google.gson.annotations.SerializedName
 import com.mobrun.plugin.api.request_assistant.PrimaryKey
 import com.rasalexman.sresult.common.extensions.orZero
 import com.rasalexman.sresult.common.extensions.toStringOrEmpty
 import com.rasalexman.sresult.models.IConvertableTo
-import pro.krit.fmpdaoexample.fmpresources.Fields
+import com.rasalexman.fmpdaoexample.fmpresources.Fields
 
 data class UserEntity(
     @JvmField

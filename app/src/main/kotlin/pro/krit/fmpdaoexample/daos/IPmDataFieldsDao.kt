@@ -1,7 +1,7 @@
-package pro.krit.fmpdaoexample.daos
+package com.rasalexman.fmpdaoexample.daos
 
-import pro.krit.hhivecore.annotations.FmpLocalDao
-import pro.krit.hhivecore.base.IDao
+import com.rasalexman.hhivecore.annotations.FmpLocalDao
+import com.rasalexman.hhivecore.base.IDao
 
 @FmpLocalDao(
     resourceName = "ZSR_TORO_PM_DATA",

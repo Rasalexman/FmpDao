@@ -22,6 +22,7 @@ android {
         minSdk = minSdkVersion
         targetSdk = buildSdkVersion
         version = "1.0.3"
+        multiDexEnabled = true
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

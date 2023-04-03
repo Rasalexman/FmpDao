@@ -1,4 +1,4 @@
-package pro.krit.fmpdaoexample.fragments.users
+package com.rasalexman.fmpdaoexample.fragments.users
 
 import android.os.Bundle
 import androidx.fragment.app.viewModels
@@ -7,13 +7,13 @@ import com.rasalexman.easyrecyclerbinding.DiffCallback
 import com.rasalexman.easyrecyclerbinding.createRecyclerConfig
 import com.rasalexman.sresult.common.extensions.orIfEmpty
 import com.rasalexman.sresultpresentation.databinding.BaseBindingFragment
-import pro.krit.fmpdaoexample.BR
-import pro.krit.fmpdaoexample.R
-import pro.krit.fmpdaoexample.constants.ArgNames
-import pro.krit.fmpdaoexample.databinding.FragmentUsersBinding
-import pro.krit.fmpdaoexample.databinding.ItemUserBinding
-import pro.krit.fmpdaoexample.models.SymptomItemUI
-import pro.krit.fmpdaoexample.models.UserItemUI
+import com.rasalexman.fmpdaoexample.BR
+import com.rasalexman.fmpdaoexample.R
+import com.rasalexman.fmpdaoexample.constants.ArgNames
+import com.rasalexman.fmpdaoexample.databinding.FragmentUsersBinding
+import com.rasalexman.fmpdaoexample.databinding.ItemUserBinding
+import com.rasalexman.fmpdaoexample.models.SymptomItemUI
+import com.rasalexman.fmpdaoexample.models.UserItemUI
 
 class UsersFragment : BaseBindingFragment<FragmentUsersBinding, UsersViewModel>() {
     override val layoutId: Int
