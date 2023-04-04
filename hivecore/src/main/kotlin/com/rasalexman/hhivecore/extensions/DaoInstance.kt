@@ -1,14 +1,13 @@
 package com.rasalexman.hhivecore.extensions
 
 import com.mobrun.plugin.models.StatusSelectTable
-import io.reactivex.rxjava3.core.Observable
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.*
 import com.rasalexman.hhivecore.base.IDao
 import com.rasalexman.hhivecore.common.QueryBuilder
 import com.rasalexman.hhivecore.common.QueryConfig
 import com.rasalexman.hhivecore.common.QueryExecuter
-import java.util.concurrent.TimeUnit
+import io.reactivex.rxjava3.core.Observable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 
 object DaoInstance {
 
@@ -59,8 +58,7 @@ object DaoInstance {
             if (config.isDevastate) this.filter { it.isNotEmpty() }
             else this
         }
-        val requestDelay = config.emitDelay
-        return trigger.delay(requestDelay, TimeUnit.MILLISECONDS).flatMap { trig ->
+        return trigger.flatMap { trig ->
             if(trig.isNotEmpty()) {
                 Observable.fromCallable {
                     config.run {
